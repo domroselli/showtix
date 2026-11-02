@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block title %}Order {{ order.id }}{% endblock %}
+{% block content %}
+<h1>Order {{ order.id }}: {{ order.status }}</h1>
+<p class="muted">{{ show.title }} · {{ show.venue }} · {{ order.email }}</p>
+<table>
+  {% for line in order.lines %}
+  <tr><td>{{ line.qty }} × {{ line.tier_name }} at {{ line.unit_price_cents|dollars }}</td>
+      <td class="num">{{ line.line_total_cents|dollars }}</td></tr>
+  {% endfor %}
+  {% for line in order.pricing_lines %}
+  <tr{% if loop.last %} class="total"{% endif %}><td>{{ line.label }}</td>
+      <td class="num"{% if loop.last %} id="total"{% endif %}>{{ line.amount_cents|dollars }}</td></tr>
+  {% endfor %}
+</table>
+<p><a href="/performances/{{ order.performance_id }}">Back to this performance</a> · <a href="/">All shows</a></p>
+{% endblock %}

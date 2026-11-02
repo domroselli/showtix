@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block title %}{{ show.title }}{% endblock %}
+{% block content %}
+{% set perf_id = availability.performance_id %}
+<h1>{{ show.title }}</h1>
+<p class="muted">{{ show.category|capitalize }} · {{ show.venue }} · {{ availability.starts_at|showtime }}</p>
+
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+
+<form method="post" action="/performances/{{ perf_id }}/quote">
+  <table>
+    <thead>
+      <tr><th>Tier</th><th class="num">Price</th><th class="num">Seats left</th><th class="num">Qty</th></tr>
+    </thead>
+    <tbody>
+      {% for tier in availability.tiers %}
+      <tr>
+        <td>{{ tier.name }}</td>
+        <td class="num">{{ tier.price_cents|dollars }}</td>
+        <td class="num">{% if tier.seats_left %}{{ tier.seats_left }}{% else %}Sold out{% endif %}</td>
+        <td class="num">
+          <input type="number" name="qty_{{ tier.tier_id }}" min="0" max="8"
+                 value="{{ form.qty.get(tier.tier_id|string, '') }}"
+                 aria-label="{{ tier.name }} quantity" {% if not tier.seats_left %}disabled{% endif %}>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="row">
+    <label>Promo code<br><input name="promo_code" value="{{ form.promo_code }}"></label>
+    <button type="submit">Get quote</button>
+  </div>
+</form>
+
+{% if quote %}
+<h2>Your quote</h2>
+<table>
+  {% for line in quote.lines %}
+  <tr><td>{{ line.qty }} × {{ line.tier_name }} at {{ line.unit_price_cents|dollars }}</td>
+      <td class="num">{{ line.line_total_cents|dollars }}</td></tr>
+  {% endfor %}
+  {% for line in quote.pricing_lines %}
+  <tr{% if loop.last %} class="total"{% endif %}><td>{{ line.label }}</td>
+      <td class="num"{% if loop.last %} id="total"{% endif %}>{{ line.amount_cents|dollars }}</td></tr>
+  {% endfor %}
+</table>
+
+<form method="post" action="/performances/{{ perf_id }}/orders" class="row">
+  {% for line in quote.lines %}
+  <input type="hidden" name="qty_{{ line.tier_id }}" value="{{ line.qty }}">
+  {% endfor %}
+  <input type="hidden" name="promo_code" value="{{ quote.promo_code or '' }}">
+  <label>Email<br><input type="email" name="email" required value="{{ form.email }}"></label>
+  <button type="submit">Place order</button>
+</form>
+{% endif %}
+{% endblock %}

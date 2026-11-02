@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run pytest *)",
+      "Bash(uv run python -m app.seed)",
+      "Bash(uv run python -m app.llm)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)"
+    ],
+    "deny": [
+      "Read(/.env)",
+      "Edit(/spec/**)"
+    ]
+  }
+}
