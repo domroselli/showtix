@@ -105,7 +105,7 @@ Ask yourself: can I explain every change? Did anything change that has nothing t
 Have a subagent review the work. It starts with a fresh context, so it hasn't seen your conversation and can't be talked into agreeing with it:
 
 > Use a subagent to review this branch's changes (git diff main) against tasks/lab1a-category-filter.md. It hasn't seen our conversation. Check every acceptance criterion, and don't report style. For each finding, give:
-> - a label: MUST FIX (a criterion isn't met, or a bug), UNSURE, or OPTIONAL
+> - a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but not in the criteria, or already there before this branch), UNSURE, or OPTIONAL
 > - which criterion it's about
 > - evidence: the file and line, or an input that gives the wrong result
 >
@@ -118,7 +118,7 @@ Have a subagent review the work. It starts with a fresh context, so it hasn't se
 - **MUST FIX:** check the evidence yourself. If it's real, fix it.
 - **UNSURE:** ask Claude to prove it with a failing test. No failing test, no fix.
 - **OPTIONAL:** skip it.
-- **Real, but not in your criteria** (often something that was there before you started): write it down and move on. Fixing it is a new feature, not this one.
+- **OUT OF SCOPE:** real, but not in your criteria (often something that was there before you started). Check the evidence, because a reviewer can wave off a real bug this way. If it holds up, write it down and move on: fixing it is a new feature, not this one.
 
 Fix the real ones test-first:
 

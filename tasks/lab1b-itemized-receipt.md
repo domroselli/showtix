@@ -77,7 +77,7 @@ Write the tests first and check them yourself, then let Claude make them pass. E
 6. **Get a second opinion.** Ask Claude:
 
    > Use a subagent to review this branch's changes (git diff main) against tasks/lab1b-itemized-receipt.md. It hasn't seen our conversation. Check every acceptance criterion, and don't report style. For each finding, give:
-   > - a label: MUST FIX (a criterion isn't met, or a bug), UNSURE, or OPTIONAL
+   > - a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but not in the criteria, or already there before this branch), UNSURE, or OPTIONAL
    > - which criterion it's about
    > - evidence: the file and line, or an input that gives the wrong result
    >
@@ -85,7 +85,7 @@ Write the tests first and check them yourself, then let Claude make them pass. E
 
    **Why "don't report style"?** A reviewer asked to find problems always finds something. If you fix every finding, you end up with extra layers of code and tests for cases that can't happen. You want bugs and unmet criteria, not someone else's taste.
 
-   The labels are the reviewer's opinion; you decide. Check the evidence for each MUST FIX yourself, ask for a failing test on anything UNSURE, and skip OPTIONAL. If a finding is real but not in your criteria (often something that was there before you started), write it down and move on: fixing it is a new feature, not this one. Then fix the real ones test-first:
+   The labels are the reviewer's opinion; you decide. Check the evidence for each MUST FIX and OUT OF SCOPE yourself (a reviewer can wave off a real bug as out of scope), ask for a failing test on anything UNSURE, and skip OPTIONAL. If an OUT OF SCOPE finding holds up, write it down and move on: fixing it is a new feature, not this one. Then fix the real ones test-first:
 
    > Findings 1 and 3 are real; ignore the rest. For each, write a failing test that shows the problem, then fix it. Run the full suite and show me the output.
 

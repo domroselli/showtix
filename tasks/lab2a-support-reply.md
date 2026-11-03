@@ -21,6 +21,7 @@ git branch --show-current               # should be your Lab 1 branch, not main
 git add -A && git commit -m "lab 1"     # save your Lab 1 work
 git switch main
 uv run python -m app.seed                # reset the local database
+uv run python -m app.llm                 # your API key works: prints OK
 git switch -c lab2a-support-reply
 uv run pytest          # green before you change anything
 ```
@@ -45,7 +46,7 @@ The full criteria are given. Write one test for each.
 
 1. `POST /orders/{id}/support-reply` with `{"message": "..."}` returns 200 with `order_id`, `reply`, `needs_review` and `unverified_amounts`.
 2. The request to Claude uses `MODEL`, puts your instructions in the system prompt, and sends a user message containing the customer's message plus the order's facts: show title, performance date and time, each ticket line (qty, tier, unit price), every pricing line, the $7.50 per-ticket service fee, the promo code (or none) and the order status.
-3. An unknown order id returns 404, and an empty or whitespace-only message returns 400. Neither calls Claude (`fake_claude.calls` stays empty).
+3. An unknown order id returns 404 with the detail `Order 99999 not found` (for id 99999), and an empty or whitespace-only message returns 400 with the detail `Message must not be empty`. Neither calls Claude (`fake_claude.calls` stays empty).
 4. **Grounding check, in your code:** every dollar amount in the reply (written like `$250.44`, `$250` or `$1,234.50`) must equal, in cents, an amount in the facts you sent or an amount in the customer's message. The discount counts by its absolute value. Any other amount sets `needs_review` to `true` and appears in `unverified_amounts` as cents, in order of first appearance, without duplicates.
 5. A reply whose amounts are all grounded returns `needs_review: false` and `unverified_amounts: []`.
 6. If the Claude call fails, the endpoint returns 502 with the detail `Reply drafter unavailable`.
@@ -65,18 +66,63 @@ The customer is wrong here: the order really was $250.44. A good reply corrects 
 
 ## The working loop
 
-This is how people really use Claude Code: one good prompt, then you check the evidence.
+Write the tests first and check them yourself, then let Claude make them pass. Each step has a prompt you can copy. Start with `/clear` so Claude begins fresh.
 
-1. **Write your answer key (no Claude yet).** Go through **Acceptance criteria** one by one and write down exactly what should happen for each: which shows come back, which status code, the exact message, the exact cents. Some criteria already state the answer; others you work out. If the sheet has a worked example, check you get the same numbers. To look things up, run the app (`uv run uvicorn app.main:app --reload`) and use /docs, for example `GET /shows` to see the seeded shows and prices. In step 3, you'll compare Claude's tests against this answer key.
-2. **One good prompt.** For example: "Read tasks/lab2a-support-reply.md and the relevant code. Write failing tests for each acceptance criterion, then implement it. Run the full suite and show me the output before and after."
-3. **Check the evidence.** Did the tests fail before the change? Does each test match your answer key, not just what Claude assumed?
-4. **Try it yourself.** In a second terminal, start the app with `uv run uvicorn app.main:app --reload`, then open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**) or the UI at http://127.0.0.1:8000/. Use values from your answer key. Ctrl+C stops the app.
-5. **Review the diff.** Run `git add -A` then `git diff --staged` (Space to page, `q` to quit), or use VS Code's Source Control panel. Can you explain every change? Was anything unexpected touched?
-6. **Get a second opinion.** Ask Claude: "Review this diff against tasks/lab2a-support-reply.md." Then decide which of its findings actually matter.
+1. **Write your answer key (no Claude yet).** Go through **Acceptance criteria** one by one and write down exactly what should happen for each: which shows come back, which status code, the exact message, the exact cents. Some criteria already state the answer; others you work out. If the sheet has a worked example, check you get the same numbers. To look things up, run the app (`uv run uvicorn app.main:app --reload`) and use /docs, for example `GET /shows` to see the seeded shows and prices. In step 2, you'll compare Claude's tests against this answer key.
+2. **Tests first.** Ask Claude:
+
+   > Read tasks/lab2a-support-reply.md and the relevant code. Write a failing test for each acceptance criterion except the eval, using `fake_claude`. Then write the eval cases to tests/evals/support_reply.json (cases only; don't call the API). Don't change anything in app/. Run the tests and show me which ones fail.
+
+   Compare each test, and each eval case, with your answer key. The eval cases are the model's answer key, so they must be right too. If one is wrong, tell Claude what it should be and why:
+
+   > The test for criterion 4 expects ___, but it should be ___ because ___. Fix that test.
+
+   Check especially:
+   - **The four worked-example rows are tests**, with exact `unverified_amounts`.
+   - **Criterion 3's tests check the exact messages, and that `fake_claude.calls` stays empty.**
+
+   When you're satisfied with the tests, commit them:
+
+   ```sh
+   git add -A && git commit -m "lab2a: tests"
+   ```
+
+3. **Clear, then implement.** Type `/clear`, then ask:
+
+   > Make the new tests from my last commit pass (see git show HEAD). Don't change any test. Read tasks/lab2a-support-reply.md for context. Run the full suite and show me the output. Then write tests/evals/run_support_reply.py, which runs those eval cases with the shared runner (see the README). Don't run it.
+
+4. **Check the evidence.**
+   - Run `uv run pytest` yourself. Is everything green?
+   - Run `git diff HEAD --stat -- tests/`. It should print nothing, which means Claude didn't change your tests.
+   - Run the eval twice against the real API: `uv run python -m tests.evals.run_support_reply --repeat 2`. A score that changes between runs is normal. Read each failing case before changing anything.
+   - Try it yourself. In a second terminal, start the app with `uv run uvicorn app.main:app --reload`, then open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**) or the UI at http://127.0.0.1:8000/. Use values from your answer key. To stop the app, click in that terminal and press **Ctrl+C** (on a Mac too: Control, not Command).
+5. **Review the diff.** Run `git add -A` then `git diff --staged` (Space to page, `q` to quit), or use VS Code's Source Control panel. Your tests are already committed, so this shows only the code Claude wrote. Can you explain every change? Was anything unexpected touched?
+6. **Get a second opinion.** Ask Claude:
+
+   > Use a subagent to review this branch's changes (git diff main) against tasks/lab2a-support-reply.md. It hasn't seen our conversation. Check every acceptance criterion, and don't report style. For each finding, give:
+   > - a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but not in the criteria, or already there before this branch), UNSURE, or OPTIONAL
+   > - which criterion it's about
+   > - evidence: the file and line, or an input that gives the wrong result
+   >
+   > Don't change any files or the database; if you need to experiment, do it in a test. Just show me the findings.
+
+   **Why "don't report style"?** A reviewer asked to find problems always finds something. If you fix every finding, you end up with extra layers of code and tests for cases that can't happen. You want bugs and unmet criteria, not someone else's taste.
+
+   The labels are the reviewer's opinion; you decide. Check the evidence for each MUST FIX and OUT OF SCOPE yourself (a reviewer can wave off a real bug as out of scope), ask for a failing test on anything UNSURE, and skip OPTIONAL. If an OUT OF SCOPE finding holds up, write it down and move on: fixing it is a new feature, not this one. Then fix the real ones test-first:
+
+   > Findings 1 and 3 are real; ignore the rest. For each, write a failing test that shows the problem, then fix it. Run the full suite and show me the output.
+
+   Then repeat step 4.
+7. **Commit** when you're satisfied with the change:
+
+   ```sh
+   git add -A && git commit -m "lab2a: support reply drafter"
+   ```
 
 ## Done means
 
 - [ ] A test for each of criteria 1–7, all passing, all offline
+- [ ] The tests you committed in step 2 weren't changed to make them pass
 - [ ] The four worked-example rows are tests, with exact `unverified_amounts`
 - [ ] The grounding check parses money with integer math only; no floats
 - [ ] The eval has at least 5 cases, and you've run it twice for real
