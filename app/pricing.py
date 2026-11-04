@@ -6,6 +6,8 @@ Order of operations:
   3. Service fee: $7.50 per ticket, never discounted
   4. Tax: 9% of the discounted subtotal only, rounded half up once
   5. Total: discounted subtotal + fees + tax
+
+Formatting: dollars() is the only place cents become "$250.44", for pages and prompts alike.
 """
 
 from dataclasses import dataclass
@@ -97,3 +99,9 @@ def pricing_lines(breakdown: PriceBreakdown, promo_code: str | None = None) -> l
         PricingLine("Tax", breakdown.tax_cents),
         PricingLine("Total", breakdown.total_cents),
     ]
+
+def dollars(cents: int) -> str:
+    """The only place cents become dollars, for pages and prompts alike: 25044 -> "$250.44"."""
+    sign = "−" if cents < 0 else ""
+    cents = abs(cents)
+    return f"{sign}${cents // 100:,}.{cents % 100:02d}"

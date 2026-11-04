@@ -1,0 +1,8 @@
+flowchart LR
+  S1["1. Align<br/>your answer key"] --> S2["2. Tests first<br/>then commit them"]
+  S2 --> S3["/clear, then<br/>3. Implement"]
+  S3 --> S4["4. Check<br/>the evidence"]
+  S4 --> S5["5. Review<br/>the diff"]
+  S5 --> S6["6. Second<br/>opinion"]
+  S6 --> S7["7. Commit"]
+  S6 -. "MUST FIX: test, then fix" .-> S4

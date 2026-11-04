@@ -4,11 +4,13 @@
 
 ## Start here
 
-0. New to this? Read [`tasks/00-how-we-work.md`](00-how-we-work.md) first: it explains the working loop, why it works, and the commands you'll need.
-1. Run the commands under **Starting branch**.
-2. Read **Goal**, **Background** and **Acceptance criteria**.
-3. Follow **The working loop**, step by step. Step 1 is yours: write your answer key before you ask Claude anything.
-4. You're done when everything under **Done means** is checked. **Optional stretch** is for extra time; **Hints** are at the very end, for when you're stuck.
+A small new endpoint that reads stored money, built with the full workflow.
+
+1. New here? Read [Getting started](01-getting-started.md) for running commands and the app, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
+2. Run the command under [Starting branch](#starting-branch), then read [Goal](#goal), [Background](#background) and [Acceptance criteria](#acceptance-criteria).
+3. Follow [The workflow](#the-workflow) step by step. Step 1 is yours: write your answer key before you ask Claude anything.
+
+You're done when every box under [Done means](#done-means) is checked. Extra time? Try the [Optional stretch](#optional-stretch). Stuck? See [Hints](#hints).
 
 ## Goal
 
@@ -16,18 +18,23 @@ Add `GET /orders/{id}/receipt`: every pricing line of a stored order, matching i
 
 ## Starting branch
 
-```sh
-git switch main
-git switch -c lab1b-itemized-receipt
-uv run pytest          # green before you change anything
+Create this lab's branch from `main`, reset the database, and check that the tests pass:
+
+```text
+! git switch main && uv run python -m app.seed && git switch -c lab1b-itemized-receipt && uv run pytest
 ```
+
+Every test should pass before you change anything. Trouble? See [Start a lab branch](01-getting-started.md#start-a-lab-branch).
 
 ## Background
 
-- An order stores its money when it's created: `subtotal_cents`, `discount_cents`, `fees_cents`, `tax_cents`, `total_cents`, plus `promo_code` (null when no promo was used).
-- Each order line stores `unit_price_cents`, the price paid at purchase time. Tier prices can change later; receipts must not.
-- `orders.get_order()` in `app/orders.py` already loads an order with its ticket `lines` and its `pricing_lines` (Subtotal, Discount, Service fees, Tax, Total), rebuilt from the stored totals. `shows.show_for_performance()` gives the show title and the venue name (`.venue`), and `inventory.availability(conn, performance_id).starts_at` gives the start time.
-- `GET /orders/{id}` is the UI's confirmation page (HTML, in `app/web.py`). The receipt is a new JSON endpoint next to it.
+Where the data you'll read lives:
+
+- **An order stores its money when it's created:** `subtotal_cents`, `discount_cents`, `fees_cents`, `tax_cents`, `total_cents`, plus `promo_code` (null when no promo was used). Each order line stores `unit_price_cents`, the price paid. Tier prices can change later; receipts must not.
+- **`orders.get_order()`** in `app/orders.py` already loads an order with its ticket `lines` and its `pricing_lines` (Subtotal, Discount, Service fees, Tax, Total), rebuilt from the stored totals. `shows.show_for_performance()` gives the show title and venue name (`.venue`), and `inventory.availability(conn, performance_id).starts_at` gives the start time.
+- **`GET /orders/{id}`** is the UI's confirmation page (HTML, in `app/web.py`). The receipt is a new JSON endpoint next to it.
+
+For a picture of how an order is created and stored, see [Quote, order, cancel](../docs/architecture.md#2-quote-order-cancel).
 
 ## Acceptance criteria
 
@@ -42,97 +49,190 @@ The full criteria are given. Write one test for each.
 7. A cancelled order still has a receipt, with `status` `cancelled`.
 8. An unknown order id returns 404 with the detail `Order 99999 not found` (for id 99999), the message `orders.get_order()` already raises.
 
-## The working loop
+## The workflow
 
-Write the tests first and check them yourself, then let Claude make them pass. Each step has a prompt you can copy. Start with `/clear` so Claude begins fresh.
+Settle what "done" means, then have Claude write the tests, check them yourself, and let Claude make them pass.
 
-1. **Write your answer key (no Claude yet).** Go through **Acceptance criteria** one by one and write down exactly what should happen for each: which status code, which fields, which labels, the exact cents. Some criteria already state the answer; others you work out. Check you get the same numbers as the worked example in criterion 4. In step 2, you'll compare Claude's tests against this answer key.
-2. **Tests first.** Ask Claude:
+- Steps that use Claude have a prompt to copy; commands start with `!`.
+- Why each step matters: [How we work](00-how-we-work.md).
+- Start with a fresh conversation:
 
-   > Read tasks/lab1b-itemized-receipt.md and the relevant code. Write a failing test for each acceptance criterion. Don't change anything in app/. Run the tests and show me which ones fail.
+  ```text
+  /clear
+  ```
 
-   Compare each test with your answer key. If one is wrong, tell Claude what it should be and why:
+### 1. Align: write your answer key (no Claude yet)
 
-   > The test for criterion 4 expects ___, but it should be ___ because ___. Fix that test.
+Write down exactly what each criterion should return before Claude writes anything.
 
-   Two things to check:
-   - **Criterion 8 should fail for the right reason.** Before the route exists, every receipt request returns FastAPI's generic `{"detail":"Not Found"}`. A test that checks only the 404 status would pass already and prove nothing; a test that checks the exact detail fails until your route is in place.
-   - **Criterion 6's test must change the tier's price *after* placing the order**, then check the receipt still shows the old price. A test that never changes the price proves nothing.
+- Go through [Acceptance criteria](#acceptance-criteria) one by one: which status code, which fields, which labels, the exact cents.
+- Work out criterion 4's example yourself and check you get the same numbers. Prices, fees and tax rules are in [`docs/seed-data.md`](../docs/seed-data.md).
+- Want to see it in the running app? See [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-   When you're satisfied with the tests, commit them:
+You'll compare Claude's tests against this answer key in step 2.
 
-   ```sh
-   git add -A && git commit -m "lab1b: tests"
-   ```
+### 2. Tests first
 
-3. **Clear, then implement.** Type `/clear`, then ask:
+Have Claude write failing tests, then check them against your answer key.
 
-   > Make the new tests from my last commit pass (see git show HEAD). Don't change any test. Read tasks/lab1b-itemized-receipt.md for context. Run the full suite and show me the output.
+```text
+Read tasks/lab1b-itemized-receipt.md and the relevant code. Write a failing
+test for each acceptance criterion. Test behavior through the API, the pages,
+or functions that already exist, not new functions or exact HTML. Don't change
+anything in app/. Run the tests and show me which ones fail.
+```
 
-4. **Check the evidence.**
-   - Run `uv run pytest` yourself. Is everything green?
-   - Run `git diff HEAD --stat -- tests/`. It should print nothing, which means Claude didn't change your tests.
-   - Try it yourself: follow **Check it in your browser** below.
-5. **Review the diff.** Run `git add -A` then `git diff --staged` (Space to page, `q` to quit), or use VS Code's Source Control panel. Your tests are already committed, so this shows only the code Claude wrote. Can you explain every change? Was anything unexpected touched?
-6. **Get a second opinion.** Ask Claude:
+Check especially:
 
-   > Use a subagent to review this branch's changes (git diff main) against tasks/lab1b-itemized-receipt.md. It hasn't seen our conversation. Check every acceptance criterion, and don't report style. For each finding, give:
-   > - a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but not in the criteria, or already there before this branch), UNSURE, or OPTIONAL
-   > - which criterion it's about
-   > - evidence: the file and line, or an input that gives the wrong result
-   >
-   > Don't change any files or the database; if you need to experiment, do it in a test. Just show me the findings.
+- **Tests check behavior through the API or the page**, not functions that don't exist yet. A test that calls a new function is designing the code for Claude.
+- **Criterion 8 fails for the right reason.** Before the route exists, every receipt request returns FastAPI's generic `{"detail":"Not Found"}`. A test that checks only the 404 would pass already and prove nothing; one that checks the exact detail fails until your route is in place.
+- **Criterion 6's test changes the tier's price *after* placing the order**, then checks the receipt still shows the old price. A test that never changes the price proves nothing.
 
-   **Why "don't report style"?** A reviewer asked to find problems always finds something. If you fix every finding, you end up with extra layers of code and tests for cases that can't happen. You want bugs and unmet criteria, not someone else's taste.
+If a test doesn't match your answer key, tell Claude what it should be and why:
 
-   The labels are the reviewer's opinion; you decide. Check the evidence for each MUST FIX and OUT OF SCOPE yourself (a reviewer can wave off a real bug as out of scope), ask for a failing test on anything UNSURE, and skip OPTIONAL. If an OUT OF SCOPE finding holds up, write it down and move on: fixing it is a new feature, not this one. Then fix the real ones test-first:
+```text
+The test for criterion 4 expects ___, but it should be ___ because ___. Fix
+that test.
+```
 
-   > Findings 1 and 3 are real; ignore the rest. For each, write a failing test that shows the problem, then fix it. Run the full suite and show me the output.
+When every test matches your answer key, commit them:
 
-   Then repeat step 4.
-7. **Commit** when you're satisfied with the change:
+```text
+! git add -A && git commit -m "lab1b: tests"
+```
 
-   ```sh
-   git add -A && git commit -m "lab1b: itemized receipt"
-   ```
+### 3. Clear, then implement
+
+Clear the conversation, so Claude builds from the sheet and your committed tests, not the chat:
+
+```text
+/clear
+```
+
+Then ask:
+
+```text
+Make the new tests from my last commit pass (see git show HEAD). Don't change
+any test. If you change anything the tests don't need, tell me what and why.
+Read tasks/lab1b-itemized-receipt.md for context. Run the full suite and show
+me the output.
+```
+
+Claude shouldn't touch any test file. Step 4 checks that.
+
+### 4. Check the evidence
+
+Don't take Claude's word for it; check for yourself.
+
+- Run the tests. The last line should say only `passed`, with no `skipped`, `deselected` or `xfailed`:
+
+  ```text
+  ! uv run pytest
+  ```
+
+- Check that Claude only changed app code. Every file this lists should be under `app/`:
+
+  ```text
+  ! git status --short
+  ```
+
+  A file in `tests/` (changed, or new with `??`), a `conftest.py`, or `pyproject.toml` means Claude touched your tests or how they run: ask why before going on. After step 6's fixes, the only test changes should be the new tests you asked for.
+
+- Try it yourself: follow [Check it in your browser](#check-it-in-your-browser) below.
+
+Something doesn't match? Tell Claude which criterion failed and what you saw.
+
+### 5. Review the diff
+
+Read every change Claude made before you accept it.
+
+```text
+! git add -A && git diff --staged
+```
+
+- Can you explain every change?
+- Was anything touched that has nothing to do with receipts?
+- Prefer side by side? Use VS Code's **Source Control** panel.
+
+Your tests are already committed, so this shows only the code Claude wrote.
+
+### 6. Get a second opinion
+
+A reviewer that hasn't seen your conversation checks the change against this sheet.
+
+```text
+Use a subagent to review this branch's changes (git diff main) against
+tasks/lab1b-itemized-receipt.md. It hasn't seen our conversation. It should
+check every acceptance criterion, not report style, and not change any files
+or the database. Show me its findings as a numbered list, each with:
+- a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but
+  not in the criteria, or already there before this branch), UNSURE, or
+  OPTIONAL
+- which criterion it's about
+- evidence: the file and line, or an input that gives the wrong result
+
+Then ask me which ones to fix. For each one I pick, write a failing test that
+shows the problem, then fix it. Run the full suite and show me the output.
+```
+
+Claude shows the findings and asks which to fix. The labels are the reviewer's opinion; decide for yourself before you answer:
+
+- **MUST FIX** and **OUT OF SCOPE:** check the evidence yourself. A reviewer can wave off a real bug as out of scope.
+- **UNSURE:** answer "prove it with a failing test first." **OPTIONAL:** usually skip.
+- **OUT OF SCOPE** that holds up: write it down and move on. Fixing it is a new feature, not this one.
+
+Answer with the numbers you want fixed, for example "1 and 3".
+
+Then repeat step 4. Why "don't report style"? See [step 6 of How we work](00-how-we-work.md#6-get-a-second-opinion).
+
+### 7. Commit
+
+Commit when you're satisfied with the change:
+
+```text
+! git add -A && git commit -m "lab1b: itemized receipt"
+```
+
+Finished with time to spare? Try the [Optional stretch](#optional-stretch) below.
 
 ## Check it in your browser
 
-Use this for step 4. You'll place a real order in the app, then look at its receipt. Compare every result with your answer key.
+Use this for step 4 of the workflow. You'll place a real order in the app, then look at its receipt. Compare every result with your answer key.
 
 ### 1. Start the app
 
-Open a second terminal, go to your `showtix` folder, and run:
+Ask Claude to start the app in the background ([more on starting the app](01-getting-started.md#start-the-app)):
 
-```sh
-uv run uvicorn app.main:app --reload
+```text
+Start the app in the background with uv run uvicorn app.main:app --reload,
+and tell me when it's ready.
 ```
 
-Wait for `Application startup complete`. Leave this terminal running; keep working with Claude in the first one.
+Wait until Claude says it's ready, then keep working in the same conversation.
 
 ### 2. Place the worked-example order
 
 1. Open http://127.0.0.1:8000/ and click any date under any show.
 
-   ![Click any date under any show](img/lab1b-1-pick-a-date.png)
+   <img src="img/lab1b-1-pick-a-date.png" alt="Click any date under any show" width="450">
 
 2. In the **Qty** column, enter `2` for **Premium**. Type `LOCALS10` in **Promo code** and click **Get quote**.
 
-   ![2 Premium, promo code LOCALS10, then Get quote](img/lab1b-2-quote-form.png)
+   <img src="img/lab1b-2-quote-form.png" alt="2 Premium, promo code LOCALS10, then Get quote" width="600">
 
 3. Check the quote: Subtotal $240.00, Discount (LOCALS10) −$24.00, Service fees $15.00, Tax $19.44, Total $250.44. Enter any email and click **Place order**.
 
-   ![The quote totals $250.44; enter an email, then Place order](img/lab1b-3-quote-and-place-order.png)
+   <img src="img/lab1b-3-quote-and-place-order.png" alt="The quote totals $250.44; enter an email, then Place order" width="600">
 
-4. The confirmation page's heading shows your order number, for example **Order 4: paid**. The seed data already has a few orders, so yours won't be 1. Write it down.
+4. The confirmation page's heading shows your order number, for example **Order 4: paid**. The seed data already has 3 orders, so yours won't be 1. Write it down.
 
-   ![The order number is in the heading](img/lab1b-4-confirmation.png)
+   <img src="img/lab1b-4-confirmation.png" alt="The order number is in the heading" width="600">
 
 ### 3. Open the receipt (criteria 1–5)
 
 Open http://127.0.0.1:8000/orders/4/receipt, using your order number. In Chrome or Edge, tick **Pretty-print**; it then looks like this (the show and time depend on which date you picked):
 
-![The receipt for the worked-example order](img/lab1b-5-receipt.png)
+<img src="img/lab1b-5-receipt.png" alt="The receipt for the worked-example order" width="450">
 
 | Criterion | You should see |
 | --- | --- |
@@ -147,27 +247,33 @@ Criterion 6 (the price changes after the order) needs a database change, so your
 
 1. Open http://127.0.0.1:8000/docs and click **POST /orders/{order_id}/cancel**. Click **Try it out**, enter your order number in **order_id**, and click **Execute**.
 
-   ![Try it out on the cancel endpoint, with your order number](img/lab1b-6-cancel-execute.png)
+   <img src="img/lab1b-6-cancel-execute.png" alt="Try it out on the cancel endpoint, with your order number" width="600">
 
 2. Scroll down to **Server response**. The code is **200**.
 
-   ![Code 200](img/lab1b-7-cancel-200.png)
+   <img src="img/lab1b-7-cancel-200.png" alt="Code 200" width="600">
 
 3. Reload your receipt. `status` is now `cancelled`, and every amount is unchanged.
 
-   ![The same receipt, now cancelled](img/lab1b-8-receipt-cancelled.png)
+   <img src="img/lab1b-8-receipt-cancelled.png" alt="The same receipt, now cancelled" width="450">
 
 ### 5. An unknown order (criterion 8)
 
 Open http://127.0.0.1:8000/orders/99999/receipt. You should see the detail `Order 99999 not found`. If you see `{"detail":"Not Found"}` instead, the receipt route doesn't exist: that's the 404 you got before building anything.
 
-![Order 99999 not found](img/lab1b-9-unknown-order.png)
+<img src="img/lab1b-9-unknown-order.png" alt="Order 99999 not found" width="600">
 
 **Something doesn't match?** Don't fix it by hand. Tell Claude which criterion failed and what you saw.
 
 ### 6. Stop the app
 
-Click in the terminal where the app is running and press **Ctrl+C** (on a Mac too: Control, not Command). You'll see `Shutting down`. If you later get "address already in use," the app is still running in another terminal: find it and press Ctrl+C there.
+When you're done checking:
+
+```text
+Stop the app.
+```
+
+Other ways to stop it, and what "address already in use" means: [Stop the app](01-getting-started.md#stop-the-app).
 
 ## Done means
 
@@ -183,9 +289,16 @@ Click in the terminal where the app is running and press **Ctrl+C** (on a Mac to
 
 ## Optional stretch
 
-Finished early? Add a "View receipt" link to the order confirmation page that opens `/orders/{id}/receipt`. Add a test that the confirmation page contains the link.
+Finished early? Pick one:
 
-Or: make receipts keep the tier's *name* at purchase, not just its price. Today, renaming a tier changes the name on old receipts. Write a failing test first. This needs a new column on `order_lines`, so reset the local database afterwards with `uv run python -m app.seed`.
+- **A "View receipt" link** on the order confirmation page that opens `/orders/{id}/receipt`. Add a test that the confirmation page contains the link.
+- **Keep the tier's *name* at purchase,** not just its price. Today, renaming a tier changes the name on old receipts. Write a failing test first. This needs a new column on `order_lines`, so [reset the local database](01-getting-started.md#reset-the-database) afterwards:
+
+  ```text
+  ! uv run python -m app.seed
+  ```
+
+Either one goes through the same workflow, starting at step 2.
 
 ## Hints
 

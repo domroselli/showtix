@@ -26,14 +26,27 @@ def conn():
 
 @pytest.fixture
 def now():
-    """Override with @pytest.mark.parametrize("now", [...]) or a local fixture to move the clock."""
+    """The time a test starts at. Override with @pytest.mark.parametrize("now", [...])."""
     return FIXED_NOW
 
 
+class Clock:
+    """The time every route sees. Read on each request, so a test can move it."""
+
+    def __init__(self, now: datetime):
+        self.now = now
+
+
 @pytest.fixture
-def client(conn, now):
+def clock(now):
+    """Move time within a test: set clock.now = datetime(...) between requests. Never sleep."""
+    return Clock(now)
+
+
+@pytest.fixture
+def client(conn, clock):
     app.dependency_overrides[get_db] = lambda: conn
-    app.dependency_overrides[get_now] = lambda: now
+    app.dependency_overrides[get_now] = lambda: clock.now
     # Not used as a context manager, so the app's startup hook never touches showtix.db.
     yield TestClient(app)
     app.dependency_overrides.clear()

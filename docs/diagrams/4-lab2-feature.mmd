@@ -1,0 +1,16 @@
+flowchart TB
+  You["Request, e.g. POST /orders/{id}/support-reply"] --> R["app/main.py route"]
+  R --> F["Your feature module<br/>e.g. app/support.py"]
+  F -- "1. look up the real facts" --> Dom["Domain modules<br/>orders.py, shows.py, inventory.py"]
+  F -- "2. prompt + facts" --> L["app/llm.py: get_llm, MODEL<br/>key from SHOWTIX_CLAUDE_KEY in .env"]
+  L --> API(("Claude API"))
+  API -- "3. text or a tool call" --> F
+  F -- "4. your code checks the output" --> Out["Response<br/>prices and seats come from the domain modules, never from the model"]
+
+  subgraph Checks["How it's checked"]
+    direction LR
+    T["Unit tests: uv run pytest<br/>fake_claude replaces get_llm<br/>scripted replies, offline, same every run"]
+    E["Eval: tests/evals/run_*.py<br/>the real model through the real API<br/>prints a score that varies run to run"]
+  end
+  T -. "fake client" .-> F
+  E -. "real client" .-> F

@@ -4,11 +4,13 @@
 
 ## Start here
 
-0. New to this? Read [`tasks/00-how-we-work.md`](00-how-we-work.md) first: it explains the working loop, why it works, and the commands you'll need.
-1. Run the commands under **Starting branch**.
-2. Read **Goal**, **Background** and **Acceptance criteria**.
-3. Follow **The working loop**, step by step. Step 1 starts with a quick brainstorm with Claude about edge cases; then you write your answer key yourself.
-4. You're done when everything under **Done means** is checked. **Optional stretch** is for extra time; **Hints** are at the very end, for when you're stuck.
+Finish a half-built rule that spans ordering and cancelling, built with the full workflow.
+
+1. New here? Read [Getting started](01-getting-started.md) for running commands and the app, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
+2. Run the command under [Starting branch](#starting-branch), then read [Goal](#goal), [Background](#background) and [Acceptance criteria](#acceptance-criteria).
+3. Follow [The workflow](#the-workflow) step by step. Step 1 starts with a quick brainstorm with Claude about edge cases; then you write your answer key yourself.
+
+You're done when every box under [Done means](#done-means) is checked. Stuck? See [Hints](#hints).
 
 ## Goal
 
@@ -16,20 +18,23 @@ Finish promo usage limits: enforce `max_uses`, and give a use back when an order
 
 ## Starting branch
 
-```sh
-git switch main
-git switch -c lab1d-promo-limits
-uv run pytest          # green before you change anything
+Create this lab's branch from `main`, reset the database, and check that the tests pass:
+
+```text
+! git switch main && uv run python -m app.seed && git switch -c lab1d-promo-limits && uv run pytest
 ```
+
+Every test should pass before you change anything. Trouble? See [Start a lab branch](01-getting-started.md#start-a-lab-branch).
 
 ## Background
 
-- `promo_codes` has `max_uses` (null means unlimited) and `uses`.
-- The base app is deliberately half-built: `promos.record_use()` adds a use when an order is created, but nothing reads `max_uses`, and cancelling never gives a use back.
-- Orders store the `promo_code` they used (null when none).
-- Validation lives in `promos.find_valid_promo()`; cancelling is `orders.cancel_order()`. Cancelling an already-cancelled order raises `Conflict` (409).
-- Promo errors already show inline on the UI's quote page, so a new error message appears there for free.
-- Seeded limits are large (LOCALS10: 500, WELCOME5: 1000). In tests, set a small limit inside `with conn:`: `with conn: conn.execute("UPDATE promo_codes SET max_uses = 1 WHERE code = 'WELCOME5'")`. Without `with conn:`, the change leaves a transaction open and the next order fails.
+Where the promo code you'll change lives:
+
+- **`promo_codes` has `max_uses` (null means unlimited) and `uses`.** The base app is deliberately half-built: `promos.record_use()` adds a use when an order is created, but nothing reads `max_uses`, and cancelling never gives a use back. Orders store the `promo_code` they used (null when none).
+- **Validation lives in `promos.find_valid_promo()`; cancelling is `orders.cancel_order()`.** Cancelling an already-cancelled order raises `Conflict` (409). Promo errors already show inline on the UI's quote page, so a new error message appears there for free.
+- **Seeded limits are large** (LOCALS10: 500, WELCOME5: 1000). In tests, set a small limit inside `with conn:`: `with conn: conn.execute("UPDATE promo_codes SET max_uses = 1 WHERE code = 'WELCOME5'")`. Without `with conn:`, the change leaves a transaction open and the next order fails.
+
+For a picture of how orders and cancels flow, see [Quote, order, cancel](../docs/architecture.md#2-quote-order-cancel).
 
 ## Acceptance criteria
 
@@ -51,63 +56,168 @@ Your edge cases:
 
 Think about: does a quote use up anything, what a freed use means for a code that was fully used, promo codes typed in lowercase, and what the 409 in criterion 4 says, not just its code.
 
-## The working loop
+## The workflow
 
-Write the tests first and check them yourself, then let Claude make them pass. Each step has a prompt you can copy. Start with `/clear` so Claude begins fresh.
+Settle what "done" means (with Claude's help on edge cases), then have Claude write the tests, check them yourself, and let Claude make them pass.
 
-1. **Find your edge cases, then write your answer key.** This sheet asks for one or two edge cases of your own. Ask Claude for ideas, then choose:
+- Steps that use Claude have a prompt to copy; commands start with `!`.
+- Why each step matters: [How we work](00-how-we-work.md).
+- Start with a fresh conversation:
 
-   > Read tasks/lab1d-promo-limits.md and the relevant code. Suggest 3 edge cases the criteria don't cover, one sentence each. Don't write any code. I'll pick which ones to add.
+  ```text
+  /clear
+  ```
 
-   Add the ones you pick to the sheet's edge-case lines. Then, without Claude: Go through **Acceptance criteria** one by one and write down exactly what should happen for each: which shows come back, which status code, the exact message, the exact cents. Some criteria already state the answer; others you work out. If the sheet has a worked example, check you get the same numbers. To look things up, run the app (`uv run uvicorn app.main:app --reload`) and use /docs, for example `GET /shows` to see the seeded shows and prices. In step 2, you'll compare Claude's tests against this answer key.
-2. **Tests first.** Ask Claude:
+### 1. Align: find your edge cases, then write your answer key
 
-   > Read tasks/lab1d-promo-limits.md and the relevant code. Write a failing test for each acceptance criterion. Don't change anything in app/. Run the tests and show me which ones fail.
+This sheet asks for one or two edge cases of your own. Ask Claude for ideas, then choose:
 
-   Compare each test with your answer key. If one is wrong, tell Claude what it should be and why:
+```text
+Read tasks/lab1d-promo-limits.md and the relevant code. Suggest 3 edge cases
+the criteria don't cover, one sentence each. Don't write any code. I'll pick
+which ones to add.
+```
 
-   > The test for criterion 4 expects ___, but it should be ___ because ___. Fix that test.
+Add the ones you pick to the sheet's edge-case lines. Then, without Claude, write down exactly what each criterion should return:
 
-   Check especially:
-   - **Some tests already pass**, as the sheet says (criteria 2, 5 and 6, maybe 4). They guard behavior your change must not break.
-   - **Each test reads `uses` from the database** after the action, not just the status code.
+- Go through [Acceptance criteria](#acceptance-criteria) one by one: which status code, the exact message, and what `uses` should be after each action.
+- Look up the seeded promo codes and their limits in [`docs/seed-data.md`](../docs/seed-data.md).
+- Want to see it in the running app? See [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-   When you're satisfied with the tests, commit them:
+You'll compare Claude's tests against this answer key in step 2.
 
-   ```sh
-   git add -A && git commit -m "lab1d: tests"
-   ```
+### 2. Tests first
 
-3. **Clear, then implement.** Type `/clear`, then ask:
+Have Claude write failing tests, then check them against your answer key.
 
-   > Make the new tests from my last commit pass (see git show HEAD). Don't change any test. Read tasks/lab1d-promo-limits.md for context. Run the full suite and show me the output.
+```text
+Read tasks/lab1d-promo-limits.md and the relevant code. Write a failing test
+for each acceptance criterion. Test behavior through the API, the pages, or
+functions that already exist, not new functions or exact HTML. Don't change
+anything in app/. Run the tests and show me which ones fail.
+```
 
-4. **Check the evidence.**
-   - Run `uv run pytest` yourself. Is everything green?
-   - Run `git diff HEAD --stat -- tests/`. It should print nothing, which means Claude didn't change your tests.
-   - Try it yourself. In a second terminal, start the app with `uv run uvicorn app.main:app --reload`, then open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**) or the UI at http://127.0.0.1:8000/. Use values from your answer key. To stop the app, click in that terminal and press **Ctrl+C** (on a Mac too: Control, not Command).
-5. **Review the diff.** Run `git add -A` then `git diff --staged` (Space to page, `q` to quit), or use VS Code's Source Control panel. Your tests are already committed, so this shows only the code Claude wrote. Can you explain every change? Was anything unexpected touched?
-6. **Get a second opinion.** Ask Claude:
+Check especially:
 
-   > Use a subagent to review this branch's changes (git diff main) against tasks/lab1d-promo-limits.md. It hasn't seen our conversation. Check every acceptance criterion, and don't report style. For each finding, give:
-   > - a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but not in the criteria, or already there before this branch), UNSURE, or OPTIONAL
-   > - which criterion it's about
-   > - evidence: the file and line, or an input that gives the wrong result
-   >
-   > Don't change any files or the database; if you need to experiment, do it in a test. Just show me the findings.
+- **Tests check behavior through the API or the page**, not functions that don't exist yet. A test that calls a new function is designing the code for Claude.
+- **Some tests already pass**, as the sheet says (criteria 2, 5 and 6, maybe 4). They guard behavior your change must not break.
+- **Each test reads `uses` from the database** after the action, not just the status code.
 
-   **Why "don't report style"?** A reviewer asked to find problems always finds something. If you fix every finding, you end up with extra layers of code and tests for cases that can't happen. You want bugs and unmet criteria, not someone else's taste.
+If a test doesn't match your answer key, tell Claude what it should be and why:
 
-   The labels are the reviewer's opinion; you decide. Check the evidence for each MUST FIX and OUT OF SCOPE yourself (a reviewer can wave off a real bug as out of scope), ask for a failing test on anything UNSURE, and skip OPTIONAL. If an OUT OF SCOPE finding holds up, write it down and move on: fixing it is a new feature, not this one. Then fix the real ones test-first:
+```text
+The test for criterion 4 expects ___, but it should be ___ because ___. Fix
+that test.
+```
 
-   > Findings 1 and 3 are real; ignore the rest. For each, write a failing test that shows the problem, then fix it. Run the full suite and show me the output.
+When every test matches your answer key, commit them:
 
-   Then repeat step 4.
-7. **Commit** when you're satisfied with the change:
+```text
+! git add -A && git commit -m "lab1d: tests"
+```
 
-   ```sh
-   git add -A && git commit -m "lab1d: promo usage limits"
-   ```
+### 3. Clear, then implement
+
+Clear the conversation, so Claude builds from the sheet and your committed tests, not the chat:
+
+```text
+/clear
+```
+
+Then ask:
+
+```text
+Make the new tests from my last commit pass (see git show HEAD). Don't change
+any test. If you change anything the tests don't need, tell me what and why.
+Read tasks/lab1d-promo-limits.md for context. Run the full suite and show me
+the output.
+```
+
+Claude shouldn't touch any test file. Step 4 checks that.
+
+### 4. Check the evidence
+
+Don't take Claude's word for it; check for yourself.
+
+- Run the tests. The last line should say only `passed`, with no `skipped`, `deselected` or `xfailed`:
+
+  ```text
+  ! uv run pytest
+  ```
+
+- Check that Claude only changed app code. Every file this lists should be under `app/`:
+
+  ```text
+  ! git status --short
+  ```
+
+  A file in `tests/` (changed, or new with `??`), a `conftest.py`, or `pyproject.toml` means Claude touched your tests or how they run: ask why before going on. After step 6's fixes, the only test changes should be the new tests you asked for.
+
+- Try it yourself. Ask Claude to start the app in the background ([more on starting the app](01-getting-started.md#start-the-app)):
+
+  ```text
+  Start the app in the background with uv run uvicorn app.main:app --reload,
+  and tell me when it's ready.
+  ```
+
+  Then open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**) or the UI at http://127.0.0.1:8000/. Use values from your answer key. When you're done, stop it:
+
+  ```text
+  Stop the app.
+  ```
+
+Something doesn't match? Tell Claude which criterion failed and what you saw.
+
+### 5. Review the diff
+
+Read every change Claude made before you accept it.
+
+```text
+! git add -A && git diff --staged
+```
+
+- Can you explain every change?
+- Was anything touched that has nothing to do with promo limits?
+- Prefer side by side? Use VS Code's **Source Control** panel.
+
+Your tests are already committed, so this shows only the code Claude wrote.
+
+### 6. Get a second opinion
+
+A reviewer that hasn't seen your conversation checks the change against this sheet.
+
+```text
+Use a subagent to review this branch's changes (git diff main) against
+tasks/lab1d-promo-limits.md. It hasn't seen our conversation. It should check
+every acceptance criterion, not report style, and not change any files or the
+database. Show me its findings as a numbered list, each with:
+- a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but
+  not in the criteria, or already there before this branch), UNSURE, or
+  OPTIONAL
+- which criterion it's about
+- evidence: the file and line, or an input that gives the wrong result
+
+Then ask me which ones to fix. For each one I pick, write a failing test that
+shows the problem, then fix it. Run the full suite and show me the output.
+```
+
+Claude shows the findings and asks which to fix. The labels are the reviewer's opinion; decide for yourself before you answer:
+
+- **MUST FIX** and **OUT OF SCOPE:** check the evidence yourself. A reviewer can wave off a real bug as out of scope.
+- **UNSURE:** answer "prove it with a failing test first." **OPTIONAL:** usually skip.
+- **OUT OF SCOPE** that holds up: write it down and move on. Fixing it is a new feature, not this one.
+
+Answer with the numbers you want fixed, for example "1 and 3".
+
+Then repeat step 4. Why "don't report style"? See [step 6 of How we work](00-how-we-work.md#6-get-a-second-opinion).
+
+### 7. Commit
+
+Commit when you're satisfied with the change:
+
+```text
+! git add -A && git commit -m "lab1d: promo usage limits"
+```
 
 ## Done means
 

@@ -28,11 +28,11 @@ Ticketing backend for fictional Las Vegas shows. Python 3.12, FastAPI, SQLite, p
 
 - **Money is integer cents.** Every price, discount, fee, tax and total is an `int` of cents with a `_cents` suffix. Never use floats for money, not even temporarily. Round with integer math (`pricing.percent_of`).
 - **All pricing logic lives in `pricing.py`.** If a change touches money, it changes `pricing.py` and is called from there. Never copy a formula into another module.
-- **The web layer holds no logic.** No business rules or money math in `web.py` or the templates. Templates show a price breakdown by looping over `pricing_lines` (built by `pricing.pricing_lines()`), never by naming totals. Cents become dollars only through the `dollars` template filter. No JavaScript, no CDN links; pages must work offline.
+- **The web layer holds no logic.** No business rules or money math in `web.py` or the templates. Templates show a price breakdown by looping over `pricing_lines` (built by `pricing.pricing_lines()`), never by naming totals. Cents become dollars only through `pricing.dollars()`: the `dollars` template filter on pages, and the same function anywhere else, such as amounts in a prompt to Claude. No JavaScript, no CDN links; pages must work offline.
 - **One price, everywhere.** A stored order must match its quote to the cent, because both come from the same function.
 - **Order lines capture the price at purchase time.** Don't recompute old orders from current tier prices.
 - **Seats are derived, not stored.** Seats sold = sum of order line qty on orders that aren't cancelled.
-- **Time is injected.** Never call `datetime.now()` in domain code; take a `now` argument. Tests pin the clock by overriding `get_now`. Times are naive local Vegas time.
+- **Time is injected.** Never call `datetime.now()` in domain code; take a `now` argument. Tests pin the clock by overriding `get_now`; to move time within a test, use the `clock` fixture in `tests/conftest.py` (set `clock.now`). Don't add another clock override. Times are naive local Vegas time.
 - **Test first.** Write a failing test, then make it pass. Tests run offline against an in-memory database (see `tests/conftest.py`).
 - **Assert exact cents.** `assert q["total_cents"] == 25044`, never `assert total < before`.
 - **All Claude API calls go through `app/llm.py`.** Tests use the `fake_claude` fixture and never touch the network.

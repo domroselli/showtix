@@ -1,7 +1,7 @@
 """Server-rendered pages.
 
 Routes read forms, call shows.py, orders.py and inventory.py, and render templates.
-No business rules or money math here or in the templates; `dollars` only formats cents.
+No business rules or money math here or in the templates; `dollars` (from pricing.py) only formats cents.
 """
 
 import sqlite3
@@ -18,16 +18,10 @@ from app.clock import get_now
 from app.db import get_db
 from app.errors import BadRequest, ShowTixError
 from app.models import CartItem, OrderRequest, QuoteRequest
+from app.pricing import dollars
 
 router = APIRouter(default_response_class=HTMLResponse, include_in_schema=False)
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
-
-
-def dollars(cents: int) -> str:
-    """The only place cents become dollars: 25044 -> "$250.44"."""
-    sign = "−" if cents < 0 else ""
-    cents = abs(cents)
-    return f"{sign}${cents // 100:,}.{cents % 100:02d}"
 
 
 def showtime(starts_at: datetime) -> str:

@@ -1,0 +1,7 @@
+flowchart LR
+  A["Cart<br/>2 × Premium at 12000"] --> S1["1. Subtotal<br/>qty × tier price<br/><b>24000</b>"]
+  S1 --> S2["2. Discount<br/>promo on the subtotal<br/>LOCALS10 = 10%<br/><b>−2400</b><br/>leaves 21600"]
+  S2 --> S3["3. Service fee<br/>750 per ticket<br/>never discounted<br/><b>+1500</b>"]
+  S3 --> S4["4. Tax<br/>9% of the discounted<br/>subtotal only, not fees<br/>rounded half up once<br/><b>+1944</b>"]
+  S4 --> S5["5. Total<br/>21600 + 1500 + 1944<br/><b>25044</b>"]
+  N["All amounts are integer cents.<br/>All of this lives in app/pricing.py."]

@@ -2,6 +2,10 @@
 
 A small ticketing backend for fictional Las Vegas shows.
 
+## How it fits together
+
+[`docs/architecture.md`](docs/architecture.md) has five diagrams: how a request flows through the app, quote → order → cancel, how a price is built, how a Lab 2 feature fits, and the workflow. Start there if the code is new to you. [`docs/seed-data.md`](docs/seed-data.md) lists the data the app starts with: every show, night, price, seat count, promo code and seeded order.
+
 ## Setup
 
 Requires [uv](https://docs.astral.sh/uv/). uv installs Python 3.12 if you don't have it.

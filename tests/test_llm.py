@@ -21,9 +21,14 @@ def env(monkeypatch, tmp_path):
     return env_file
 
 
-def test_missing_key_raises_503(env):
+def call_claude(client):
+    return client.messages.create(model=llm.MODEL, max_tokens=16, messages=[{"role": "user", "content": "hi"}])
+
+
+def test_missing_key_raises_503_only_when_claude_is_called(env):
+    client = llm.get_llm()  # no error yet, so a route can still return its own 404 or 400 first
     with pytest.raises(ServiceUnavailable) as exc:
-        llm.get_llm()
+        call_claude(client)
     assert exc.value.status_code == 503
     assert str(exc.value) == "Claude API key not configured: set SHOWTIX_CLAUDE_KEY in .env"
 
@@ -31,13 +36,37 @@ def test_missing_key_raises_503(env):
 def test_blank_key_counts_as_missing(env, monkeypatch):
     monkeypatch.setenv("SHOWTIX_CLAUDE_KEY", "  ")
     with pytest.raises(ServiceUnavailable):
-        llm.get_llm()
+        call_claude(llm.get_llm())
 
 
 def test_anthropic_api_key_is_ignored(env, monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-wrong")
     with pytest.raises(ServiceUnavailable):
-        llm.get_llm()
+        call_claude(llm.get_llm())
+
+
+def test_route_without_a_key_returns_its_own_404_first(env, client):
+    """With no key, a route still runs: its own 404 comes first, and the 503 only when it calls Claude."""
+    from app.errors import NotFound
+    from app.main import app
+
+    app.dependency_overrides.pop(llm.get_llm)  # use the real get_llm, with no key
+
+    def probe(n: int, claude=Depends(llm.get_llm)):
+        if n == 0:
+            raise NotFound("Thing 0 not found")
+        return {"text": call_claude(claude)}
+
+    app.add_api_route("/_probe/{n}", probe)
+    try:
+        not_found = client.get("/_probe/0")
+        no_key = client.get("/_probe/1")
+    finally:
+        app.router.routes.pop()
+
+    assert not_found.status_code == 404
+    assert no_key.status_code == 503
+    assert no_key.json() == {"detail": "Claude API key not configured: set SHOWTIX_CLAUDE_KEY in .env"}
 
 
 def test_key_comes_from_showtix_claude_key(env, monkeypatch):

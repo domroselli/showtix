@@ -1,0 +1,38 @@
+sequenceDiagram
+  autonumber
+  actor You as You (UI or /docs)
+  participant R as main.py / web.py
+  participant O as orders.py
+  participant I as inventory.py
+  participant P as promos.py
+  participant $ as pricing.py
+  participant DB as SQLite
+
+  Note over You,DB: Quote: POST /orders/quote. Prices a cart and writes nothing.
+  You->>R: cart + optional promo code
+  R->>O: quote(req, now)
+  O->>I: tiers_for_performance()
+  I->>DB: seats sold = order lines on orders that aren't cancelled
+  I-->>O: price and seats left per tier
+  O->>I: check_seats() (409 if not enough)
+  O->>P: find_valid_promo(code, now) (400 if unknown or expired)
+  O->>$: price_order(lines, promo)
+  $-->>O: subtotal, discount, fees, tax, total
+  O-->>You: Quote with pricing_lines
+
+  Note over You,DB: Order: POST /orders. Prices through quote(), then writes.
+  You->>R: cart + promo + email
+  R->>O: create_order(req, now)
+  O->>DB: lock (BEGIN IMMEDIATE)
+  O->>O: quote(req, now), the same steps as above
+  O->>DB: INSERT order (status paid, stored totals)
+  O->>DB: INSERT order lines (price paid, captured now)
+  O->>P: record_use(code): uses + 1
+  O->>DB: COMMIT
+  O-->>You: Order
+
+  Note over You,DB: Cancel: POST /orders/{id}/cancel
+  You->>R: order id
+  R->>O: cancel_order(id) (409 if already cancelled)
+  O->>DB: UPDATE status = cancelled
+  Note over I,DB: Seats free up by themselves: seat counts skip cancelled orders

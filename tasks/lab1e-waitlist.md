@@ -4,11 +4,13 @@
 
 ## Start here
 
-0. New to this? Read [`tasks/00-how-we-work.md`](00-how-we-work.md) first: it explains the working loop, why it works, and the commands you'll need.
-1. Run the commands under **Starting branch**.
-2. Read **Goal**, **Background** and **Acceptance criteria**.
-3. Follow **The working loop**, step by step. Step 1 starts with Claude interviewing you about the open decisions; then you write your answer key yourself.
-4. You're done when everything under **Done means** is checked. **Optional stretch** is for extra time; **Hints** are at the very end, for when you're stuck.
+A feature you design yourself: you settle the open decisions with Claude, then build it slice by slice.
+
+1. New here? Read [Getting started](01-getting-started.md) for running commands and the app, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
+2. Run the command under [Starting branch](#starting-branch), then read [Goal](#goal), [Background](#background), [Acceptance criteria](#acceptance-criteria) and [Decisions to make](#decisions-to-make).
+3. Follow [The workflow](#the-workflow) step by step. Step 1 starts with Claude explaining the code you'll change, then interviewing you about the open decisions; then you write your answer key yourself.
+
+You're done when every box under [Done means](#done-means) is checked. Extra time? Pull an item off your Not doing list (step 7). Stuck? See [Hints](#hints).
 
 ## Goal
 
@@ -16,105 +18,274 @@
 
 ## Starting branch
 
-```sh
-git switch main
-git switch -c lab1e-waitlist
-uv run pytest          # green before you change anything
+Create this lab's branch from `main`, reset the database, and check that the tests pass:
+
+```text
+! git switch main && uv run python -m app.seed && git switch -c lab1e-waitlist && uv run pytest
 ```
+
+Every test should pass before you change anything. Trouble? See [Start a lab branch](01-getting-started.md#start-a-lab-branch).
 
 ## Background
 
-- Seats are never stored as a count: seats sold = sum of order line qty on orders that aren't cancelled (`app/inventory.py`). Cancelling an order frees its seats automatically.
-- There's no waitlist table yet. The schema is in `app/db.py`.
-- Seats are freed in exactly one place: `orders.cancel_order()`.
-- The UI already marks a sold-out tier "Sold out" on the performance page; a join form could sit there.
-- In tests, make any tier small inside `with conn:`: `with conn: conn.execute("UPDATE price_tiers SET seats_total = 3 WHERE id = ?", (tier_id,))`. Without `with conn:`, the change leaves a transaction open and the next order fails. Then buy 3 seats in one order to sell it out, add two waitlist entries for 2 each, and cancel that order to free exactly 3.
+Where the code you'll change lives:
+
+- **Seats are never stored as a count:** seats sold = sum of order line qty on orders that aren't cancelled (`app/inventory.py`). Cancelling an order frees its seats automatically, and seats are freed in exactly one place: `orders.cancel_order()`.
+- **There's no waitlist table yet.** The schema is in `app/db.py`. The UI already marks a sold-out tier "Sold out" on the performance page; a join form could sit there.
+- **In tests, make any tier small inside `with conn:`:** `with conn: conn.execute("UPDATE price_tiers SET seats_total = 3 WHERE id = ?", (tier_id,))`. Without `with conn:`, the change leaves a transaction open and the next order fails. Then buy 3 seats in one order to sell it out, add two waitlist entries for 2 each, and cancel that order to free exactly 3.
+
+Changing the schema? If you add a table or column in `app/db.py`, [reset the database](01-getting-started.md#reset-the-database) afterwards, or the UI will break even while tests pass. For a picture of how orders and cancels work, see [Quote, order, cancel](../docs/architecture.md#2-quote-order-cancel).
 
 ## Acceptance criteria
 
-Two criteria are given. **Write the rest with Claude's help** before you write tests.
+Two criteria are given. Criteria 3 and on come from your decisions (see [Decisions to make](#decisions-to-make) below): **write them with Claude's help** before you write tests.
 
 1. Joining the waitlist for a tier that still has seats is rejected with 409. The customer should buy instead.
 2. When 3 seats are freed and the first two people in line want 2 seats each, the first gets 2 and the second gets 1, in the order they joined.
+3. _..._
+4. _..._
+5. _..._
 
 ### Decisions to make
 
-Decide these with Claude, then turn each decision into a criterion:
+Decide these with Claude, then turn each decision into a criterion. Use the explore and interview prompts in [step 1 of The workflow](#1-align-explore-settle-the-decisions-then-write-your-answer-key) below:
 
 - What does "gets the seats" mean: a paid order created for them, or something else? At what price, with which fees?
 - After a partial fill, does the person keep waiting for the rest?
 - What does joining return, and how does a customer check their place or status? API only, or the UI too?
 - Can the same email join twice? Does the 8-ticket limit apply to a waitlist entry?
+- Can a regular buyer get freed seats while someone is waiting? Can a customer leave the waitlist?
 - What if the freed seats are more than everyone in line wants?
 - What does the 409 in criterion 1 say? The criterion gives only the code.
 
 50 minutes is tight. For each question, pick the simplest answer that works and note what you'd do with more time.
 
-### Your criteria
+## The workflow
 
-3. _..._
-4. _..._
-5. _..._
+Explore the code and settle the decisions with Claude, write your answer key, then have Claude write the tests, check them yourself, and let Claude build it slice by slice.
 
-## The working loop
+- Steps that use Claude have a prompt to copy; commands start with `!`.
+- Why each step matters: [How we work](00-how-we-work.md).
+- Start with a fresh conversation:
 
-Write the tests first and check them yourself, then let Claude make them pass. Each step has a prompt you can copy. Start with `/clear` so Claude begins fresh.
+  ```text
+  /clear
+  ```
 
-1. **Settle the decisions, then write your answer key.** Have Claude interview you about **Decisions to make**:
+### 1. Align: explore, settle the decisions, then write your answer key
 
-   > Read tasks/lab1e-waitlist.md and the relevant code. Interview me about the "Decisions to make", one question at a time. For each, give me 2-3 options and your recommendation. Don't write any code or tests. When we've covered every decision, update "Your criteria" in the sheet and change nothing else: one numbered, testable criterion per decision, with exact status codes and messages; under each, a "Why:" line with the reason we chose it; and a short "Not doing" list for what we deferred. Then show me the section so I can check it.
+Get oriented in the code you'll change, decide with Claude, then write down what "done" means without Claude.
 
-   You choose; Claude only offers options. ⏱ About 10 minutes: if a decision drags on, pick the simplest option and put the other on the "Not doing" list. Then, without Claude: Go through **Acceptance criteria** one by one and write down exactly what should happen for each: which shows come back, which status code, the exact message, the exact cents. Some criteria already state the answer; others you work out. If the sheet has a worked example, check you get the same numbers. To look things up, run the app (`uv run uvicorn app.main:app --reload`) and use /docs, for example `GET /shows` to see the seeded shows and prices. In step 2, you'll compare Claude's tests against this answer key.
-2. **Tests first.** Ask Claude:
+First, have Claude explain the code:
 
-   > Read tasks/lab1e-waitlist.md and the relevant code. Write a failing test for each acceptance criterion. Don't change anything in app/. Run the tests and show me which ones fail.
+```text
+Read tasks/lab1e-waitlist.md. Before we decide anything, explain how seats
+work today: how seats left are counted, exactly what happens when an order is
+cancelled, and every route and page form that leads there. Plain words, file
+names included, short enough to read in 2 minutes. Don't change anything.
+```
 
-   Compare each test with your answer key. If one is wrong, tell Claude what it should be and why:
+Then have Claude interview you about [Decisions to make](#decisions-to-make):
 
-   > The test for criterion 4 expects ___, but it should be ___ because ___. Fix that test.
+```text
+Read tasks/lab1e-waitlist.md and the relevant code. Interview me about the
+"Decisions to make", one question at a time. For each, give me 2-3 options and
+your recommendation. If a question depends on how the code works, explain that
+part in plain words first. Don't write any code or tests. When we've covered
+every decision, imagine this shipped and a customer hit a problem: list what
+they could still run into that our decisions don't cover, and ask me which
+ones to make criteria. Then replace the placeholder criteria (3 onward) in
+Acceptance criteria: one numbered, testable criterion per decision, describing
+behavior rather than which functions to create, with exact status codes and
+messages; under each, a "Why:" line with the reason we chose it; right after
+them, a short "Not doing" list for what we deferred, including problems I
+didn't make criteria; and last, a "Slices" list: the order to build it in, as
+vertical slices (each one a piece of behavior that works end to end, small
+enough to review in a few minutes), with the criteria each slice covers. Then
+replace the Decisions to make list with one line: "Decided: see criteria 3
+onward, each with its Why. Deferred items are under Not doing." Change nothing
+else in the sheet. Show me what you changed so I can check it.
+```
 
-   Check especially:
-   - **First-in-first-out and the partial fill are tested with exact seat counts.**
-   - **Every decision in "Your criteria" has a test.**
+**Short on time?** Add this to the end of the prompt:
 
-   When you're satisfied with the tests, commit them:
+```text
+Keep the scope small enough to build and test in about 20 minutes; anything
+bigger goes on the Not doing list.
+```
 
-   ```sh
-   git add -A && git commit -m "lab1e: tests"
-   ```
+You choose; Claude only offers options. ⏱ About 15 minutes for exploring and the interview together: if a decision drags on, pick the simplest option and put the other on the "Not doing" list.
 
-3. **Clear, then implement.** Type `/clear`, then ask:
+Then, without Claude, write your answer key:
 
-   > Make the new tests from my last commit pass (see git show HEAD). Don't change any test. Read tasks/lab1e-waitlist.md for context. Run the full suite and show me the output.
+- Go through [Acceptance criteria](#acceptance-criteria) one by one, including the ones you just added: which status code, the exact message, the exact seat counts and cents.
+- Look up anything you need in [`docs/seed-data.md`](../docs/seed-data.md): every show, night, price, seat count, promo code and seeded order, plus how a price is built.
+- Want to see it in the running app? See [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-   This is a bigger feature, so build it in slices (joining the waitlist first, then giving freed seats to the line). Add to the prompt: "Start with the tests for the first slice only. Stop when they pass." Commit each slice when you're satisfied with it, then ask for the next.
+You'll compare Claude's tests against this answer key in step 2.
 
-4. **Check the evidence.**
-   - Run `uv run pytest` yourself. Is everything green?
-   - Run `git diff HEAD --stat -- tests/`. It should print nothing, which means Claude didn't change your tests.
-   - Try it yourself. In a second terminal, start the app with `uv run uvicorn app.main:app --reload`, then open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**) or the UI at http://127.0.0.1:8000/. Use values from your answer key. To stop the app, click in that terminal and press **Ctrl+C** (on a Mac too: Control, not Command).
-5. **Review the diff.** Run `git add -A` then `git diff --staged` (Space to page, `q` to quit), or use VS Code's Source Control panel. Your tests are already committed, so this shows only the code Claude wrote. Can you explain every change? Was anything unexpected touched?
-6. **Get a second opinion.** Ask Claude:
+### 2. Tests first
 
-   > Use a subagent to review this branch's changes (git diff main) against tasks/lab1e-waitlist.md. It hasn't seen our conversation. Check every acceptance criterion, and don't report style. For each finding, give:
-   > - a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but not in the criteria, or already there before this branch), UNSURE, or OPTIONAL
-   > - which criterion it's about
-   > - evidence: the file and line, or an input that gives the wrong result
-   >
-   > Don't change any files or the database; if you need to experiment, do it in a test. Just show me the findings.
+Have Claude write failing tests, then check them against your answer key.
 
-   **Why "don't report style"?** A reviewer asked to find problems always finds something. If you fix every finding, you end up with extra layers of code and tests for cases that can't happen. You want bugs and unmet criteria, not someone else's taste.
+```text
+Read tasks/lab1e-waitlist.md and the relevant code. Write a failing test for
+each acceptance criterion, including the ones you added from your decisions
+(not the "Not doing" list). Test behavior through the API, the pages, or
+functions that already exist, not new functions or exact HTML. Don't change
+anything in app/. Run the tests and show me which ones fail.
+```
 
-   The labels are the reviewer's opinion; you decide. Check the evidence for each MUST FIX and OUT OF SCOPE yourself (a reviewer can wave off a real bug as out of scope), ask for a failing test on anything UNSURE, and skip OPTIONAL. If an OUT OF SCOPE finding holds up, write it down and move on: fixing it is a new feature, not this one. Then fix the real ones test-first:
+Check especially:
 
-   > Findings 1 and 3 are real; ignore the rest. For each, write a failing test that shows the problem, then fix it. Run the full suite and show me the output.
+- **Tests check behavior through the API or the page**, not functions that don't exist yet. A test that calls a new function is designing the code for Claude.
+- **First-in-first-out and the partial fill are tested with exact seat counts.**
+- **Every criterion you added from your decisions has a test.**
 
-   Then repeat step 4.
-7. **Commit** when you're satisfied with the change:
+If a test doesn't match your answer key, tell Claude what it should be and why:
 
-   ```sh
-   git add -A && git commit -m "lab1e: waitlist"
-   ```
+```text
+The test for criterion 4 expects ___, but it should be ___ because ___. Fix
+that test.
+```
+
+When every test matches your answer key, commit them:
+
+```text
+! git add -A && git commit -m "lab1e: tests"
+```
+
+### 3. Clear, then implement, one slice at a time
+
+Clear the conversation, so Claude builds from the sheet and your committed tests, not the chat:
+
+```text
+/clear
+```
+
+Then ask:
+
+```text
+Make the new tests from my last commit pass (see git show HEAD), one slice at
+a time, in the order of the Slices list in the sheet. Don't change any test.
+If you change anything the tests don't need, tell me what and why. Read
+tasks/lab1e-waitlist.md for context. After each slice, run the full suite,
+show me the output, and stop so I can review and commit it.
+```
+
+After each slice:
+
+- Read its diff:
+
+  ```text
+  ! git diff
+  ```
+
+- Check that Claude only changed app code. Every file this lists should be under `app/`:
+
+  ```text
+  ! git status --short
+  ```
+
+- Commit the slice, then tell Claude "Next slice.":
+
+  ```text
+  ! git add -A && git commit -m "lab1e: <slice name>"
+  ```
+
+Tests for later slices still fail until their slice is built; that's expected. Why slices? See [step 3 of How we work](00-how-we-work.md#3-clear-then-implement).
+
+### 4. Check the evidence
+
+Don't take Claude's word for it; check for yourself.
+
+- Run the tests. The last line should say only `passed`, with no `skipped`, `deselected` or `xfailed`:
+
+  ```text
+  ! uv run pytest
+  ```
+
+- Check that Claude only changed app code. Every file this lists should be under `app/`:
+
+  ```text
+  ! git status --short
+  ```
+
+  A file in `tests/` (changed, or new with `??`), a `conftest.py`, or `pyproject.toml` means Claude touched your tests or how they run: ask why before going on. After step 6's fixes, the only test changes should be the new tests you asked for.
+
+- Check that no slice commit changed your tests. This lists the commits on this branch that touched them, and should show only your "lab1e: tests" commit:
+
+  ```text
+  ! git log --oneline --stat main..HEAD -- tests/ conftest.py pyproject.toml
+  ```
+
+- Try it yourself. Start the app ([more on starting the app](01-getting-started.md#start-the-app)):
+
+  ```text
+  Start the app in the background with uv run uvicorn app.main:app --reload,
+  and tell me when it's ready.
+  ```
+
+  Then open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**) or the UI at http://127.0.0.1:8000/, and use values from your answer key. When you're done, stop it:
+
+  ```text
+  Stop the app.
+  ```
+
+Something doesn't match? Tell Claude which criterion failed and what you saw.
+
+### 5. Review the diff
+
+You read each slice as it went in. Now read the whole feature together, before you accept it:
+
+```text
+! git diff main -- app/
+```
+
+- Can you explain every change?
+- Was anything touched that has nothing to do with the waitlist?
+- Prefer side by side? Use VS Code's **Source Control** panel.
+
+This shows everything Claude changed in `app/` on this branch; your tests are in their own commit.
+
+### 6. Get a second opinion
+
+A reviewer that hasn't seen your conversation checks the change against this sheet.
+
+```text
+Use a subagent to review this branch's changes (git diff main) against
+tasks/lab1e-waitlist.md. It hasn't seen our conversation. It should check
+every acceptance criterion, not report style, and not change any files or the
+database. Show me its findings as a numbered list, each with:
+- a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but
+  not in the criteria, or already there before this branch), UNSURE, or
+  OPTIONAL
+- which criterion it's about
+- evidence: the file and line, or an input that gives the wrong result
+
+Then ask me which ones to fix. For each one I pick, write a failing test that
+shows the problem, then fix it. Run the full suite and show me the output.
+```
+
+Claude shows the findings and asks which to fix. The labels are the reviewer's opinion; decide for yourself before you answer:
+
+- **MUST FIX** and **OUT OF SCOPE:** check the evidence yourself. A reviewer can wave off a real bug as out of scope.
+- **UNSURE:** answer "prove it with a failing test first." **OPTIONAL:** usually skip.
+- **OUT OF SCOPE** that holds up: write it down and move on. Fixing it is a new feature, not this one.
+
+Answer with the numbers you want fixed, for example "1 and 3".
+
+Then repeat step 4. Why "don't report style"? See [step 6 of How we work](00-how-we-work.md#6-get-a-second-opinion).
+
+### 7. Commit
+
+Commit when you're satisfied with the change:
+
+```text
+! git add -A && git commit -m "lab1e: waitlist"
+```
+
+**Finished with time to spare?** Pull an item off your Not doing list and run it through the workflow, starting at step 2.
 
 ## Done means
 

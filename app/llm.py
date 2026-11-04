@@ -15,12 +15,25 @@ ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
 KEY_VAR = "SHOWTIX_CLAUDE_KEY"
 
 
-def get_llm() -> anthropic.Anthropic:
+MISSING_KEY = f"Claude API key not configured: set {KEY_VAR} in .env"
+
+
+class MissingKeyClient:
+    """Stands in for the client when there's no key. Routes still run, so a 404 or 400 comes first;
+    the 503 is raised only when the route actually calls Claude."""
+
+    def __getattr__(self, name):
+        if name == "messages":
+            return self
+        raise ServiceUnavailable(MISSING_KEY)
+
+
+def get_llm() -> anthropic.Anthropic | MissingKeyClient:
     """FastAPI dependency: a Claude client built from SHOWTIX_CLAUDE_KEY. Tests override it with fake_claude."""
     load_dotenv(ENV_PATH)
     key = os.environ.get(KEY_VAR, "").strip()
     if not key:
-        raise ServiceUnavailable(f"Claude API key not configured: set {KEY_VAR} in .env")
+        return MissingKeyClient()
     # Pass the key explicitly so the SDK never falls back to ANTHROPIC_API_KEY.
     return anthropic.Anthropic(api_key=key, timeout=30, max_retries=1)
 

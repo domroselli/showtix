@@ -1,10 +1,16 @@
 # How we work in these labs
 
-Every lab uses the same seven-step loop. This page explains each step, why it's good practice, and the commands you'll need. Read it once before your first lab (about 5 minutes), then come back whenever a step is unclear. Your sheet has every prompt ready to copy, with its own file name filled in.
+Every lab uses the same seven-step workflow. This page explains each step and why it's good practice. For how to run commands and the app, see [Getting started](01-getting-started.md). Read it once before your first lab (about 5 minutes), then come back whenever a step is unclear. For diagrams of how the app itself works, see [`docs/architecture.md`](../docs/architecture.md). Your sheet has every prompt ready to copy, with its own file name filled in.
 
-## The loop at a glance
+A note on words: you may read about "agent loops" elsewhere. That means something different: the model calling tools over and over until a task is done, which is what you build in Lab 2c. This page is about the workflow *you* follow.
 
-1. **Write your answer key** (no Claude yet). If your sheet has **Decisions to make** or asks for your own edge cases, settle those with Claude first.
+## The workflow at a glance
+
+<img src="../docs/img/5-workflow-compact.png" alt="The seven-step workflow" width="760">
+
+The [detailed version](../docs/architecture.md#5-the-workflow) shows what happens in each step.
+
+1. **Align: settle what "done" means.** On the harder labs, Claude first explains the code (1e, 1f, 2c) and you settle the open decisions or edge cases with it. Every lab ends step 1 with your answer key, written without Claude
 2. **Tests first:** Claude writes failing tests, you check them against your answer key, then you commit them
 3. **Clear, then implement:** `/clear`, then Claude makes your tests pass without changing them
 4. **Check the evidence:** run the tests yourself, confirm they weren't changed, and try it in your browser
@@ -14,41 +20,79 @@ Every lab uses the same seven-step loop. This page explains each step, why it's 
 
 Start every lab with `/clear`, so Claude doesn't carry anything over from the last one.
 
-## 1. Write your answer key
+## 1. Align: settle what "done" means
 
-Go through the sheet's **Acceptance criteria** one by one and write down exactly what should happen for each: which shows come back, which status code, the exact message, the exact cents.
+Before Claude writes anything, you agree on exactly what the feature should do. Every lab's step 1 ends with your answer key. On the harder labs, two parts come first, in this order: explore, then decide.
+
+### Explore (the Breakthrough and Advanced labs: 1e, 1f, 2c)
+
+You can't decide how to change code you've never seen. Your sheet's first prompt asks Claude to explain the part of the code you'll change, in plain words, short enough to read in 2 minutes. It also lists every route and page form that leads to that code, so the interview can ask about each. It changes nothing. For the big picture, see [`docs/architecture.md`](../docs/architecture.md).
+
+### Decide (the Intermediate labs and up)
+
+- **Sheets with "Decisions to make"** (1e, 1f, 2c): have Claude interview you. For example:
+
+  ```text
+  Read tasks/lab1e-waitlist.md and the relevant code. Interview me about the
+  "Decisions to make", one question at a time. For each, give me 2-3 options and
+  your recommendation. If a question depends on how the code works, explain that
+  part in plain words first. Don't write any code or tests. When we've covered
+  every decision, imagine this shipped and a customer hit a problem: list what
+  they could still run into that our decisions don't cover, and ask me which
+  ones to make criteria. Then replace the placeholder criteria (3 onward) in
+  Acceptance criteria: one numbered, testable criterion per decision, describing
+  behavior rather than which functions to create, with exact status codes and
+  messages; under each, a "Why:" line with the reason we chose it; right after
+  them, a short "Not doing" list for what we deferred, including problems I
+  didn't make criteria; and last, a "Slices" list: the order to build it in, as
+  vertical slices (each one a piece of behavior that works end to end, small
+  enough to review in a few minutes), with the criteria each slice covers. Then
+  replace the Decisions to make list with one line: "Decided: see criteria 3
+  onward, each with its Why. Deferred items are under Not doing." Change nothing
+  else in the sheet. Show me what you changed so I can check it.
+  ```
+
+  You choose; Claude only offers options. The last question is a pre-mortem: what could a customer still run into? Anything you don't make a criterion goes on Not doing. Spend about 15 minutes on exploring and the interview together. If a decision drags on, pick the simplest option and put the other on the "Not doing" list.
+- **Sheets that ask for your own edge cases** (1c, 1d, 2b): ask for ideas, then choose.
+
+  ```text
+  Read tasks/lab1c-group-discount.md and the relevant code. Suggest 3 edge cases
+  the criteria don't cover, one sentence each. Don't write any code. I'll pick
+  which ones to add.
+  ```
+
+**Why the decisions go in the sheet:** a file survives `/clear`; the conversation doesn't. You'll `/clear` before implementing, so the sheet and your committed tests are everything the next session knows.
+
+### Answer key (every lab, without Claude)
+
+Go through the sheet's **Acceptance criteria** one by one, including any you just added, and write down exactly what should happen for each: which shows come back, which status code, the exact message, the exact cents. The data the app starts with (every show, night, price, seat count, promo code and seeded order, plus how a price is built) is in [`docs/seed-data.md`](../docs/seed-data.md). If Claude wrote exact values into your new criteria, check them yourself there or in /docs rather than copying them.
 
 **Why:** Claude is fast and sounds confident, and it writes tests that agree with its own understanding. If you don't know the right answer before you see Claude's, you can't tell a test that checks the right thing from one that checks the wrong thing. While this app was being built, Claude once added 36000 + 2250 + 3240 and got 40590. The right answer is 41490. An answer key catches that; nodding along doesn't.
 
-Acceptance criteria are the definition of "done." Turning each one into an exact expected value is what makes it testable.
-
-**If your sheet leaves decisions open,** settle them with Claude before you write the answer key:
-
-- **Sheets with "Decisions to make"** (the Breakthrough and Advanced labs): have Claude interview you. For example:
-
-  > Read tasks/lab1e-waitlist.md and the relevant code. Interview me about the "Decisions to make", one question at a time. For each, give me 2-3 options and your recommendation. Don't write any code or tests. When we've covered every decision, update "Your criteria" in the sheet and change nothing else: one numbered, testable criterion per decision, with exact status codes and messages; under each, a "Why:" line with the reason we chose it; and a short "Not doing" list for what we deferred. Then show me the section so I can check it.
-
-  You choose; Claude only offers options. Spend about 10 minutes. If a decision drags on, pick the simplest option and put the other on the "Not doing" list. Then write the expected values for your new criteria into your answer key yourself.
-- **Sheets that ask for your own edge cases** (the Intermediate labs): ask for ideas, then choose.
-
-  > Read tasks/lab1c-group-discount.md and the relevant code. Suggest 3 edge cases the criteria don't cover, one sentence each. Don't write any code. I'll pick which ones to add.
-
-**Why:** the decisions end up in the sheet, a file, not just in the conversation. That matters because you'll `/clear` before implementing: the sheet and your committed tests are everything the next session knows.
+Acceptance criteria are the definition of "done." Turning each one into an exact expected value is what makes it testable. On the Starter labs, this is all of step 1: aligning means agreeing with yourself on what right looks like, before Claude does anything.
 
 ## 2. Tests first
 
 Ask Claude for the tests, and only the tests:
 
-> Read tasks/lab1a-category-filter.md and the relevant code. Write a failing test for each acceptance criterion. Don't change anything in app/. Run the tests and show me which ones fail.
+```text
+Read tasks/lab1a-category-filter.md and the relevant code. Write a failing
+test for each acceptance criterion. Test behavior through the API, the pages,
+or functions that already exist, not new functions or exact HTML. Don't change
+anything in app/. Run the tests and show me which ones fail.
+```
 
-Compare each test with your answer key. Same shows, same status code, same message, same cents? A test that checks "the total got smaller" instead of "the total is 25044" is a weak test. If one is wrong, tell Claude what it should be and why:
+Compare each test with your answer key. Same shows, same status code, same message, same cents? A test that checks "the total got smaller" instead of "the total is 25044" is a weak test. And a test should check behavior through the API or the page, not call a function that doesn't exist yet: a test like that designs the code for Claude, and step 3 won't let Claude change it. If one is wrong, tell Claude what it should be and why:
 
-> The test for criterion 4 expects ___, but it should be ___ because ___. Fix that test.
+```text
+The test for criterion 4 expects ___, but it should be ___ because ___. Fix
+that test.
+```
 
 When you're satisfied with the tests, commit them:
 
-```
-git add -A && git commit -m "lab1a: tests"
+```text
+! git add -A && git commit -m "lab1a: tests"
 ```
 
 **Why:**
@@ -62,9 +106,16 @@ git add -A && git commit -m "lab1a: tests"
 
 Type `/clear`, then:
 
-> Make the new tests from my last commit pass (see git show HEAD). Don't change any test. Read tasks/lab1a-category-filter.md for context. Run the full suite and show me the output.
+```text
+Make the new tests from my last commit pass (see git show HEAD). Don't change
+any test. If you change anything the tests don't need, tell me what and why.
+Read tasks/lab1a-category-filter.md for context. Run the full suite and show
+me the output.
+```
 
-For a big feature, build one slice at a time: "Start with criteria 1 and 2 only. Stop when those tests pass." Commit each slice when you're satisfied with it.
+**Big features: one vertical slice at a time.** On the Breakthrough and Advanced labs, the interview ends with a Slices list in the sheet, based on what you decided; step 3 builds them in that order, and Claude stops after each one. How many slices depends on the feature: each one should work end to end and be small enough to review in a few minutes. A *vertical* slice is a piece that works end to end, such as "customers can join the waitlist", not a layer such as "all the database code". After each slice, read its diff, commit it, then ask for the next.
+
+**Why slices?** One feature built in one go can touch seven files at once, and a diff that big is too large to review honestly. Slices keep each diff small enough to read, give you a commit to go back to if the next slice goes wrong, and catch a misunderstanding after one slice instead of after the whole feature is built on it. Tests for later slices fail until their slice is built; that's expected. On a real project, you'd usually go one step further: write and review the tests for each slice just before building it. Here, the whole feature's tests come first to save time.
 
 **Why:**
 
@@ -75,28 +126,37 @@ For a big feature, build one slice at a time: "Start with criteria 1 and 2 only.
 
 ## 4. Check the evidence
 
-- **Run the tests yourself:** `uv run pytest`. Don't take Claude's word for it.
-- **Check your tests weren't changed:** `git diff HEAD --stat -- tests/` should print nothing.
+Don't take Claude's word for it. The `!` runs a command yourself, not through Claude, and Claude sees the output too.
+
+- **Run the tests yourself.** The last line should say only `passed`, with no `skipped`, `deselected` or `xfailed`:
+
+  ```text
+  ! uv run pytest
+  ```
+
+- **Check that Claude only changed app code.** Every file this lists should be under `app/`:
+
+  ```text
+  ! git status --short
+  ```
+
+  A file in `tests/` (changed, or new with `??`), a `conftest.py`, or `pyproject.toml` means Claude touched your tests or how they run: ask why. On labs built slice by slice (1e, 1f, 2c), also check the slice commits: [Check your tests didn't change](01-getting-started.md#check-your-tests-didnt-change).
 - **Lab 2 only: run your eval** twice and read any failing case before changing anything. Your sheet explains how.
-- **Try it in your browser.** Your sheet's **Check it in your browser** section has the exact links, clicks and results to expect. In short:
-  - **Start the app** in a **second terminal** and leave it running: `uv run uvicorn app.main:app --reload`
-  - **API:** open http://127.0.0.1:8000/docs, click your endpoint, then **Try it out**, fill in the values and **Execute**.
-  - **Web UI:** open http://127.0.0.1:8000/
-  - **Stop the app:** click in that terminal and press **Ctrl+C** (on a Mac too: Control, not Command).
-  - **Reset the database** if things look strange, or after a schema change: `uv run python -m app.seed`
+- **Try it yourself.** Your sheet's **Check it in your browser** section has the exact links, clicks and results to expect. To start and stop the app, see [Start the app](01-getting-started.md#start-the-app) and [Stop the app](01-getting-started.md#stop-the-app).
 
 Use the values from your answer key. Does the running app agree?
 
+**Why `git status`, not `git diff`?** `git diff` only shows files git already tracks, so a new test file or a new `conftest.py` that skips tests wouldn't show up. And test settings can live outside `tests/`, in `pyproject.toml`.
+
 ## 5. Review the diff
 
-See everything that changed, including new files:
+See everything that changed, including new files.
 
-```
-git add -A
-git diff --staged
+```text
+! git add -A && git diff --staged
 ```
 
-Press Space to page down and `q` to quit. Or use the **Source Control** panel in VS Code, which shows the same thing side by side. `git status` gives just the list of changed files. Your tests are already committed, so this shows only the code Claude wrote.
+Or use the **Source Control** panel in VS Code, which shows the same thing side by side. `git status` gives just the list of changed files. Your tests are already committed, so this shows only the code Claude wrote.
 
 Ask yourself: can I explain every change? Did anything change that has nothing to do with this feature? (`git add -A` only stages; it doesn't commit anything.)
 
@@ -104,25 +164,31 @@ Ask yourself: can I explain every change? Did anything change that has nothing t
 
 Have a subagent review the work. It starts with a fresh context, so it hasn't seen your conversation and can't be talked into agreeing with it:
 
-> Use a subagent to review this branch's changes (git diff main) against tasks/lab1a-category-filter.md. It hasn't seen our conversation. Check every acceptance criterion, and don't report style. For each finding, give:
-> - a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but not in the criteria, or already there before this branch), UNSURE, or OPTIONAL
-> - which criterion it's about
-> - evidence: the file and line, or an input that gives the wrong result
->
-> Don't change any files or the database; if you need to experiment, do it in a test. Just show me the findings.
+```text
+Use a subagent to review this branch's changes (git diff main) against
+tasks/lab1a-category-filter.md. It hasn't seen our conversation. It should
+check every acceptance criterion, not report style, and not change any files
+or the database. Show me its findings as a numbered list, each with:
+- a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but
+  not in the criteria, or already there before this branch), UNSURE, or
+  OPTIONAL
+- which criterion it's about
+- evidence: the file and line, or an input that gives the wrong result
+
+Then ask me which ones to fix. For each one I pick, write a failing test that
+shows the problem, then fix it. Run the full suite and show me the output.
+```
 
 **Why "don't report style"?** A reviewer asked to find problems always finds something. If you fix every finding, you end up with extra layers of code and tests for cases that can't happen. You want bugs and unmet criteria, not someone else's taste.
 
-**What to do with the findings.** The labels are the reviewer's opinion; you decide.
+**What to do with the findings.** Claude shows them as a numbered list and asks which to fix. The labels are the reviewer's opinion; you decide.
 
 - **MUST FIX:** check the evidence yourself. If it's real, fix it.
-- **UNSURE:** ask Claude to prove it with a failing test. No failing test, no fix.
-- **OPTIONAL:** skip it.
+- **UNSURE:** answer "prove it with a failing test first." No failing test, no fix.
+- **OPTIONAL:** usually skip it.
 - **OUT OF SCOPE:** real, but not in your criteria (often something that was there before you started). Check the evidence, because a reviewer can wave off a real bug this way. If it holds up, write it down and move on: fixing it is a new feature, not this one.
 
-Fix the real ones test-first:
-
-> Findings 1 and 3 are real; ignore the rest. For each, write a failing test that shows the problem, then fix it. Run the full suite and show me the output.
+Answer with the numbers you want fixed, for example "1 and 3". Claude writes a failing test for each one, then fixes it.
 
 Then repeat step 4. One review round is enough unless the fixes were big.
 
@@ -130,8 +196,8 @@ Then repeat step 4. One review round is enough unless the fixes were big.
 
 When you're satisfied with the change:
 
-```
-git add -A && git commit -m "lab1a: category filter"
+```text
+! git add -A && git commit -m "lab1a: category filter"
 ```
 
 **Why:** a commit is a safe point. If anything goes wrong later, you can get back here.
@@ -149,7 +215,14 @@ Find out why before you correct it. Press Esc to stop it if it's still going, th
 
    For example, for the fee cap from Demo 1:
 
-   > Make the new tests from my last commit pass (see git show HEAD). Don't change any test. Important: cap only the service fees, not the total or the tax, because tax and ticket prices are separate charges. For example, 8 tickets have fees of 3000 cents (not 6000), and their tax doesn't change. All of the money math belongs in app/pricing.py. Run the full suite and show me the output.
+   ```text
+   Make the new tests from my last commit pass (see git show HEAD). Don't change
+   any test. If you change anything the tests don't need, tell me what and why.
+   Important: cap only the service fees, not the total or the tax, because tax
+   and ticket prices are separate charges. For example, 8 tickets have fees of
+   3000 cents (not 6000), and their tax doesn't change. All of the money math
+   belongs in app/pricing.py. Run the full suite and show me the output.
+   ```
 4. **If it's a rule for the whole project,** add it to `CLAUDE.md` so every session knows it.
 
 Also: one feature per branch, small changes. Small diffs are easy to review and easy to undo.
@@ -158,30 +231,37 @@ Also: one feature per branch, small changes. Small diffs are easy to review and 
 
 Each sheet ends with a link to its hints: three levels, from a gentle nudge to a near-answer. Open one level at a time, and only after you've tried without it. Still stuck? Raise your hand.
 
-## Running tests
+## Commands
 
-| What | Command |
-| --- | --- |
-| Everything | `uv run pytest` |
-| One file | `uv run pytest tests/test_shows.py` |
-| One test | `uv run pytest tests/test_shows.py::test_name` |
-| Tests whose name contains a word | `uv run pytest -k category` |
-| Stop at the first failure | `uv run pytest -x` |
-| Show each test's name | `uv run pytest -v` |
+How to run a command yourself, run the tests, start and stop the app, reset the database, and use git: [Getting started](01-getting-started.md).
 
-## Claude Code basics
+## Appendix: sources behind the workflow
 
-- **Start it** in the project folder: `claude`. **Leave:** `/exit`.
-- **Stop Claude mid-task:** Esc.
-- **Start fresh:** `/clear`. Use it at the start of every lab, before implementing (step 3), and when a conversation has gone off track.
-- **Permission prompts:** Claude asks before running commands or editing files. Running tests is always fine. Read anything that deletes files or touches things outside this project before you approve it.
+This workflow isn't ours alone. Each step follows advice from the people who build and use coding agents most. Quotes and links were checked on Nov 3, 2026.
 
-## Git basics for the labs
+**Anthropic's own guidance:** [Best practices for Claude Code](https://code.claude.com/docs/en/best-practices). The older Anthropic engineering post on the same topic now redirects here.
 
-| What | Command |
-| --- | --- |
-| Which branch am I on? | `git branch --show-current` |
-| What changed? | `git status` |
-| Save your work | `git add -A && git commit -m "message"` |
-| Did my committed tests change? | `git diff HEAD --stat -- tests/` (prints nothing if not) |
-| Start a new branch from main | `git switch main && git switch -c <name>` |
+| Step | What the page says | Section |
+| --- | --- | --- |
+| 1. Align | "Interview me until you could write the spec, then write it to SPEC.md." Then "start a fresh session to build from it, so the build begins with a clean context and a written definition of done." | Brainstorm with Claude first |
+| 2. Tests first | Its example of a good prompt: "write a failing test that reproduces it, then fix it." | Write a specific prompt |
+| 3. Clear | "`/clear` between unrelated tasks … a focused context gets you better answers." | Keep cost and context down |
+| 4. Evidence | "Ask Claude for *evidence*: the command it ran and its output … 'All tests pass' on its own tells you very little." | Give Claude a check to run |
+| 6. Second opinion | `/code-review` "reviews the diff in a fresh subagent that never saw your conversation." Subagents help when "getting a reviewer that hasn't seen how the code was written." | Give Claude a check to run; Know what subagents cost |
+| 6. "Don't report style" | "A reviewer that's asked to find problems will always find *something*. If you fix every finding, you end up with extra abstraction layers and tests for cases that can't happen." | Review against your spec |
+| When Claude goes wrong | "After two failed corrections run `/clear` and write a better prompt instead of a third." We go one step further: ask why on the first miss. | Steer the session |
+
+**Other sources, by step:**
+
+- **1. Align: explore before deciding.** Dex Horthy (HumanLayer), [Getting AI to Work in Complex Codebases](https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/ace-fca.md) (Aug 29, 2025): research first, to "understand the codebase, the files relevant to the issue, and how information flows," because a misunderstanding there "could land you with thousands of bad lines of code." His 2026 revision adds questioning first: [Lessons Learned Rolling Out RPI to Hundreds of Engineers](https://www.youtube.com/watch?v=YwZR6tc7qYg) (Mar 24, 2026) and [Everything We Got Wrong About Research-Plan-Implement](https://www.youtube.com/live/6IxSbMhT7v4?t=1947) (Apr 20, 2026).
+- **1. Align: the interview and the spec.** Matt Pocock, [mattpocock/skills](https://github.com/mattpocock/skills): `/grill-me`, "Get relentlessly interviewed about a plan or design until every branch of the design tree is resolved," and `/to-spec`, "Turn the current conversation into a spec."
+- **1. Align: plan before you build.** Simon Willison, [Vibe engineering](https://simonwillison.net/2025/Oct/7/vibe-engineering/) (Oct 7, 2025): "Sitting down to hack something together goes much better if you start with a high level plan."
+- **2. Tests first.** Jesse Vincent, [Superpowers](https://github.com/obra/superpowers): "write failing test, watch it fail, write minimal code, watch it pass, commit." Kent Beck's system prompt in [Augmented Coding: Beyond the Vibes](https://newsletter.kentbeck.com/p/augmented-coding-beyond-the-vibes) (Jun 25, 2025): "Always follow the TDD cycle: Red → Green → Refactor." The classic book is Kent Beck, *Test-Driven Development: By Example* (2002).
+- **2. Test behavior, not implementation.** Andrew Trenk, [Testing on the Toilet: Test Behavior, Not Implementation](https://testing.googleblog.com/2013/08/testing-on-toilet-test-behavior-not.html) (Google Testing Blog, Aug 5, 2013): "Tests that are independent of implementation details are easier to maintain."
+- **2. Commit your tests so changes show.** Kent Beck, in the same essay, lists a warning sign to watch for: "Any indication that the genie was cheating, for example by disabling or deleting tests." Committing the reviewed tests makes that kind of cheating visible in `git diff`. That part is our own practice, from our dry runs.
+- **3. Vertical slices.** Addy Osmani, [agent-skills](https://github.com/addyosmani/agent-skills): "Thin vertical slices - implement, test, verify, commit." Matt Pocock's `/tdd` "builds features or fixes bugs one vertical slice at a time," and his `/to-tickets` breaks a spec into "tracer-bullet tickets."
+- **4. Check the evidence.** Boris Cherny, who created Claude Code, in [Inside the Development Workflow of Claude Code's Creator](https://www.infoq.com/news/2026/01/claude-code-creator-workflow/) (InfoQ, Jan 10, 2026): the most important tip is to "give Claude a way to verify its work," which he says improves the result 2–3 times. Simon Willison: with a good test suite, "agentic coding tools can *fly*."
+- **5. Review the diff.** Addy Osmani, [The 70% Problem](https://addyosmani.com/agentic-engineering/the-70-percent-problem/): "AI gets you 70% of the way fast. The remaining 30% is where experienced engineers earn their keep." Simon Willison: "If you're fast and productive at code review you're going to have a much better time working with LLMs."
+- **6. A second opinion.** Superpowers runs code review "between tasks," reporting issues "by severity," and "critical issues block progress."
+- **7. Commit.** Simon Willison: "Being able to undo mistakes and understand when and how something was changed is even more important" with agents.
+- **Why there's no plan-mode step.** In January 2026, Boris Cherny described starting in plan mode (InfoQ, above). By September he wrote, on [Hacker News](https://news.ycombinator.com/item?id=49840054), "plan mode was useful, and is no longer useful," agreeing with Ayman Nadeem's [Plan mode is dead](https://www.aymannadeem.com/artificial/intelligence,/developer/tools/2026/09/24/plan-mode-is-dead.html) (Sep 24, 2026). In our workflow, the interview and the test review do that job.

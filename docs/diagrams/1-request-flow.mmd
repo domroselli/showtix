@@ -1,0 +1,35 @@
+flowchart LR
+  subgraph You["You"]
+    direction TB
+    B["Browser<br/>web UI at /"]
+    D["/docs<br/>API explorer"]
+  end
+
+  subgraph Routes["Routes: no business rules"]
+    direction TB
+    W["app/web.py<br/>pages + templates"]
+    M["app/main.py<br/>JSON API routes"]
+  end
+
+  subgraph Domain["Domain modules: the business rules"]
+    direction TB
+    S["shows.py<br/>list shows, dates"]
+    O["orders.py<br/>quote, create, cancel"]
+    I["inventory.py<br/>seats left per tier"]
+    P["promos.py<br/>promo code checks"]
+    PR["pricing.py<br/>ALL money math"]
+  end
+
+  DB[("SQLite<br/>app/db.py")]
+  C["app/clock.py<br/>current Vegas time"]
+  L["app/llm.py<br/>Claude client, Lab 2"]
+
+  B --> W
+  D --> M
+  Routes --> Domain
+  O --> I
+  O --> P
+  O --> PR
+  Domain --> DB
+  C -. "injected as now" .-> Routes
+  L -. "injected as llm" .-> Routes
