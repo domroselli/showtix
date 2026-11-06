@@ -8,7 +8,7 @@ A new pricing rule that has to fit the existing pricing order, built with the fu
 
 1. New here? Read [Getting started](01-getting-started.md) for running commands and the app, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
 2. Run the command under [Starting branch](#starting-branch), then read [Goal](#goal), [Background](#background) and [Acceptance criteria](#acceptance-criteria).
-3. Follow [The workflow](#the-workflow) step by step. Step 1 starts with a quick brainstorm with Claude about edge cases; then you write your answer key yourself.
+3. Follow [The workflow](#the-workflow) step by step. Step 1 starts with you thinking through edge cases; then you write your expected results yourself.
 
 You're done when every box under [Done means](#done-means) is checked. Stuck? See [Hints](#hints).
 
@@ -33,6 +33,7 @@ Where the pricing code you'll change lives:
 - **Pricing happens in `pricing.price_order()`** in `app/pricing.py`, in a fixed order (see CLAUDE.md): subtotal, discount, service fee, tax, total. `orders.quote()` merges cart items by tier, so each `pricing.Line` it passes in is one tier.
 - **A promo discount is computed by `pricing.discount()`.** Quotes and orders carry a single `discount_cents` today. `pricing.pricing_lines()` turns a breakdown into the ordered lines (Subtotal, Discount, Service fees, Tax, Total) that quotes and orders return as `pricing_lines`. The UI's quote and confirmation pages loop over that list, so a line you add there shows up in the UI with no template changes.
 - **Quotes (`Quote`) and stored orders (`Order`, `orders` table) must show the same numbers.** Tests use an in-memory database, but the running app uses a local SQLite file. If you change the schema, [reset the database](01-getting-started.md#reset-the-database), or the UI will break even while tests pass.
+- **Leave `CLAUDE.md` and `docs/` as they are.** They'll still describe a promo-only discount after this change. That's fine: they describe `main`, and every lab starts from `main`.
 
 For a picture of the pricing order, see [How a price is built](../docs/architecture.md#3-how-a-price-is-built).
 
@@ -43,7 +44,7 @@ Most criteria are given. **Add one or two edge cases of your own** before you wr
 1. 6 or more tickets in the same tier get 15% off that tier's subtotal (rounded half up to the cent).
 2. 5 tickets get no discount; exactly 6 do.
 3. If a promo code also applies, the customer gets whichever discount is larger. They never stack.
-4. The quote breakdown shows the group discount as its own line: its own field, and its own entry in `pricing_lines` (labelled exactly `Group discount (15%)`, negative, right after `Subtotal`, and only when it's non-zero).
+4. The quote breakdown shows the group discount as its own line: its own field, `group_discount_cents`, and its own entry in `pricing_lines` (labelled exactly `Group discount (15%)`, negative, right after `Subtotal`, and only when it's non-zero).
 5. All amounts stay in integer cents; tax follows the existing pricing order (9% of the subtotal after the discount that won).
 6. The stored order matches the quote, including the group discount line.
 7. If the group discount beats a promo, the promo isn't applied: the order doesn't record the promo code, and the promo's use count doesn't go up.
@@ -62,11 +63,11 @@ Your edge cases:
 8. _..._
 9. _..._ (optional)
 
-Think about: ties, the 8-ticket limit, a fixed promo, which discount the breakdown reports when one loses.
+Think about: ties (no seeded promo can tie, so a test needs its own promo), the 8-ticket limit, a fixed promo, which discount the breakdown reports when one loses.
 
 ## The workflow
 
-Settle what "done" means (with Claude's help on edge cases), then have Claude write the tests, check them yourself, and let Claude make them pass.
+Settle what "done" means, then have Claude write the tests, check them yourself, and let Claude make them pass.
 
 - Steps that use Claude have a prompt to copy; commands start with `!`.
 - Why each step matters: [How we work](00-how-we-work.md).
@@ -76,27 +77,30 @@ Settle what "done" means (with Claude's help on edge cases), then have Claude wr
   /clear
   ```
 
-### 1. Align: find your edge cases, then write your answer key
+### 1. Align: find your edge cases, then write your expected results
 
-This sheet asks for one or two edge cases of your own. Ask Claude for ideas, then choose:
+This sheet asks for one or two edge cases of your own. Think them through yourself first: what could a customer do that the criteria don't answer? Type yours into the sheet's edge-case lines.
+
+Stuck? Ask Claude for a hint:
 
 ```text
-Read tasks/lab1c-group-discount.md and the relevant code. Suggest 3 edge cases
-the criteria don't cover, one sentence each. Don't write any code. I'll pick
-which ones to add.
+Read tasks/lab1c-group-discount.md and the relevant code. I'm stuck finding edge cases
+the criteria don't cover. Give me one hint at a time, as a question, not the
+edge case itself. If I say "just tell me", suggest 3 edge cases, one sentence
+each, and I'll pick. Don't write any code or change any files.
 ```
 
-Add the ones you pick to the sheet's edge-case lines. Then, without Claude, write down exactly what each criterion should return:
+Then, without Claude, write down exactly what each criterion should return:
 
 - Go through [Acceptance criteria](#acceptance-criteria) one by one: which status code, the exact message, the exact cents.
 - Check you get the same numbers as the worked examples. Prices, fees, tax rules and promo codes are in [`docs/seed-data.md`](../docs/seed-data.md).
 - Want to see it in the running app? See [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-You'll compare Claude's tests against this answer key in step 2.
+You'll compare Claude's tests against these expected results in step 2.
 
 ### 2. Tests first
 
-Have Claude write failing tests, then check them against your answer key.
+Have Claude write failing tests, then check them against your expected results.
 
 ```text
 Read tasks/lab1c-group-discount.md and the relevant code. Write a failing test
@@ -105,20 +109,20 @@ functions that already exist, not new functions or exact HTML. Don't change
 anything in app/. Run the tests and show me which ones fail.
 ```
 
-Check especially:
+Claude may write more tests than you expect. Check these first, then the rest as time allows:
 
 - **Tests check behavior through the API or the page**, not functions that don't exist yet. A test that calls a new function is designing the code for Claude.
 - **The four worked examples are tests**, with every line asserted in exact cents.
 - **Your own edge cases have tests too.**
 
-If a test doesn't match your answer key, tell Claude what it should be and why:
+If a test doesn't match your expected results, tell Claude what it should be and why:
 
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
 that test.
 ```
 
-When every test matches your answer key, commit them:
+When every test matches your expected results, commit them:
 
 ```text
 ! git add -A && git commit -m "lab1c: tests"
@@ -161,14 +165,29 @@ Don't take Claude's word for it; check for yourself.
 
   A file in `tests/` (changed, or new with `??`), a `conftest.py`, or `pyproject.toml` means Claude touched your tests or how they run: ask why before going on. After step 6's fixes, the only test changes should be the new tests you asked for.
 
-- Try it yourself. Ask Claude to start the app in the background ([more on starting the app](01-getting-started.md#start-the-app)):
+- Try it yourself. First, reset the database. Storing the group discount on orders needs a new column, but the app's `showtix.db` file was created before that column existed, so placing or viewing an order would fail. The tests still pass because each one builds a fresh in-memory database. Resetting rebuilds the file with the new column and puts back the starting data (in production you'd run a migration to keep real data, but this is local practice data, so a reset is fine):
+
+  ```text
+  ! uv run python -m app.seed
+  ```
+
+  Then ask Claude to start the app in the background ([more on starting the app](01-getting-started.md#start-the-app)):
 
   ```text
   Start the app in the background with uv run uvicorn app.main:app --reload,
   and tell me when it's ready.
   ```
 
-  Then open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**) or the UI at http://127.0.0.1:8000/. Use values from your answer key. When you're done, stop it:
+  Then check the worked examples in the UI:
+
+  1. Open http://127.0.0.1:8000/ and click a date under **Laugh Lines Live**.
+  2. In the **Qty** column, enter the tickets for one worked example, such as `6` for **GA**. If it has a promo, type it in **Promo code**. Click **Get quote** and compare every line with your expected results.
+  3. Go back to the date page and repeat for the other worked examples.
+  4. For one of them, enter any email and click **Place order**. The page you land on should show the same lines.
+
+  Prefer the API? Open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**).
+
+  When you're done, stop the app:
 
   ```text
   Stop the app.

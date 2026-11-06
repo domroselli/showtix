@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="850" viewBox="0 0 1120 850" role="img" aria-labelledby="title description">
+  <title id="title">How tests control the app</title>
+  <desc id="description">Three dependencies are replaced in tests/conftest.py. get_db becomes the conn fixture, a fresh seeded in-memory database. get_now becomes the clock fixture, starting at noon on November 1, 2026; set clock.now to move time. get_llm becomes a fresh FakeClaude, applied to every test, which plays back queued replies. All three feed TestClient, so the real routes, validation, domain rules and SQL still run. This makes exact cents, errors, seat release and scripted model replies repeatable.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10Z" fill="#526677"/>
+    </marker>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #172f43; }
+      .title { font-size: 34px; font-weight: 700; }
+      .heading { font-size: 23px; font-weight: 700; }
+      .body { font-size: 20px; fill: #445d6d; }
+      .small { font-size: 18px; fill: #445d6d; }
+      .note { font-size: 17px; fill: #445d6d; }
+      .tag { font-size: 16px; fill: #445d6d; }
+      .label { font-size: 15px; font-weight: 700; letter-spacing: 1.5px; }
+      .edge { fill: none; stroke: #526677; stroke-width: 2; stroke-linejoin: round; }
+      .dash { stroke-dasharray: 6 5; }
+      .card { stroke: #bdcbd3; stroke-width: 1.3; }
+    </style>
+  </defs>
+  <rect width="1120" height="850" fill="#fbfaf6"/>
+  <rect width="8" height="850" fill="#172f43"/>
+  <text x="48" y="58" class="title">How tests control the app</text>
+  <text x="48" y="94" class="body">Tests swap FastAPI dependencies instead of using the real database, clock or Claude API.</text>
+  <text x="48" y="140" class="label" style="fill:#285e98">NORMAL REQUEST</text>
+  <text x="632" y="140" class="label" style="fill:#a33e28">IN A TEST • TESTS/CONFTEST.PY</text>
+  <rect x="48" y="160" width="440" height="118" rx="12" fill="#fff1d5" class="card"/>
+  <text x="70" y="196" class="heading">get_db()</text>
+  <text x="70" y="227" class="small">db.connect() → showtix.db</text>
+  <text x="70" y="253" class="small">Persistent local SQLite database</text>
+  <rect x="632" y="160" width="440" height="118" rx="12" fill="#fff1d5" class="card"/>
+  <text x="654" y="196" class="heading">get_db override</text>
+  <text x="654" y="227" class="small">conn fixture → :memory:</text>
+  <text x="654" y="253" class="small">Fresh schema + seed for each test</text>
+  <polyline points="488,219 632,219" class="edge dash" marker-end="url(#arrow)"/>
+  <text x="560" y="206" class="tag" text-anchor="middle">replaced by</text>
+  <polyline points="1072,219 1096,219" class="edge"/>
+  <rect x="48" y="306" width="440" height="118" rx="12" fill="#f0f3f4" class="card"/>
+  <text x="70" y="342" class="heading">get_now()</text>
+  <text x="70" y="373" class="small">clock.now() → current Vegas time</text>
+  <text x="70" y="399" class="small">Naive datetime in local time</text>
+  <rect x="632" y="306" width="440" height="118" rx="12" fill="#f0f3f4" class="card"/>
+  <text x="654" y="342" class="heading">get_now override</text>
+  <text x="654" y="373" class="small">clock.now → 2026-11-01 12:00</text>
+  <text x="654" y="399" class="small">Set clock.now to move time; no sleeping</text>
+  <polyline points="488,365 632,365" class="edge dash" marker-end="url(#arrow)"/>
+  <text x="560" y="352" class="tag" text-anchor="middle">replaced by</text>
+  <polyline points="1072,365 1096,365" class="edge"/>
+  <rect x="48" y="452" width="440" height="118" rx="12" fill="#eeeafa" class="card"/>
+  <text x="70" y="488" class="heading">get_llm()</text>
+  <text x="70" y="519" class="small">llm.py → configured Claude client</text>
+  <text x="70" y="545" class="small">Used by Lab 2 feature routes</text>
+  <rect x="632" y="452" width="440" height="118" rx="12" fill="#eeeafa" class="card"/>
+  <text x="654" y="488" class="heading">get_llm override</text>
+  <text x="654" y="519" class="small">_fake_llm → fresh FakeClaude</text>
+  <text x="654" y="545" class="small">Every test; queue text, tool calls, errors</text>
+  <polyline points="488,511 632,511" class="edge dash" marker-end="url(#arrow)"/>
+  <text x="560" y="498" class="tag" text-anchor="middle">replaced by</text>
+  <polyline points="1072,511 1096,511" class="edge"/>
+  <polyline points="1096,219 1096,692 1072,692" class="edge" marker-end="url(#arrow)"/>
+  <rect x="48" y="620" width="480" height="146" rx="12" fill="#fcebe5" class="card"/>
+  <text x="70" y="656" class="heading">What this makes repeatable</text>
+  <text x="70" y="687" class="small">Exact cents; HTML and API parity; errors</text>
+  <text x="70" y="713" class="small">Cancellation releases seats; rollback on failure</text>
+  <text x="70" y="739" class="small">Seeded starting data; scripted model replies</text>
+  <rect x="552" y="620" width="520" height="146" rx="12" fill="#e2f0e9" class="card"/>
+  <text x="574" y="656" class="heading">TestClient → real app routes</text>
+  <text x="574" y="687" class="small">Pydantic validation + domain rules + SQL</text>
+  <text x="574" y="713" class="small">all run against the test dependencies.</text>
+  <text x="574" y="739" class="small">Pricing tests call pure functions directly.</text>
+  <polyline points="48,794 1072,794" class="edge"/>
+  <text x="48" y="818" class="note">The client fixture skips app startup, so tests never touch showtix.db. Pytest excludes tests/evals/.</text>
+</svg>

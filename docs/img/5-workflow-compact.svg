@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="424" viewBox="0 0 1120 424" role="img" aria-labelledby="title description">
+  <title id="title">The seven-step workshop workflow at a glance</title>
+  <desc id="description">Start each lab with a fresh conversation. Follow the top row left to right: align with your own expected results; review and commit failing tests; clear then implement without changing tests; check evidence. Continue along the bottom row right to left: review the diff; assess a fresh reviewer's findings; commit when satisfied. Real findings get a failing test, then a fix, then another evidence check.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10Z" fill="#526677"/>
+    </marker>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #172f43; }
+      .heading { font-size: 21px; font-weight: 700; }
+      .body { font-size: 17px; fill: #445d6d; }
+      .edge { fill: none; stroke: #526677; stroke-width: 2; stroke-linejoin: round; marker-end: url(#arrow); }
+      .card { stroke: #bdcbd3; stroke-width: 1.2; }
+    </style>
+  </defs>
+  <rect width="1120" height="424" fill="#fbfaf6"/>
+  <rect width="8" height="424" fill="#172f43"/>
+  <text x="32" y="36" class="body" style="fill:#a33e28;font-weight:700">START EACH LAB: /clear • one feature per branch</text>
+
+  <rect x="32" y="72" width="240" height="84" rx="10" fill="#fcebe5" class="card"/>
+  <text x="48" y="106" class="heading">1  Align</text>
+  <text x="48" y="136" class="body">Your own expected results</text>
+
+  <rect x="304" y="72" width="240" height="84" rx="10" fill="#fcebe5" class="card"/>
+  <text x="320" y="106" class="heading">2  Tests first</text>
+  <text x="320" y="136" class="body">Review, then commit tests</text>
+
+  <rect x="576" y="72" width="240" height="84" rx="10" fill="#e2f0e9" class="card"/>
+  <text x="592" y="106" class="heading">3  Implement</text>
+  <text x="592" y="136" class="body">/clear; keep tests unchanged</text>
+
+  <rect x="848" y="72" width="240" height="84" rx="10" fill="#fcebe5" class="card"/>
+  <text x="864" y="106" class="heading">4  Check evidence</text>
+  <text x="864" y="136" class="body">Tests, browser, Lab 2 eval</text>
+
+  <path d="M272 114H304" class="edge"/>
+  <path d="M544 114H576" class="edge"/>
+  <path d="M816 114H848" class="edge"/>
+  <path d="M968 156V254" class="edge"/>
+
+  <rect x="848" y="254" width="240" height="84" rx="10" fill="#fcebe5" class="card"/>
+  <text x="864" y="288" class="heading">5  Review the diff</text>
+  <text x="864" y="318" class="body">Explain each change</text>
+
+  <rect x="576" y="254" width="240" height="84" rx="10" fill="#fcebe5" class="card"/>
+  <text x="592" y="288" class="heading">6  Second opinion</text>
+  <text x="592" y="318" class="body">Assess reviewer findings</text>
+
+  <rect x="304" y="254" width="240" height="84" rx="10" fill="#e2f0e9" class="card"/>
+  <text x="320" y="288" class="heading">7  Commit</text>
+  <text x="320" y="318" class="body">When you are satisfied</text>
+
+  <path d="M848 296H816" class="edge"/>
+  <path d="M576 296H544" class="edge"/>
+  <path d="M696 338V376H1104V114H1088" class="edge" stroke-dasharray="6 5"/>
+  <text x="1088" y="406" class="body" text-anchor="end">Real finding → failing test → fix → check evidence again</text>
+</svg>

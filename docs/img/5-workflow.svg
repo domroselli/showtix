@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="900" viewBox="0 0 1120 900" role="img" aria-labelledby="title description">
+<title id="title">The development workflow</title>
+<desc id="description">Seven steps: align with independent expected results; write failing behavior tests and review and commit them; clear the conversation then implement without changing the tests; run the full suite and check tests are unchanged, use the browser and Lab 2 evals; review the diff; get a fresh reviewer and assess findings; commit when satisfied. Real findings get a failing test then a fix and another evidence check. Larger labs use small vertical slices reviewed and committed one at a time.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#526677"/></marker></defs>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#172f43}.edge{fill:none;stroke:#526677;stroke-width:2;stroke-linejoin:round}</style>
+<rect width="1120" height="900" fill="#fbfaf6"/>
+<rect width="8" height="900" fill="#172f43"/>
+<text x="48" y="56" font-size="32" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">The development workflow</text>
+<text x="48" y="92" font-size="19" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">The student defines done. The agent helps build it. Evidence earns the commit.</text>
+<text x="48" y="140" font-size="16" fill="#a33e28" style="fill:#a33e28" font-weight="700" text-anchor="start">START EACH LAB: /clear • one feature per branch</text>
+<rect x="48" y="174" width="296" height="136" rx="10" fill="#fcebe5" stroke="#bdcbd3" stroke-width="1.2"/>
+<text x="68" y="208" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">1  Align</text>
+<text x="68" y="238" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Read the sheet; settle decisions</text>
+<text x="68" y="263" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Write your own expected results</text>
+<text x="68" y="288" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Exact shows, errors and cents</text>
+<rect x="412" y="174" width="296" height="136" rx="10" fill="#fcebe5" stroke="#bdcbd3" stroke-width="1.2"/>
+<text x="432" y="208" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">2  Tests first</text>
+<text x="432" y="238" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Agent writes failing behavior tests</text>
+<text x="432" y="263" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Compare to your expected results</text>
+<text x="432" y="288" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Commit the reviewed tests</text>
+<rect x="776" y="174" width="296" height="136" rx="10" fill="#e2f0e9" stroke="#bdcbd3" stroke-width="1.2"/>
+<text x="796" y="208" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">3  Implement</text>
+<text x="796" y="238" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Fresh session: /clear</text>
+<text x="796" y="263" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Read sheet + committed tests</text>
+<text x="796" y="288" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Pass tests; keep them unchanged</text>
+<rect x="48" y="448" width="296" height="136" rx="10" fill="#fcebe5" stroke="#bdcbd3" stroke-width="1.2"/>
+<text x="68" y="482" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">4  Check evidence</text>
+<text x="68" y="512" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Full suite; tests unchanged</text>
+<text x="68" y="537" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Try the browser or /docs</text>
+<text x="68" y="562" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Lab 2: run the feature eval</text>
+<rect x="412" y="448" width="296" height="136" rx="10" fill="#fcebe5" stroke="#bdcbd3" stroke-width="1.2"/>
+<text x="432" y="482" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">5  Review the diff</text>
+<text x="432" y="512" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Read every changed line</text>
+<text x="432" y="537" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Explain why each belongs</text>
+<text x="432" y="562" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Check the acceptance criteria</text>
+<rect x="776" y="448" width="296" height="136" rx="10" fill="#fcebe5" stroke="#bdcbd3" stroke-width="1.2"/>
+<text x="796" y="482" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">6  Second opinion</text>
+<text x="796" y="512" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Fresh reviewer checks the criteria</text>
+<text x="796" y="537" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">You assess the findings</text>
+<text x="796" y="562" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">For real fixes: failing test, then fix</text>
+<polyline points="344,242 412,242" class="edge" marker-end="url(#arrow)"/>
+<polyline points="708,242 776,242" class="edge" marker-end="url(#arrow)"/>
+<polyline points="924,310 924,362 196,362 196,448" class="edge" marker-end="url(#arrow)"/>
+<text x="560" y="395" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="middle">The sheet + committed tests carry intent across /clear.</text>
+<polyline points="344,516 412,516" class="edge" marker-end="url(#arrow)"/>
+<polyline points="708,516 776,516" class="edge" marker-end="url(#arrow)"/>
+<polyline points="924,584 924,626 196,626 196,584" class="edge" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<text x="560" y="660" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="middle">Real finding → failing test → fix → repeat the evidence checks</text>
+<rect x="776" y="726" width="296" height="90" rx="10" fill="#e2f0e9" stroke="#bdcbd3" stroke-width="1.2"/>
+<text x="796" y="760" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">7  Commit</text>
+<text x="796" y="790" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">When you are satisfied</text>
+<polyline points="1072,516 1094,516 1094,771 1072,771" class="edge" marker-end="url(#arrow)"/>
+<text x="48" y="755" font-size="19" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">Larger labs: build small vertical slices that work end to end.</text>
+<text x="48" y="786" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Review and commit each slice before building the next.</text>
+<polyline points="48,848 1072,848" class="edge"/>
+<text x="48" y="872" font-size="17" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Source: tasks/00-how-we-work.md • Each lab sheet supplies its acceptance criteria and prompts.</text>
+</svg>

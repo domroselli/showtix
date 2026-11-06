@@ -8,7 +8,7 @@ Your first lab: a small filter, built with the full workflow.
 
 1. New here? Read [Getting started](01-getting-started.md) for running commands and the app, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
 2. Run the command under [Starting branch](#starting-branch), then read [Goal](#goal), [Background](#background) and [Acceptance criteria](#acceptance-criteria).
-3. Follow [The workflow](#the-workflow) step by step. Step 1 is yours: write your answer key before you ask Claude anything.
+3. Follow [The workflow](#the-workflow) step by step. Step 1 is yours: write your expected results before you ask Claude anything.
 
 You're done when every box under [Done means](#done-means) is checked. Extra time? Try the [Optional stretch](#optional-stretch). Stuck? See [Hints](#hints).
 
@@ -38,7 +38,7 @@ For a picture of how a request flows through these files, see [`docs/architectur
 
 ## Acceptance criteria
 
-The full criteria are given. Write one test for each.
+The full criteria are given. Every criterion needs at least one test.
 
 1. `GET /shows?category=comedy` returns exactly `Laugh Lines Live` and `Stand-Up Saloon`, ordered by title.
 2. Each of the four categories returns exactly its 2 shows.
@@ -60,7 +60,7 @@ Settle what "done" means, then have Claude write the tests, check them yourself,
   /clear
   ```
 
-### 1. Align: write your answer key (no Claude yet)
+### 1. Align: write your expected results (no Claude yet)
 
 Write down exactly what each criterion should return before Claude writes anything.
 
@@ -68,11 +68,11 @@ Write down exactly what each criterion should return before Claude writes anythi
 - Look up anything you need in [`docs/seed-data.md`](../docs/seed-data.md). For example, which 2 shows are in each category.
 - Want to see it in the running app? See [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-You'll compare Claude's tests against this answer key in step 2.
+You'll compare Claude's tests against these expected results in step 2.
 
 ### 2. Tests first
 
-Have Claude write failing tests, then check them against your answer key.
+Have Claude write failing tests, then check them against your expected results.
 
 ```text
 Read tasks/lab1a-category-filter.md and the relevant code. Write a failing
@@ -87,14 +87,14 @@ Check especially:
 - **Criterion 4 already passes** before you build anything: without `category`, `GET /shows` already returns all 8 shows. That's expected; the test guards behavior your change must not break.
 - **Criterion 6's test checks the exact message**, not just the 400.
 
-If a test doesn't match your answer key, tell Claude what it should be and why:
+If a test doesn't match your expected results, tell Claude what it should be and why:
 
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
 that test.
 ```
 
-When every test matches your answer key, commit them:
+When every test matches your expected results, commit them:
 
 ```text
 ! git add -A && git commit -m "lab1a: tests"
@@ -196,7 +196,7 @@ Finished with time to spare? Try the [Optional stretch](#optional-stretch) below
 
 ## Check it in your browser
 
-Use this for step 4 of the workflow. Compare every result with your answer key.
+Use this for step 4 of the workflow. Compare what you see with your expected results.
 
 ### 1. Start the app
 

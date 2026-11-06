@@ -8,7 +8,7 @@ A small new endpoint that reads stored money, built with the full workflow.
 
 1. New here? Read [Getting started](01-getting-started.md) for running commands and the app, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
 2. Run the command under [Starting branch](#starting-branch), then read [Goal](#goal), [Background](#background) and [Acceptance criteria](#acceptance-criteria).
-3. Follow [The workflow](#the-workflow) step by step. Step 1 is yours: write your answer key before you ask Claude anything.
+3. Follow [The workflow](#the-workflow) step by step. Step 1 is yours: write your expected results before you ask Claude anything.
 
 You're done when every box under [Done means](#done-means) is checked. Extra time? Try the [Optional stretch](#optional-stretch). Stuck? See [Hints](#hints).
 
@@ -38,7 +38,7 @@ For a picture of how an order is created and stored, see [Quote, order, cancel](
 
 ## Acceptance criteria
 
-The full criteria are given. Write one test for each.
+The full criteria are given. Every criterion needs at least one test.
 
 1. `GET /orders/{id}/receipt` returns 200 with `order_id`, `status`, `email`, `show_title`, `venue_name`, `starts_at`, `promo_code` and `lines`. `starts_at` uses the same format `GET /shows/{id}` returns.
 2. `lines` is a list of `{"label": str, "amount_cents": int}` in this order: one line per tier bought, labelled like `2 × Premium` (the × sign, U+00D7, not the letter x); then `Subtotal`, `Discount`, `Service fees`, `Tax`, `Total`.
@@ -61,7 +61,7 @@ Settle what "done" means, then have Claude write the tests, check them yourself,
   /clear
   ```
 
-### 1. Align: write your answer key (no Claude yet)
+### 1. Align: write your expected results (no Claude yet)
 
 Write down exactly what each criterion should return before Claude writes anything.
 
@@ -69,11 +69,11 @@ Write down exactly what each criterion should return before Claude writes anythi
 - Work out criterion 4's example yourself and check you get the same numbers. Prices, fees and tax rules are in [`docs/seed-data.md`](../docs/seed-data.md).
 - Want to see it in the running app? See [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-You'll compare Claude's tests against this answer key in step 2.
+You'll compare Claude's tests against these expected results in step 2.
 
 ### 2. Tests first
 
-Have Claude write failing tests, then check them against your answer key.
+Have Claude write failing tests, then check them against your expected results.
 
 ```text
 Read tasks/lab1b-itemized-receipt.md and the relevant code. Write a failing
@@ -87,15 +87,16 @@ Check especially:
 - **Tests check behavior through the API or the page**, not functions that don't exist yet. A test that calls a new function is designing the code for Claude.
 - **Criterion 8 fails for the right reason.** Before the route exists, every receipt request returns FastAPI's generic `{"detail":"Not Found"}`. A test that checks only the 404 would pass already and prove nothing; one that checks the exact detail fails until your route is in place.
 - **Criterion 6's test changes the tier's price *after* placing the order**, then checks the receipt still shows the old price. A test that never changes the price proves nothing.
+- **Criterion 4's test changes every stored total, so they no longer match today's prices, fees or tax and no longer add up,** then checks the receipt shows them anyway. This stands in for an order placed under older rules. Criterion 6 can't do this job: it only changes a tier price, so code that redoes the math from the price paid still passes.
 
-If a test doesn't match your answer key, tell Claude what it should be and why:
+If a test doesn't match your expected results, tell Claude what it should be and why:
 
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
 that test.
 ```
 
-When every test matches your answer key, commit them:
+When every test matches your expected results, commit them:
 
 ```text
 ! git add -A && git commit -m "lab1b: tests"
@@ -197,7 +198,7 @@ Finished with time to spare? Try the [Optional stretch](#optional-stretch) below
 
 ## Check it in your browser
 
-Use this for step 4 of the workflow. You'll place a real order in the app, then look at its receipt. Compare every result with your answer key.
+Use this for step 4 of the workflow. You'll place a real order in the app, then look at its receipt. Compare what you see with your expected results.
 
 ### 1. Start the app
 

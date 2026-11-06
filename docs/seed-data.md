@@ -1,6 +1,6 @@
 # Seed data
 
-Everything the app starts with: the shows, nights, prices, seats, promo codes and orders that `uv run python -m app.seed` creates. The tests use the same data, in a fresh in-memory database for every test. Use this page to work out your answer key.
+Everything the app starts with: the shows, nights, prices, seats, promo codes and orders that `uv run python -m app.seed` creates. The tests use the same data, in a fresh in-memory database for every test. Use this page to work out your expected results.
 
 The source is `app/seed.py`. If it and this page ever disagree, `app/seed.py` wins.
 
@@ -43,7 +43,7 @@ Tier ids run in order too: each performance's GA, Premium, VIP. `GET /performanc
 
 ## The nearly sold-out tier
 
-**Gravity Optional, Nov 14, VIP** is the one tier that's almost gone: 24 seats, 22 sold, **2 left**. Performance id 103, tier id 309. Every other tier has all its seats.
+**Gravity Optional, Nov 14, VIP** is the one tier that's almost gone: 14 seats, 12 sold, **2 left**. Performance id 103, tier id 309. Every other tier has all its seats.
 
 ## Orders
 
@@ -51,9 +51,9 @@ The seed creates 3 paid orders, all on that tier, so **the first order you place
 
 | Order | Email | Tickets | Subtotal | Fees | Tax | Total |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | group1@example.com | 8 × VIP | `159992` | `6000` | `14399` | `180391` ($1,803.91) |
-| 2 | group2@example.com | 8 × VIP | `159992` | `6000` | `14399` | `180391` ($1,803.91) |
-| 3 | group3@example.com | 6 × VIP | `119994` | `4500` | `10799` | `135293` ($1,352.93) |
+| 1 | group1@example.com | 4 × VIP | `79996` | `3000` | `7200` | `90196` ($901.96) |
+| 2 | group2@example.com | 4 × VIP | `79996` | `3000` | `7200` | `90196` ($901.96) |
+| 3 | group3@example.com | 4 × VIP | `79996` | `3000` | `7200` | `90196` ($901.96) |
 
 ## Promo codes
 

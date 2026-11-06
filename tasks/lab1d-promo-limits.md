@@ -8,7 +8,7 @@ Finish a half-built rule that spans ordering and cancelling, built with the full
 
 1. New here? Read [Getting started](01-getting-started.md) for running commands and the app, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
 2. Run the command under [Starting branch](#starting-branch), then read [Goal](#goal), [Background](#background) and [Acceptance criteria](#acceptance-criteria).
-3. Follow [The workflow](#the-workflow) step by step. Step 1 starts with a quick brainstorm with Claude about edge cases; then you write your answer key yourself.
+3. Follow [The workflow](#the-workflow) step by step. Step 1 starts with you thinking through edge cases; then you write your expected results yourself.
 
 You're done when every box under [Done means](#done-means) is checked. Stuck? See [Hints](#hints).
 
@@ -58,7 +58,7 @@ Think about: does a quote use up anything, what a freed use means for a code tha
 
 ## The workflow
 
-Settle what "done" means (with Claude's help on edge cases), then have Claude write the tests, check them yourself, and let Claude make them pass.
+Settle what "done" means, then have Claude write the tests, check them yourself, and let Claude make them pass.
 
 - Steps that use Claude have a prompt to copy; commands start with `!`.
 - Why each step matters: [How we work](00-how-we-work.md).
@@ -68,27 +68,30 @@ Settle what "done" means (with Claude's help on edge cases), then have Claude wr
   /clear
   ```
 
-### 1. Align: find your edge cases, then write your answer key
+### 1. Align: find your edge cases, then write your expected results
 
-This sheet asks for one or two edge cases of your own. Ask Claude for ideas, then choose:
+This sheet asks for one or two edge cases of your own. Think them through yourself first: what could a customer do that the criteria don't answer? Type yours into the sheet's edge-case lines.
+
+Stuck? Ask Claude for a hint:
 
 ```text
-Read tasks/lab1d-promo-limits.md and the relevant code. Suggest 3 edge cases
-the criteria don't cover, one sentence each. Don't write any code. I'll pick
-which ones to add.
+Read tasks/lab1d-promo-limits.md and the relevant code. I'm stuck finding edge cases
+the criteria don't cover. Give me one hint at a time, as a question, not the
+edge case itself. If I say "just tell me", suggest 3 edge cases, one sentence
+each, and I'll pick. Don't write any code or change any files.
 ```
 
-Add the ones you pick to the sheet's edge-case lines. Then, without Claude, write down exactly what each criterion should return:
+Then, without Claude, write down exactly what each criterion should return:
 
 - Go through [Acceptance criteria](#acceptance-criteria) one by one: which status code, the exact message, and what `uses` should be after each action.
 - Look up the seeded promo codes and their limits in [`docs/seed-data.md`](../docs/seed-data.md).
 - Want to see it in the running app? See [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-You'll compare Claude's tests against this answer key in step 2.
+You'll compare Claude's tests against these expected results in step 2.
 
 ### 2. Tests first
 
-Have Claude write failing tests, then check them against your answer key.
+Have Claude write failing tests, then check them against your expected results.
 
 ```text
 Read tasks/lab1d-promo-limits.md and the relevant code. Write a failing test
@@ -103,14 +106,14 @@ Check especially:
 - **Some tests already pass**, as the sheet says (criteria 2, 5 and 6, maybe 4). They guard behavior your change must not break.
 - **Each test reads `uses` from the database** after the action, not just the status code.
 
-If a test doesn't match your answer key, tell Claude what it should be and why:
+If a test doesn't match your expected results, tell Claude what it should be and why:
 
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
 that test.
 ```
 
-When every test matches your answer key, commit them:
+When every test matches your expected results, commit them:
 
 ```text
 ! git add -A && git commit -m "lab1d: tests"
@@ -160,7 +163,7 @@ Don't take Claude's word for it; check for yourself.
   and tell me when it's ready.
   ```
 
-  Then open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**) or the UI at http://127.0.0.1:8000/. Use values from your answer key. When you're done, stop it:
+  Then open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**) or [the UI](01-getting-started.md#use-the-web-ui) at http://127.0.0.1:8000/. Use values from your expected results. When you're done, stop it:
 
   ```text
   Stop the app.

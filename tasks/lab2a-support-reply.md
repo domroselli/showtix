@@ -8,7 +8,7 @@ Your first Claude API feature: Claude drafts the words, and your code checks the
 
 1. New here? Read [Getting started](01-getting-started.md) for running commands, the app and your API key, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
 2. Run the commands under [Starting branch](#starting-branch), then read [Goal](#goal), [Background](#background) and [Acceptance criteria](#acceptance-criteria).
-3. Follow [The workflow](#the-workflow) step by step. Step 1 is yours: write your answer key before you ask Claude anything.
+3. Follow [The workflow](#the-workflow) step by step. Step 1 is yours: write your expected results before you ask Claude anything.
 
 You're done when every box under [Done means](#done-means) is checked. Extra time? Try the [Optional stretch](#optional-stretch). Stuck? See [Hints](#hints).
 
@@ -53,7 +53,7 @@ When a case fails, read what Claude wrote before changing anything.
 
 ## Acceptance criteria
 
-The full criteria are given. Write one test for each.
+The full criteria are given. Every criterion needs at least one test.
 
 1. `POST /orders/{id}/support-reply` with `{"message": "..."}` returns 200 with `order_id`, `reply`, `needs_review` and `unverified_amounts`.
 2. The request to Claude uses `MODEL`, puts your instructions in the system prompt, and sends a user message containing the customer's message plus the order's facts: show title, performance date and time, each ticket line (qty, tier, unit price), every pricing line, the $7.50 per-ticket service fee, the promo code (or none) and the order status.
@@ -87,7 +87,7 @@ Settle what "done" means, then have Claude write the tests, check them yourself,
   /clear
   ```
 
-### 1. Align: write your answer key (no Claude yet)
+### 1. Align: write your expected results (no Claude yet)
 
 Write down exactly what each criterion should return before Claude writes anything.
 
@@ -95,11 +95,11 @@ Write down exactly what each criterion should return before Claude writes anythi
 - Work through the worked example yourself and check you get the same rows. Prices, fees and tax rules are in [`docs/seed-data.md`](../docs/seed-data.md).
 - Want to see an order in the running app? See [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-You'll compare Claude's tests and eval cases against this answer key in step 2.
+You'll compare Claude's tests and eval cases against these expected results in step 2.
 
 ### 2. Tests first
 
-Have Claude write failing tests and the eval cases, then check them against your answer key.
+Have Claude write failing tests and the eval cases, then check them against your expected results.
 
 ```text
 Read tasks/lab2a-support-reply.md and the relevant code. Write a failing test
@@ -110,7 +110,7 @@ exist, not new functions or exact HTML. Don't change anything in app/. Run the
 tests and show me which ones fail.
 ```
 
-Compare each test, and each eval case, with your answer key. The eval cases are the model's answer key, so they must be right too.
+Compare each test, and each eval case, with your expected results. The eval cases are the model's expected results, so they must be right too.
 
 Check especially:
 
@@ -119,14 +119,14 @@ Check especially:
 - **Criterion 3's tests check the exact messages, and that `fake_claude.calls` stays empty.**
 - **A near-miss amount doesn't pass as grounded.** `$15.5` or `$250.4` must not be read as `$15.00` or `$250.00` and match a real amount. If no test tries one, ask for it.
 
-If a test or case doesn't match your answer key, tell Claude what it should be and why:
+If a test or case doesn't match your expected results, tell Claude what it should be and why:
 
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
 that test.
 ```
 
-When every test and case matches your answer key, commit them:
+When every test and case matches your expected results, commit them:
 
 ```text
 ! git add -A && git commit -m "lab2a: tests"
@@ -176,7 +176,7 @@ Don't take Claude's word for it; check for yourself.
   ! uv run python -m tests.evals.run_support_reply --repeat 2
   ```
 
-- Try it yourself. Start the app ([more on starting the app](01-getting-started.md#start-the-app)), then open http://127.0.0.1:8000/docs, click your endpoint, **Try it out**, **Execute**. Use values from your answer key.
+- Try it yourself. Start the app ([more on starting the app](01-getting-started.md#start-the-app)), then open http://127.0.0.1:8000/docs, click your endpoint, **Try it out**, **Execute**. Use values from your expected results.
 
   ```text
   Start the app in the background with uv run uvicorn app.main:app --reload,

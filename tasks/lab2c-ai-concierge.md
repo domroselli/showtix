@@ -8,7 +8,7 @@ An AI feature you design yourself: Claude calls tools over the app's own code, a
 
 1. New here? Read [Getting started](01-getting-started.md) for running commands and the app, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
 2. Run the command under [Starting branch](#starting-branch), then read [Goal](#goal), [Background](#background), [About the eval](#about-the-eval), [Acceptance criteria](#acceptance-criteria) and [Decisions to make](#decisions-to-make).
-3. Follow [The workflow](#the-workflow) step by step. Step 1 starts with Claude explaining the code you'll change, then interviewing you about the open decisions; then you write your answer key yourself.
+3. Follow [The workflow](#the-workflow) step by step. Step 1 starts with Claude explaining the code you'll change, then interviewing you about the open decisions; then you write your expected results yourself.
 
 You're done when every box under [Done means](#done-means) is checked. Extra time? Pull an item off your Not doing list (step 7). Stuck? See [Hints](#hints).
 
@@ -72,7 +72,7 @@ Two criteria are given. Criteria 3 and on come from your decisions (see [Decisio
 
 ### Decisions to make
 
-Decide these with Claude, then turn each decision into a criterion. Use the explore and interview prompts in [step 1 of The workflow](#1-align-explore-settle-the-decisions-then-write-your-answer-key) below:
+Decide these with Claude, then turn each decision into a criterion. Use the explore and interview prompts in [step 1 of The workflow](#1-align-explore-settle-the-decisions-then-write-your-expected-results) below:
 
 - Request and response shape: what does `POST /concierge` take, and what does each recommendation contain?
 - Does "under $100 each" mean the tier price, or the price per person including fees and tax?
@@ -86,7 +86,7 @@ Decide these with Claude, then turn each decision into a criterion. Use the expl
 
 ## The workflow
 
-Explore the code and settle the decisions with Claude, write your answer key, then have Claude write the tests, check them yourself, and let Claude build it slice by slice.
+Explore the code and settle the decisions with Claude, write your expected results, then have Claude write the tests, check them yourself, and let Claude build it slice by slice.
 
 - Steps that use Claude have a prompt to copy; commands start with `!`.
 - Why each step matters: [How we work](00-how-we-work.md).
@@ -96,7 +96,7 @@ Explore the code and settle the decisions with Claude, write your answer key, th
   /clear
   ```
 
-### 1. Align: explore, settle the decisions, then write your answer key
+### 1. Align: explore, settle the decisions, then write your expected results
 
 Get oriented in the code you'll change, decide with Claude, then write down what "done" means without Claude.
 
@@ -141,17 +141,17 @@ bigger goes on the Not doing list.
 
 You choose; Claude only offers options. ⏱ About 15 minutes for exploring and the interview together: if a decision drags on, pick the simplest option and put the other on the "Not doing" list.
 
-Then, without Claude, write your answer key:
+Then, without Claude, write your expected results:
 
 - Go through [Acceptance criteria](#acceptance-criteria) one by one, including the ones you just added: which status code, the exact message, the exact cents, and which show ids each eval question should get.
 - Look up anything you need in [`docs/seed-data.md`](../docs/seed-data.md): every show, night, price, seat count, promo code and seeded order, plus how a price is built.
 - Want to see it in the running app? See [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-You'll compare Claude's tests against this answer key in step 2.
+You'll compare Claude's tests against these expected results in step 2.
 
 ### 2. Tests first
 
-Have Claude write failing tests and the eval cases, then check them against your answer key.
+Have Claude write failing tests and the eval cases, then check them against your expected results.
 
 ```text
 Read tasks/lab2c-ai-concierge.md and the relevant code. Write a failing test
@@ -163,20 +163,20 @@ new functions or exact HTML. Don't change anything in app/. Run the tests and
 show me which ones fail.
 ```
 
-Compare each test, and each eval case, with your answer key. The eval cases are the model's answer key, so they must be right too. Check especially:
+Compare each test, and each eval case, with your expected results. The eval cases are the model's expected results, so they must be right too. Check especially:
 
 - **Tests check behavior through the API or the page**, not functions that don't exist yet. A test that calls a new function is designing the code for Claude.
 - **One test's fake client recommends a made-up show id**, and the response leaves it out (criterion 1).
 - **Every criterion you added from your decisions has a test.**
 
-If a test doesn't match your answer key, tell Claude what it should be and why:
+If a test doesn't match your expected results, tell Claude what it should be and why:
 
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
 that test.
 ```
 
-When every test and eval case matches your answer key, commit them:
+When every test and eval case matches your expected results, commit them:
 
 ```text
 ! git add -A && git commit -m "lab2c: tests"
@@ -261,7 +261,7 @@ Don't take Claude's word for it; check for yourself.
   and tell me when it's ready.
   ```
 
-  Then open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**) or the UI at http://127.0.0.1:8000/, and use values from your answer key. When you're done, stop it:
+  Then open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**) or [the UI](01-getting-started.md#use-the-web-ui) at http://127.0.0.1:8000/, and use values from your expected results. When you're done, stop it:
 
   ```text
   Stop the app.

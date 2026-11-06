@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="896" viewBox="0 0 1120 896" role="img" aria-labelledby="title description">
+  <title id="title">Follow a quote through the code</title>
+  <desc id="description">A browser form posts to /performances/{id}/quote, where web.py builds a QuoteRequest from the form fields. A JSON client posts to /orders/quote, where FastAPI builds the same QuoteRequest and models.py checks it. Both call orders.quote with a database connection and the injected time. It checks the performance, merges repeated tiers, validates tiers, seats and the promo, and prices the cart. The in-memory Quote is rendered as HTML by looping over pricing_lines, or returned as JSON with integer cents. API model validation errors are 422, domain errors are 400, 404 or 409, and caught form errors render as HTML with status 400.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10Z" fill="#526677"/>
+    </marker>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #172f43; }
+      .title { font-size: 34px; font-weight: 700; }
+      .heading { font-size: 23px; font-weight: 700; }
+      .body { font-size: 20px; fill: #445d6d; }
+      .small { font-size: 18px; fill: #445d6d; }
+      .note { font-size: 17px; fill: #445d6d; }
+      .tag { font-size: 16px; fill: #445d6d; }
+      .label { font-size: 15px; font-weight: 700; letter-spacing: 1.5px; }
+      .edge { fill: none; stroke: #526677; stroke-width: 2; stroke-linejoin: round; }
+      .dash { stroke-dasharray: 6 5; }
+      .card { stroke: #bdcbd3; stroke-width: 1.3; }
+    </style>
+  </defs>
+  <rect width="1120" height="896" fill="#fbfaf6"/>
+  <rect width="8" height="896" fill="#172f43"/>
+  <text x="48" y="58" class="title">Follow a quote through the code</text>
+  <text x="48" y="94" class="body">Two HTTP requests converge on orders.quote(). Neither saves a quote.</text>
+  <text x="48" y="140" class="label" style="fill:#285e98">BROWSER FORM</text>
+  <text x="560" y="140" class="label" style="fill:#285e98">JSON API • ALSO USED BY /DOCS</text>
+  <rect x="48" y="160" width="480" height="140" rx="12" fill="#eaf1fa" class="card"/>
+  <text x="70" y="196" class="heading">POST /performances/{id}/quote</text>
+  <text x="70" y="227" class="small">web.py reads qty_&lt;tier_id&gt; and promo_code</text>
+  <text x="70" y="253" class="small">cart_items() builds CartItem objects</text>
+  <text x="70" y="279" class="small">Constructs a QuoteRequest</text>
+  <rect x="560" y="160" width="512" height="140" rx="12" fill="#eaf1fa" class="card"/>
+  <text x="582" y="196" class="heading">POST /orders/quote</text>
+  <text x="582" y="227" class="small">main.py receives a JSON body</text>
+  <text x="582" y="253" class="small">FastAPI constructs a QuoteRequest</text>
+  <text x="582" y="279" class="small">models.py checks quantities and the 8-ticket limit</text>
+  <polyline points="288,300 288,332 560,332 560,372" class="edge" marker-end="url(#arrow)"/>
+  <polyline points="816,300 816,332 560,332" class="edge"/>
+  <rect x="286" y="372" width="548" height="114" rx="12" fill="#e2f0e9" class="card"/>
+  <text x="308" y="408" class="heading">orders.quote()</text>
+  <text x="308" y="439" class="small">Check the performance; merge repeated tiers</text>
+  <text x="308" y="465" class="small">Get inventory; validate tier, seats and promo; price</text>
+  <text x="860" y="410" class="small">Also takes a database</text>
+  <text x="860" y="436" class="small">connection and the</text>
+  <text x="860" y="462" class="small">injected now.</text>
+  <polyline points="560,486 560,538" class="edge" marker-end="url(#arrow)"/>
+  <rect x="286" y="538" width="548" height="114" rx="12" fill="#e2f0e9" class="card"/>
+  <text x="308" y="574" class="heading">Quote response model</text>
+  <text x="308" y="605" class="small">Ticket lines + pricing_lines + exact totals in cents</text>
+  <text x="308" y="631" class="small">An in-memory value: no quote ID, no reservation</text>
+  <polyline points="560,652 560,684 288,684 288,724" class="edge" marker-end="url(#arrow)"/>
+  <polyline points="560,684 816,684 816,724" class="edge" marker-end="url(#arrow)"/>
+  <rect x="48" y="724" width="480" height="90" rx="12" fill="#eaf1fa" class="card"/>
+  <text x="70" y="760" class="heading">HTML • performance.html</text>
+  <text x="70" y="791" class="small">Loop over pricing_lines; format with dollars()</text>
+  <rect x="560" y="724" width="512" height="90" rx="12" fill="#eaf1fa" class="card"/>
+  <text x="582" y="760" class="heading">JSON • Quote fields</text>
+  <text x="582" y="791" class="small">Return integers such as total_cents: 25044</text>
+  <polyline points="48,842 1072,842" class="edge"/>
+  <text x="48" y="866" class="note">Errors: API validation → 422; domain errors → 400 / 404 / 409. Caught form errors render as HTML 400.</text>
+</svg>

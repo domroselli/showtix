@@ -45,10 +45,10 @@ PROMOS = [
     ("SPRING24", "percent", 20, "2024-03-01", "2024-05-31", 200),
 ]
 
-# One tier left nearly sold out: a small VIP box with 2 of 24 seats left.
+# One tier left nearly sold out: a small VIP box with 2 of 14 seats left.
 NEARLY_SOLD_OUT = ("Gravity Optional", date(2026, 11, 14), "VIP")
-NEARLY_SOLD_OUT_SEATS = 24
-NEARLY_SOLD_OUT_ORDERS = [8, 8, 6]
+NEARLY_SOLD_OUT_SEATS = 14
+NEARLY_SOLD_OUT_ORDERS = [4, 4, 4]
 
 SEEDED_AT = datetime(2026, 10, 28, 12, 0)
 

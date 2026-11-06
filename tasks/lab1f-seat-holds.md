@@ -8,7 +8,7 @@ A feature you design yourself: you settle the open decisions with Claude, then b
 
 1. New here? Read [Getting started](01-getting-started.md) for running commands and the app, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
 2. Run the command under [Starting branch](#starting-branch), then read [Goal](#goal), [Background](#background), [Acceptance criteria](#acceptance-criteria) and [Decisions to make](#decisions-to-make).
-3. Follow [The workflow](#the-workflow) step by step. Step 1 starts with Claude explaining the code you'll change, then interviewing you about the open decisions; then you write your answer key yourself.
+3. Follow [The workflow](#the-workflow) step by step. Step 1 starts with Claude explaining the code you'll change, then interviewing you about the open decisions; then you write your expected results yourself.
 
 You're done when every box under [Done means](#done-means) is checked. Extra time? Pull an item off your Not doing list (step 7). Stuck? See [Hints](#hints).
 
@@ -50,7 +50,7 @@ Two criteria are given. Criteria 3 and on come from your decisions (see [Decisio
 
 ### Decisions to make
 
-Decide these with Claude, then turn each decision into a criterion. Use the explore and interview prompts in [step 1 of The workflow](#1-align-explore-settle-the-decisions-then-write-your-answer-key) below:
+Decide these with Claude, then turn each decision into a criterion. Use the explore and interview prompts in [step 1 of The workflow](#1-align-explore-settle-the-decisions-then-write-your-expected-results) below:
 
 - Exactly when does a hold expire: at 10:00, or after it? Test both sides of the boundary.
 - How does the customer who holds the seats use them? (A hold id returned by the quote and passed to `POST /orders`, and carried by the UI's "Place order" form?)
@@ -62,7 +62,7 @@ Decide these with Claude, then turn each decision into a criterion. Use the expl
 
 ## The workflow
 
-Explore the code and settle the decisions with Claude, write your answer key, then have Claude write the tests, check them yourself, and let Claude build it slice by slice.
+Explore the code and settle the decisions with Claude, write your expected results, then have Claude write the tests, check them yourself, and let Claude build it slice by slice.
 
 - Steps that use Claude have a prompt to copy; commands start with `!`.
 - Why each step matters: [How we work](00-how-we-work.md).
@@ -72,7 +72,7 @@ Explore the code and settle the decisions with Claude, write your answer key, th
   /clear
   ```
 
-### 1. Align: explore, settle the decisions, then write your answer key
+### 1. Align: explore, settle the decisions, then write your expected results
 
 Get oriented in the code you'll change, decide with Claude, then write down what "done" means without Claude.
 
@@ -117,17 +117,17 @@ bigger goes on the Not doing list.
 
 You choose; Claude only offers options. ⏱ About 15 minutes for exploring and the interview together: if a decision drags on, pick the simplest option and put the other on the "Not doing" list.
 
-Then, without Claude, write your answer key:
+Then, without Claude, write your expected results:
 
 - Go through [Acceptance criteria](#acceptance-criteria) one by one, including the ones you just added: which status code, the exact message, the exact seat counts and cents, and the exact times on each side of the 10-minute boundary.
 - Look up anything you need in [`docs/seed-data.md`](../docs/seed-data.md): every show, night, price, seat count, promo code and seeded order, plus how a price is built.
 - Want to see it in the running app? See [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-You'll compare Claude's tests against this answer key in step 2.
+You'll compare Claude's tests against these expected results in step 2.
 
 ### 2. Tests first
 
-Have Claude write failing tests, then check them against your answer key.
+Have Claude write failing tests, then check them against your expected results.
 
 ```text
 Read tasks/lab1f-seat-holds.md and the relevant code. Write a failing test for
@@ -144,14 +144,14 @@ Check especially:
 - **`test_quote_writes_nothing` says what you decided a quote may now write** (see [Background](#background)).
 - **Every criterion you added from your decisions has a test.**
 
-If a test doesn't match your answer key, tell Claude what it should be and why:
+If a test doesn't match your expected results, tell Claude what it should be and why:
 
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
 that test.
 ```
 
-When every test matches your answer key, commit them:
+When every test matches your expected results, commit them:
 
 ```text
 ! git add -A && git commit -m "lab1f: tests"
@@ -228,7 +228,7 @@ Don't take Claude's word for it; check for yourself.
   and tell me when it's ready.
   ```
 
-  Then open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**) or the UI at http://127.0.0.1:8000/. Use values from your answer key: check that a second customer's quote for held seats gets a 409.
+  Then open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**) or [the UI](01-getting-started.md#use-the-web-ui) at http://127.0.0.1:8000/. Use values from your expected results: check that a second customer's quote for held seats gets a 409.
 
   Don't sit and wait for a hold to expire: the running app uses the real clock, and your tests already check expiry. Want to see one expire anyway? Quote the last 2 VIP seats (Gravity Optional, Nov 14) now, then do steps 5 and 6. When you're done, quote them again as a different customer, in /docs or another browser window: the hold has expired, so it works.
 

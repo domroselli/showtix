@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="1100" viewBox="0 0 1120 1100" role="img" aria-labelledby="title description">
+  <title id="title">How a request flows through ShowTix</title>
+  <desc id="description">The browser shop sends HTML forms to web.py; the API explorer or another client sends JSON to main.py. Both route layers call shared domain modules directly. Orders coordinates inventory, promo validation and pure pricing functions. Shows, inventory, promos and orders query SQLite. FastAPI injects a database connection and, where needed, current Vegas time. Responses return through the routes as HTML or JSON. In Lab 2, llm.py connects to FastAPI dependency injection through get_llm(), providing routes with the configured Claude API client to pass to feature code for drafting support replies, interpreting search queries and powering the AI concierge.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10Z" fill="#526677"/>
+    </marker>
+    <marker id="injected-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10Z" fill="#6c549a"/>
+    </marker>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #172f43; }
+      .title { font-size: 34px; font-weight: 700; }
+      .heading { font-size: 23px; font-weight: 700; }
+      .body { font-size: 20px; fill: #445d6d; }
+      .small { font-size: 18px; fill: #445d6d; }
+      .label { font-size: 15px; font-weight: 700; letter-spacing: 1.5px; }
+      .edge { fill: none; stroke: #526677; stroke-width: 2; stroke-linejoin: round; marker-end: url(#arrow); }
+      .injected { fill: none; stroke: #6c549a; stroke-width: 2; stroke-dasharray: 6 5; marker-end: url(#injected-arrow); }
+      .card { stroke: #bdcbd3; stroke-width: 1.3; }
+    </style>
+  </defs>
+  <rect width="1120" height="1100" fill="#fbfaf6"/>
+  <rect width="8" height="1100" fill="#172f43"/>
+  <text x="48" y="58" class="title">How a request flows through ShowTix</text>
+  <text x="48" y="94" class="body">One FastAPI app. Two entry points. One shared set of business rules.</text>
+
+  <text x="48" y="140" class="label" style="fill:#285e98">1  REQUEST</text>
+  <text x="368" y="140" class="label" style="fill:#285e98">2  ROUTE • READ INPUT / RETURN OUTPUT</text>
+
+  <rect x="48" y="160" width="260" height="116" rx="12" fill="#eaf1fa" class="card"/>
+  <text x="70" y="196" class="heading">Browser shop</text>
+  <text x="70" y="229" class="body">Pages at /</text>
+  <text x="70" y="256" class="body">HTML forms</text>
+
+  <rect x="368" y="160" width="320" height="116" rx="12" fill="#eaf1fa" class="card"/>
+  <text x="390" y="196" class="heading">app/web.py</text>
+  <text x="390" y="229" class="body">Parse forms; call domain code</text>
+  <text x="390" y="256" class="body">Render templates → HTML</text>
+  <path d="M308 218H368" class="edge"/>
+
+  <rect x="48" y="310" width="260" height="116" rx="12" fill="#eaf1fa" class="card"/>
+  <text x="70" y="346" class="heading">/docs or API client</text>
+  <text x="70" y="379" class="body">API explorer or code</text>
+  <text x="70" y="406" class="body">JSON requests</text>
+
+  <rect x="368" y="310" width="320" height="116" rx="12" fill="#eaf1fa" class="card"/>
+  <text x="390" y="346" class="heading">app/main.py</text>
+  <text x="390" y="379" class="body">Validate with models.py</text>
+  <text x="390" y="406" class="body">Call domain code → JSON</text>
+  <path d="M308 368H368" class="edge"/>
+
+  <rect x="784" y="160" width="288" height="266" rx="12" fill="#eeeafa" class="card"/>
+  <text x="806" y="196" class="heading">FastAPI injects</text>
+  <text x="806" y="234" class="body">db.get_db() → conn</text>
+  <text x="806" y="262" class="small">One connection per request</text>
+  <path d="M806 282H1050" stroke="#c9bedf"/>
+  <text x="806" y="315" class="body">clock.get_now() → now</text>
+  <text x="806" y="343" class="small">Vegas time, where needed</text>
+  <path d="M806 362H1050" stroke="#c9bedf"/>
+  <text x="806" y="397" class="body">get_llm() → llm • Lab 2</text>
+  <path d="M784 292H736V218H688" class="injected"/>
+  <path d="M736 292V368H688" class="injected"/>
+
+  <path d="M528 276V292H344V455H528" fill="none" stroke="#526677" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M528 426V490" class="edge"/>
+  <text x="550" y="463" class="small">Direct Python calls; no HTTP between these layers</text>
+
+  <rect x="48" y="490" width="1024" height="340" rx="16" fill="#f1f7f3" stroke="#bbd1c7" stroke-width="1.3"/>
+  <text x="72" y="523" class="label" style="fill:#176650">3  SHARED DOMAIN MODULES • THE BUSINESS RULES</text>
+
+  <rect x="72" y="548" width="220" height="108" rx="12" fill="#e2f0e9" class="card"/>
+  <text x="92" y="583" class="heading">shows.py</text>
+  <text x="92" y="615" class="body">Shows, date filters,</text>
+  <text x="92" y="642" class="body">upcoming nights</text>
+
+  <rect x="352" y="548" width="280" height="108" rx="12" fill="#e2f0e9" class="card"/>
+  <text x="374" y="583" class="heading">orders.py</text>
+  <text x="374" y="615" class="body">Quote, create, read, cancel</text>
+  <text x="374" y="642" class="body">Coordinates the other rules</text>
+
+  <rect x="792" y="548" width="256" height="108" rx="12" fill="#e2f0e9" class="card"/>
+  <text x="814" y="583" class="heading">inventory.py</text>
+  <text x="814" y="615" class="body">Seats left per tier</text>
+  <text x="814" y="642" class="body">Check requested seats</text>
+  <path d="M632 592H792" class="edge"/>
+  <text x="712" y="576" class="small" text-anchor="middle">calls</text>
+
+  <rect x="352" y="714" width="280" height="92" rx="12" fill="#e2f0e9" class="card"/>
+  <text x="374" y="750" class="heading">promos.py</text>
+  <text x="374" y="782" class="body">Validate promo codes</text>
+  <path d="M492 656V714" class="edge"/>
+
+  <rect x="792" y="714" width="256" height="92" rx="12" fill="#e2f0e9" class="card"/>
+  <text x="814" y="750" class="heading">pricing.py</text>
+  <text x="814" y="782" class="body">All money math; no SQL</text>
+  <path d="M632 630H708V760H792" class="edge"/>
+
+  <text x="72" y="715" class="small">Both route layers call</text>
+  <text x="72" y="742" class="small">shows, orders and</text>
+  <text x="72" y="769" class="small">inventory as needed.</text>
+
+  <path d="M492 830V902" class="edge"/>
+  <rect x="72" y="902" width="560" height="112" rx="12" fill="#fff1d5" class="card"/>
+  <text x="94" y="938" class="heading">4  SQLite • showtix.db</text>
+  <text x="94" y="969" class="body">shows, orders, inventory and promos issue SQL.</text>
+  <text x="94" y="996" class="body">app/db.py owns the schema and connection.</text>
+
+  <rect x="728" y="902" width="344" height="112" rx="12" fill="#eeeafa" class="card"/>
+  <text x="750" y="938" class="heading">app/llm.py • Lab 2</text>
+  <text x="750" y="969" class="body">Claude API client for AI features</text>
+  <text x="750" y="996" class="small">Support replies, search, concierge</text>
+  <path d="M1072 958H1096V397H1072" class="injected"/>
+
+  <path d="M48 1040H1072" stroke="#bdcbd3"/>
+  <text x="48" y="1072" class="small">Results return through the same routes as HTML or JSON. Dashed arrows show injected dependencies.</text>
+</svg>

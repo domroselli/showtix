@@ -6,12 +6,12 @@ A note on words: you may read about "agent loops" elsewhere. That means somethin
 
 ## The workflow at a glance
 
-<img src="../docs/img/5-workflow-compact.png" alt="The seven-step workflow" width="760">
+<img src="../docs/img/5-workflow-compact.svg" alt="Align; review and commit tests; clear and implement; check evidence; review the diff; get a second opinion; commit. Real findings loop back through a failing test, a fix and another evidence check." width="1000">
 
 The [detailed version](../docs/architecture.md#5-the-workflow) shows what happens in each step.
 
-1. **Align: settle what "done" means.** On the harder labs, Claude first explains the code (1e, 1f, 2c) and you settle the open decisions or edge cases with it. Every lab ends step 1 with your answer key, written without Claude
-2. **Tests first:** Claude writes failing tests, you check them against your answer key, then you commit them
+1. **Align: settle what "done" means.** On the harder labs, Claude first explains the code (1e, 1f, 2c) and you settle the open decisions with it. Every lab ends step 1 with your expected results, written without Claude
+2. **Tests first:** Claude writes failing tests, you check them against your expected results, then you commit them
 3. **Clear, then implement:** `/clear`, then Claude makes your tests pass without changing them
 4. **Check the evidence:** run the tests yourself, confirm they weren't changed, and try it in your browser
 5. **Review the diff**
@@ -22,7 +22,7 @@ Start every lab with `/clear`, so Claude doesn't carry anything over from the la
 
 ## 1. Align: settle what "done" means
 
-Before Claude writes anything, you agree on exactly what the feature should do. Every lab's step 1 ends with your answer key. On the harder labs, two parts come first, in this order: explore, then decide.
+Before Claude writes anything, you agree on exactly what the feature should do. Every lab's step 1 ends with your expected results. On the harder labs, two parts come first, in this order: explore, then decide.
 
 ### Explore (the Breakthrough and Advanced labs: 1e, 1f, 2c)
 
@@ -53,21 +53,24 @@ You can't decide how to change code you've never seen. Your sheet's first prompt
   ```
 
   You choose; Claude only offers options. The last question is a pre-mortem: what could a customer still run into? Anything you don't make a criterion goes on Not doing. Spend about 15 minutes on exploring and the interview together. If a decision drags on, pick the simplest option and put the other on the "Not doing" list.
-- **Sheets that ask for your own edge cases** (1c, 1d, 2b): ask for ideas, then choose.
+- **Sheets that ask for your own edge cases** (1c, 1d, 2b): think them through yourself first and type them into the sheet. Stuck? Ask Claude for a hint:
 
   ```text
-  Read tasks/lab1c-group-discount.md and the relevant code. Suggest 3 edge cases
-  the criteria don't cover, one sentence each. Don't write any code. I'll pick
-  which ones to add.
+  Read tasks/lab1c-group-discount.md and the relevant code. I'm stuck finding edge cases
+  the criteria don't cover. Give me one hint at a time, as a question, not the
+  edge case itself. If I say "just tell me", suggest 3 edge cases, one sentence
+  each, and I'll pick. Don't write any code or change any files.
   ```
 
 **Why the decisions go in the sheet:** a file survives `/clear`; the conversation doesn't. You'll `/clear` before implementing, so the sheet and your committed tests are everything the next session knows.
 
-### Answer key (every lab, without Claude)
+### Expected results (every lab, without Claude)
+
+Your expected results are just a list of what should happen for each acceptance criterion. A few lines per criterion is enough. Keep them wherever you like.
 
 Go through the sheet's **Acceptance criteria** one by one, including any you just added, and write down exactly what should happen for each: which shows come back, which status code, the exact message, the exact cents. The data the app starts with (every show, night, price, seat count, promo code and seeded order, plus how a price is built) is in [`docs/seed-data.md`](../docs/seed-data.md). If Claude wrote exact values into your new criteria, check them yourself there or in /docs rather than copying them.
 
-**Why:** Claude is fast and sounds confident, and it writes tests that agree with its own understanding. If you don't know the right answer before you see Claude's, you can't tell a test that checks the right thing from one that checks the wrong thing. While this app was being built, Claude once added 36000 + 2250 + 3240 and got 40590. The right answer is 41490. An answer key catches that; nodding along doesn't.
+**Why:** Claude is fast and sounds confident, and it writes tests that agree with its own understanding. If you don't know the right answer before you see Claude's, you can't tell a test that checks the right thing from one that checks the wrong thing. While this app was being built, Claude once added 36000 + 2250 + 3240 and got 40590. The right answer is 41490. Expected results catch that; nodding along doesn't.
 
 Acceptance criteria are the definition of "done." Turning each one into an exact expected value is what makes it testable. On the Starter labs, this is all of step 1: aligning means agreeing with yourself on what right looks like, before Claude does anything.
 
@@ -82,7 +85,7 @@ or functions that already exist, not new functions or exact HTML. Don't change
 anything in app/. Run the tests and show me which ones fail.
 ```
 
-Compare each test with your answer key. Same shows, same status code, same message, same cents? A test that checks "the total got smaller" instead of "the total is 25044" is a weak test. And a test should check behavior through the API or the page, not call a function that doesn't exist yet: a test like that designs the code for Claude, and step 3 won't let Claude change it. If one is wrong, tell Claude what it should be and why:
+Compare each test with your expected results. Same shows, same status code, same message, same cents? A test that checks "the total got smaller" instead of "the total is 25044" is a weak test. And a test should check behavior through the API or the page, not call a function that doesn't exist yet: a test like that designs the code for Claude, and step 3 won't let Claude change it. If one is wrong, tell Claude what it should be and why:
 
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
@@ -98,7 +101,7 @@ When you're satisfied with the tests, commit them:
 **Why:**
 
 - **A test that has never failed proves nothing.** It might not test anything at all. A test that fails first proves it can detect the missing behavior; when it passes after the change, you know *your change* made it pass. This is called red, then green.
-- **Checking tests is easier than checking code.** Each test is one criterion with one expected result, so you can hold it against your answer key line by line. Once the tests are right, they're the target Claude works toward.
+- **Checking tests is easier than checking code.** Each test is one criterion with one expected result, so you can hold it against your expected results line by line. Once the tests are right, they're the target Claude works toward.
 - **Committing them makes them tamper-evident.** If a test is awkward to pass, an AI can quietly loosen it. Once your reviewed tests are committed, any later change to them shows up in `git diff`.
 - **A test that already passes isn't always a mistake.** If the behavior exists today (a request without the new filter returns everything, as before), the test should pass. Your sheet says when to expect that.
 
@@ -142,9 +145,9 @@ Don't take Claude's word for it. The `!` runs a command yourself, not through Cl
 
   A file in `tests/` (changed, or new with `??`), a `conftest.py`, or `pyproject.toml` means Claude touched your tests or how they run: ask why. On labs built slice by slice (1e, 1f, 2c), also check the slice commits: [Check your tests didn't change](01-getting-started.md#check-your-tests-didnt-change).
 - **Lab 2 only: run your eval** twice and read any failing case before changing anything. Your sheet explains how.
-- **Try it yourself.** Your sheet's **Check it in your browser** section has the exact links, clicks and results to expect. To start and stop the app, see [Start the app](01-getting-started.md#start-the-app) and [Stop the app](01-getting-started.md#stop-the-app).
+- **Try it yourself.** On 1a and 1b, your sheet's **Check it in your browser** section has the exact links, clicks and results to expect. On later labs, choose your own checks from your expected results. To start and stop the app, see [Start the app](01-getting-started.md#start-the-app) and [Stop the app](01-getting-started.md#stop-the-app).
 
-Use the values from your answer key. Does the running app agree?
+Use the values from your expected results. Does the running app agree?
 
 **Why `git status`, not `git diff`?** `git diff` only shows files git already tracks, so a new test file or a new `conftest.py` that skips tests wouldn't show up. And test settings can live outside `tests/`, in `pyproject.toml`.
 
@@ -210,7 +213,7 @@ Find out why before you correct it. Press Esc to stop it if it's still going, th
 2. **Correct it with the reason:** say what you want and why. "Cap only the service fees, not the total, because tax and ticket prices are separate charges" works better than "don't do that."
 3. **Still wrong after that?** The conversation is now full of wrong turns. Type `/clear` (it wipes the conversation, which is why you ask first) and start the step over with your sheet's prompt plus three additions:
    - **The rule it got wrong, stated as what you want, with the reason.**
-   - **One example from your answer key,** with the exact result.
+   - **One example from your expected results,** with the exact result.
    - **Where the change belongs**, if Claude put it somewhere else.
 
    For example, for the fee cap from Demo 1:

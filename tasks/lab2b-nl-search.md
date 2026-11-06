@@ -8,7 +8,7 @@ Claude turns a customer's words into search filters; your code checks them and r
 
 1. New here? Read [Getting started](01-getting-started.md) for running commands, the app and your API key, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
 2. Run the commands under [Starting branch](#starting-branch), then read [Goal](#goal), [Background](#background) and [Acceptance criteria](#acceptance-criteria).
-3. Follow [The workflow](#the-workflow) step by step. Step 1 starts with a quick brainstorm with Claude about edge cases; then you write your answer key yourself.
+3. Follow [The workflow](#the-workflow) step by step. Step 1 starts with you thinking through edge cases; then you write your expected results yourself.
 
 You're done when every box under [Done means](#done-means) is checked. Extra time? Try the [Optional stretch](#optional-stretch). Stuck? See [Hints](#hints).
 
@@ -103,7 +103,7 @@ Work these out yourself before you trust any test. If `now` were Saturday, Nov 1
 
 ## The workflow
 
-Settle what "done" means (with Claude's help on edge cases), then have Claude write the tests, check them yourself, and let Claude make them pass.
+Settle what "done" means, then have Claude write the tests, check them yourself, and let Claude make them pass.
 
 - Steps that use Claude have a prompt to copy; commands start with `!`.
 - Why each step matters: [How we work](00-how-we-work.md).
@@ -113,27 +113,29 @@ Settle what "done" means (with Claude's help on edge cases), then have Claude wr
   /clear
   ```
 
-### 1. Align: find your edge cases, then write your answer key
+### 1. Align: find your edge cases, then write your expected results
 
-This sheet asks for one or two edge cases of your own. Ask Claude for ideas, then choose:
+This sheet asks for one or two edge cases of your own. Think them through yourself first: what could a customer do that the criteria don't answer? Type yours into the sheet's edge-case lines (criteria 10 and 11).
+
+Stuck? Ask Claude for a hint:
 
 ```text
-Read tasks/lab2b-nl-search.md and the relevant code. Suggest 3 edge cases the
-criteria don't cover, one sentence each. Don't write any code. I'll pick which
-ones to add.
+Read tasks/lab2b-nl-search.md and the relevant code. I'm stuck finding edge cases
+the criteria don't cover. Give me one hint at a time, as a question, not the
+edge case itself. If I say "just tell me", suggest 3 edge cases, one sentence
+each, and I'll pick. Don't write any code or change any files.
 ```
 
 Then, without Claude:
 
-- Add the ones you pick to the sheet's edge-case lines (criteria 10 and 11).
 - Go through [Acceptance criteria](#acceptance-criteria) one by one: which filters, which shows come back, which status code, the exact message.
 - Work out the worked-example table yourself and check you get the same filters and shows. Shows and prices are in [`docs/seed-data.md`](../docs/seed-data.md); to see them in the running app, see [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-You'll compare Claude's tests and eval cases against this answer key in step 2.
+You'll compare Claude's tests and eval cases against these expected results in step 2.
 
 ### 2. Tests first
 
-Have Claude write failing tests and the eval cases, then check them against your answer key.
+Have Claude write failing tests and the eval cases, then check them against your expected results.
 
 ```text
 Read tasks/lab2b-nl-search.md and the relevant code. Write a failing test for
@@ -144,7 +146,7 @@ new functions or exact HTML. Don't change anything in app/. Run the tests and
 show me which ones fail.
 ```
 
-Compare each test, and each eval case, with your answer key. The eval cases are the model's answer key, so they must be right too.
+Compare each test, and each eval case, with your expected results. The eval cases are the model's expected results, so they must be right too.
 
 Check especially:
 
@@ -152,14 +154,14 @@ Check especially:
 - **Each invalid-filter case in criterion 4 has its own 422 test.**
 - **The eval cases' expected filters match the worked-example table**, especially the dates for "this weekend".
 
-If a test or case doesn't match your answer key, tell Claude what it should be and why:
+If a test or case doesn't match your expected results, tell Claude what it should be and why:
 
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
 that test.
 ```
 
-When every test and case matches your answer key, commit them:
+When every test and case matches your expected results, commit them:
 
 ```text
 ! git add -A && git commit -m "lab2b: tests"
@@ -209,7 +211,7 @@ Don't take Claude's word for it; check for yourself.
   ! uv run python -m tests.evals.run_nl_search --repeat 2
   ```
 
-- Try it yourself. Start the app ([more on starting the app](01-getting-started.md#start-the-app)), then open http://127.0.0.1:8000/docs, click your endpoint, **Try it out**, **Execute**. Use queries from your answer key.
+- Try it yourself. Start the app ([more on starting the app](01-getting-started.md#start-the-app)), then open http://127.0.0.1:8000/docs, click your endpoint, **Try it out**, **Execute**. Use queries from your expected results.
 
   ```text
   Start the app in the background with uv run uvicorn app.main:app --reload,

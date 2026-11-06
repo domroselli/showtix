@@ -29,8 +29,8 @@ def test_availability_lists_every_tier(client, performance_id):
 
 def test_nearly_sold_out_tier_has_two_seats_left(client, performance_id):
     vip = seats(client, performance_id("Gravity Optional", "2026-11-14"))["VIP"]
-    assert vip["seats_total"] == 24
-    assert vip["seats_sold"] == 22
+    assert vip["seats_total"] == 14
+    assert vip["seats_sold"] == 12
     assert vip["seats_left"] == 2
 
 

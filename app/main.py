@@ -30,6 +30,12 @@ def handle_showtix_error(request: Request, exc: ShowTixError) -> JSONResponse:
     return JSONResponse(status_code=exc.status_code, content={"detail": str(exc)})
 
 
+@app.exception_handler(OverflowError)
+def handle_id_too_big(request: Request, exc: OverflowError) -> JSONResponse:
+    """SQLite integers are 64-bit, so looking up a bigger id raises this. No such row can exist."""
+    return JSONResponse(status_code=404, content={"detail": "Not found"})
+
+
 @app.get("/shows")
 def list_shows(
     start_date: date | None = None,

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="660" viewBox="0 0 1120 660" role="img" aria-labelledby="title description">
+<title id="title">How a price is built</title>
+<desc id="description">Five steps using integer cents: subtotal two times 12000 is 24000; ten percent discount is 2400 leaving 21600; fees are two times 750 or 1500; tax is nine percent of 21600 or 1944; total is 25044 cents or 250.44 dollars. Fees are never discounted or taxed. Tax rounds half up once.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#526677"/></marker></defs>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#172f43}.edge{fill:none;stroke:#526677;stroke-width:2;stroke-linejoin:round}</style>
+<rect width="1120" height="660" fill="#fbfaf6"/>
+<rect width="8" height="660" fill="#172f43"/>
+<text x="48" y="56" font-size="32" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">How a price is built</text>
+<text x="48" y="92" font-size="19" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">2 Premium tickets × 12000 cents, with LOCALS10 • all calculations live in pricing.py</text>
+<text x="98" y="142" font-size="15" fill="#445d6d" style="fill:#445d6d" font-weight="700" text-anchor="start">STEP</text>
+<text x="414" y="142" font-size="15" fill="#445d6d" style="fill:#445d6d" font-weight="700" text-anchor="start">CALCULATION • CENTS</text>
+<text x="1048" y="142" font-size="15" fill="#445d6d" style="fill:#445d6d" font-weight="700" text-anchor="end">AMOUNT</text>
+<rect x="48" y="160" width="1024" height="66" rx="8" fill="#ffffff" stroke="#bdcbd3" stroke-width="1.2"/>
+<text x="68" y="200" font-size="24" fill="#176650" style="fill:#176650" font-weight="700" text-anchor="start">1</text>
+<text x="112" y="188" font-size="21" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">Subtotal</text>
+<text x="112" y="212" font-size="16" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Ticket prices only</text>
+<text x="414" y="200" font-size="23" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">2 × 12000</text>
+<text x="1048" y="200" font-size="27" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="end">24000</text>
+<polyline points="79,226 79,238" class="edge" marker-end="url(#arrow)"/>
+<rect x="48" y="238" width="1024" height="66" rx="8" fill="#ffffff" stroke="#bdcbd3" stroke-width="1.2"/>
+<text x="68" y="278" font-size="24" fill="#176650" style="fill:#176650" font-weight="700" text-anchor="start">2</text>
+<text x="112" y="266" font-size="21" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">Discount</text>
+<text x="112" y="290" font-size="16" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Leaves 21600 taxable cents</text>
+<text x="414" y="278" font-size="23" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">10% × 24000 = 2400</text>
+<text x="1048" y="278" font-size="27" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="end">−2400</text>
+<polyline points="79,304 79,316" class="edge" marker-end="url(#arrow)"/>
+<rect x="48" y="316" width="1024" height="66" rx="8" fill="#ffffff" stroke="#bdcbd3" stroke-width="1.2"/>
+<text x="68" y="356" font-size="24" fill="#176650" style="fill:#176650" font-weight="700" text-anchor="start">3</text>
+<text x="112" y="344" font-size="21" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">Service fee</text>
+<text x="112" y="368" font-size="16" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Never discounted</text>
+<text x="414" y="356" font-size="23" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">2 × 750</text>
+<text x="1048" y="356" font-size="27" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="end">+1500</text>
+<polyline points="79,382 79,394" class="edge" marker-end="url(#arrow)"/>
+<rect x="48" y="394" width="1024" height="66" rx="8" fill="#ffffff" stroke="#bdcbd3" stroke-width="1.2"/>
+<text x="68" y="434" font-size="24" fill="#176650" style="fill:#176650" font-weight="700" text-anchor="start">4</text>
+<text x="112" y="422" font-size="21" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">Tax</text>
+<text x="112" y="446" font-size="16" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Excludes fees; round half up</text>
+<text x="414" y="434" font-size="23" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">9% × 21600</text>
+<text x="1048" y="434" font-size="27" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="end">+1944</text>
+<polyline points="79,460 79,472" class="edge" marker-end="url(#arrow)"/>
+<rect x="48" y="472" width="1024" height="66" rx="8" fill="#e2f0e9" stroke="#bdcbd3" stroke-width="1.2"/>
+<text x="68" y="512" font-size="24" fill="#176650" style="fill:#176650" font-weight="700" text-anchor="start">5</text>
+<text x="112" y="500" font-size="21" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">Total</text>
+<text x="112" y="524" font-size="16" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Displayed as $250.44</text>
+<text x="414" y="512" font-size="23" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">21600 + 1500 + 1944</text>
+<text x="1048" y="512" font-size="27" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="end">25044</text>
+<polyline points="48,583 1072,583" class="edge"/>
+<text x="48" y="607" font-size="17" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Discounts are capped at the subtotal. Fees are 750 cents per ticket. The 9% tax is a workshop simplification.</text>
+<text x="48" y="632" font-size="17" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Integer rounding: percent_of(amount, rate) = (amount × rate + 50) // 100.</text>
+</svg>

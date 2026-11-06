@@ -105,7 +105,7 @@ Download your own copy of ShowTix and check that it works. Install the [Prerequi
 
 3. Your copy is in `C:\Users\<your name>\showtix`.
 
-The last line should say something like `96 passed`. A "not found" error means a prerequisite isn't installed yet: see [Check](#check).
+The last line should say something like `112 passed`. A "not found" error means a prerequisite isn't installed yet: see [Check](#check).
 
 ## Open ShowTix in Claude Code
 
@@ -158,6 +158,15 @@ Each lab gets its own branch, made from `main`, so labs don't mix. The command a
 ```text
 ! git switch main && uv run python -m app.seed && git switch -c lab1a-category-filter && uv run pytest
 ```
+
+That's four commands joined by `&&`. Here's what each one does, in order:
+
+| Command | What it does |
+| --- | --- |
+| `git switch main` | Moves you to the `main` branch, so your new branch starts from the original code, not from another lab. |
+| `uv run python -m app.seed` | Resets the database to the starting data. See [Reset the database](#reset-the-database). |
+| `git switch -c lab1a-category-filter` | Creates a new branch with this name and moves you onto it. `-c` means create. Your commits for this lab go here. |
+| `uv run pytest` | Runs all the tests, to prove everything works before you start. |
 
 - Every test should pass before you change anything.
 - If you have uncommitted work from another lab, `git switch` stops and says so. [Commit](#commit) it first.
@@ -221,6 +230,15 @@ http://127.0.0.1:8000/docs lists every API endpoint and lets you call one from y
 3. Scroll down to **Server response**: **Code** is the status code (200, 400, 404 …) and **Response body** is what came back.
 
 The **Request URL** box shows the link for the same request, which you can open directly in your browser.
+
+## Use the web UI
+
+http://127.0.0.1:8000/ is the ShowTix site. To place an order:
+
+1. Click a date under any show.
+2. In the **Qty** column, enter how many tickets you want. If you have a promo code, type it in **Promo code**. Click **Get quote**.
+3. Read the price breakdown. To try a different cart, go back to the date page.
+4. Enter any email and click **Place order**. You land on the order's page.
 
 ## Stop the app
 

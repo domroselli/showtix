@@ -1,7 +1,13 @@
 """Tests that check how separately-tested rules combine."""
 
+import pytest
+
 NIGHT = "2026-11-12"
 SHOW = "Laugh Lines Live"
+
+# SQLite integers are 64-bit, so these ids can't exist and can't even be looked up.
+TOO_BIG = 2**63
+TOO_SMALL = -(2**63) - 1
 
 
 def cart(performance_id, items, promo_code=None):
@@ -72,3 +78,30 @@ def test_end_date_includes_evening_shows_on_that_day(client):
 def test_end_date_on_the_first_night_includes_evening_shows(client):
     resp = client.get("/shows?end_date=2026-11-10")
     assert len(resp.json()) == 8
+
+
+@pytest.mark.parametrize("bad_id", [TOO_BIG, TOO_SMALL])
+@pytest.mark.parametrize(
+    "method, path",
+    [
+        ("GET", "/shows/{}"),
+        ("GET", "/performances/{}/availability"),
+        ("GET", "/performances/{}"),
+        ("POST", "/performances/{}/quote"),
+        ("POST", "/performances/{}/orders"),
+        ("GET", "/orders/{}"),
+        ("POST", "/orders/{}/cancel"),
+    ],
+)
+def test_id_too_big_for_the_database_in_the_path_is_404(client, method, path, bad_id):
+    resp = client.request(method, path.format(bad_id))
+    assert resp.status_code == 404
+    assert resp.json() == {"detail": "Not found"}
+
+
+@pytest.mark.parametrize("path", ["/orders/quote", "/orders"])
+def test_performance_id_too_big_for_the_database_in_the_body_is_404(client, tier_id, path):
+    body = cart(TOO_BIG, [{"tier_id": tier_id(SHOW, NIGHT, "GA"), "qty": 1}])
+    resp = client.post(path, json=body)
+    assert resp.status_code == 404
+    assert resp.json() == {"detail": "Not found"}

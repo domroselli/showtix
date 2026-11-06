@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="930" viewBox="0 0 1120 930" role="img" aria-labelledby="title description">
+  <title id="title">The data model</title>
+  <desc id="description">Seven SQLite tables. Venues have many shows, shows have many performances, and each performance has many price tiers and many orders. An order may use one promo code and has many order lines. Each order line belongs to one order and one price tier and stores the unit price paid. Availability is computed from tiers, order lines and order status; it is not a table.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10Z" fill="#526677"/>
+    </marker>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #172f43; }
+      .title { font-size: 34px; font-weight: 700; }
+      .heading { font-size: 23px; font-weight: 700; }
+      .body { font-size: 20px; fill: #445d6d; }
+      .small { font-size: 18px; fill: #445d6d; }
+      .note { font-size: 17px; fill: #445d6d; }
+      .tag { font-size: 16px; fill: #445d6d; }
+      .label { font-size: 15px; font-weight: 700; letter-spacing: 1.5px; }
+      .edge { fill: none; stroke: #526677; stroke-width: 2; stroke-linejoin: round; }
+      .dash { stroke-dasharray: 6 5; }
+      .card { stroke: #bdcbd3; stroke-width: 1.3; }
+    </style>
+  </defs>
+  <rect width="1120" height="930" fill="#fbfaf6"/>
+  <rect width="8" height="930" fill="#172f43"/>
+  <text x="48" y="58" class="title">The data model</text>
+  <text x="48" y="94" class="body">A show is a production. A performance is one night. A tier belongs to that night.</text>
+  <text x="48" y="140" class="label" style="fill:#885810">CATALOG</text>
+  <rect x="48" y="160" width="270" height="150" rx="12" fill="#fff1d5" class="card"/>
+  <text x="70" y="196" class="heading">venues</text>
+  <text x="70" y="227" class="small">id • primary key</text>
+  <text x="70" y="253" class="small">name, capacity</text>
+  <text x="70" y="279" class="small">e.g. Neon Mesa Showroom</text>
+  <rect x="425" y="160" width="270" height="150" rx="12" fill="#fff1d5" class="card"/>
+  <text x="447" y="196" class="heading">shows</text>
+  <text x="447" y="227" class="small">id • primary key</text>
+  <text x="447" y="253" class="small">venue_id → venues.id</text>
+  <text x="447" y="279" class="small">title, category</text>
+  <rect x="802" y="160" width="270" height="150" rx="12" fill="#fff1d5" class="card"/>
+  <text x="824" y="196" class="heading">performances</text>
+  <text x="824" y="227" class="small">id • primary key</text>
+  <text x="824" y="253" class="small">show_id → shows.id</text>
+  <text x="824" y="279" class="small">starts_at • Vegas time</text>
+  <polyline points="318,235 425,235" class="edge" marker-end="url(#arrow)"/>
+  <text x="371" y="222" class="tag" text-anchor="middle">has many</text>
+  <polyline points="695,235 802,235" class="edge" marker-end="url(#arrow)"/>
+  <text x="748" y="222" class="tag" text-anchor="middle">has many</text>
+  <text x="48" y="392" class="label" style="fill:#885810">PURCHASES AND PRICES</text>
+  <rect x="48" y="412" width="270" height="176" rx="12" fill="#fff1d5" class="card"/>
+  <text x="70" y="448" class="heading">promo_codes</text>
+  <text x="70" y="479" class="small">code • primary key</text>
+  <text x="70" y="505" class="small">kind, value, valid dates</text>
+  <text x="70" y="531" class="small">max_uses, uses</text>
+  <text x="70" y="572" class="tag" style="fill:#885810">Optional on an order</text>
+  <rect x="425" y="412" width="270" height="176" rx="12" fill="#fff1d5" class="card"/>
+  <text x="447" y="448" class="heading">orders</text>
+  <text x="447" y="479" class="small">id • primary key</text>
+  <text x="447" y="505" class="small">performance_id, promo_code</text>
+  <text x="447" y="531" class="small">email, status, created_at</text>
+  <text x="447" y="557" class="small">stored totals in cents</text>
+  <rect x="802" y="412" width="270" height="176" rx="12" fill="#fff1d5" class="card"/>
+  <text x="824" y="448" class="heading">price_tiers</text>
+  <text x="824" y="479" class="small">id • primary key</text>
+  <text x="824" y="505" class="small">performance_id → night</text>
+  <text x="824" y="531" class="small">name, price_cents</text>
+  <text x="824" y="557" class="small">seats_total • fixed capacity</text>
+  <polyline points="990,310 990,412" class="edge" marker-end="url(#arrow)"/>
+  <text x="1002" y="366" class="tag">has many</text>
+  <polyline points="870,310 870,352 560,352 560,412" class="edge" marker-end="url(#arrow)"/>
+  <text x="715" y="342" class="tag" text-anchor="middle">one night → many orders</text>
+  <polyline points="318,500 425,500" class="edge" marker-end="url(#arrow)"/>
+  <text x="371" y="487" class="tag" text-anchor="middle">used by</text>
+  <rect x="425" y="668" width="420" height="192" rx="12" fill="#fff1d5" class="card"/>
+  <text x="447" y="704" class="heading">order_lines</text>
+  <text x="447" y="735" class="small">id • primary key</text>
+  <text x="447" y="761" class="small">order_id → orders.id</text>
+  <text x="447" y="787" class="small">tier_id → price_tiers.id</text>
+  <text x="447" y="813" class="small">qty, unit_price_cents • price paid</text>
+  <text x="447" y="844" class="tag" style="fill:#885810">Purchase snapshot; not today&#x27;s tier price</text>
+  <polyline points="560,588 560,668" class="edge" marker-end="url(#arrow)"/>
+  <text x="574" y="633" class="tag">has many</text>
+  <polyline points="990,588 990,764 845,764" class="edge" marker-end="url(#arrow)"/>
+  <text x="1002" y="640" class="tag">appears on</text>
+  <text x="1002" y="662" class="tag">many lines</text>
+  <text x="48" y="692" class="small">Arrows read parent → children.</text>
+  <text x="48" y="718" class="small">Each child refers to one parent;</text>
+  <text x="48" y="744" class="small">a promo is optional on an order.</text>
+  <text x="48" y="796" class="small">Availability is computed,</text>
+  <text x="48" y="822" class="small">not a separate table.</text>
+  <polyline points="48,880 1072,880" class="edge"/>
+  <text x="48" y="904" class="note">Schema: app/db.py • Pydantic classes in app/models.py describe requests and responses, not tables.</text>
+</svg>

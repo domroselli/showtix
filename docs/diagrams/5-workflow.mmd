@@ -1,7 +1,7 @@
 flowchart TB
   subgraph Before["Before Claude builds"]
     direction LR
-    S0["/clear<br/>start fresh"] --> S1["1. Align<br/>harder labs: explore, decide<br/>every lab: your answer key"]
+    S0["/clear<br/>start fresh"] --> S1["1. Align<br/>harder labs: explore, decide<br/>every lab: your expected results"]
     S1 --> S2["2. Tests first<br/>Claude writes failing tests,<br/>you check them"]
     S2 --> C1["commit<br/>the tests"]
   end
