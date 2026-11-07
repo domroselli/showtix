@@ -15,12 +15,13 @@ Eight pictures of the app and the way we work on it. Read this before your first
 
 ## 2. Quote, order, cancel
 
-<img src="img/2-order-lifecycle.svg" alt="Compact sequence diagram: routes call orders, which checks inventory and promos and calculates pricing. Creating an order repeats those checks under a SQLite write lock, saves totals and lines, records promo use and commits. Cancellation changes status, releasing seats through the inventory query." width="1000">
+<img src="img/2-order-lifecycle.svg" alt="Compact sequence diagram: API and browser quote and purchase routes call orders, which checks inventory and promos and calculates pricing. Creating an order repeats those checks under a SQLite write lock, saves totals and lines, records promo use and commits. API-only cancellation changes status, releasing seats through the inventory query." width="1000">
 
 - **A quote writes nothing.** It checks seats and the promo code, then prices the cart.
 - **An order prices itself by calling `quote()`,** then writes the order, its lines (with the price paid, captured now) and one promo use, all inside one lock.
 - **Seats are never stored as a count.** Seats sold is the sum of order lines on orders that aren't cancelled, so cancelling an order frees its seats with no extra code.
 - **A quote is not a price guarantee or a seat hold.** Current facts are checked again at purchase, and the form sends quantities and a promo, never an amount the server trusts.
+- **Quote and purchase have two entry points.** The API uses `POST /orders/quote` and `POST /orders`; browser forms use `POST /performances/{id}/quote` and `POST /performances/{id}/orders`. Cancellation is API only: `POST /orders/{id}/cancel`.
 - Labs 1b, 1d, 1e and 1f all change something in this picture.
 
 **Check your understanding:** Why is there no `seats_left = seats_left + qty` in cancellation? Seats left is worked out on every read; a second counter would duplicate that information.
@@ -38,9 +39,11 @@ Eight pictures of the app and the way we work on it. Read this before your first
 
 ## 4. How a Lab 2 feature fits
 
-<img src="img/4-lab2-feature.svg" alt="A Lab 2 route injects the Claude client into a feature module. The feature reads domain facts, calls Claude using llm.py, checks text or tool calls and returns a response. Unit tests use a fake client; separate evals use the real model." width="1000">
+<img src="img/4-lab2-feature.svg" alt="Planned Lab 2 routes pass an injected Claude client to feature code. llm.py configures the client; feature code calls it and validates results. Support replies read facts first, search parses and validates filters before querying, and concierge alternates model calls with domain tools. Unit tests use a fake client; separate evals use the real model." width="1000">
 
-- **Your feature gets the real facts from the domain modules first,** then sends them to Claude with the prompt.
+- **These are features you build in Lab 2.** The client dependency, fake and shared eval runner exist today; the feature routes, modules and feature-specific evals are lab additions.
+- **The call order depends on the feature.** Support replies load order facts before calling Claude. Search asks Claude for filters, validates them, then queries the domain modules. Concierge alternates model calls with domain tools and sends their real results back to Claude.
+- **`llm.py` configures the client and supplies `MODEL`.** FastAPI injects the client through `get_llm()`; the route passes it to feature code, which calls its `messages.create()` method.
 - **Your code checks what comes back** before it reaches the customer. Prices and seats always come from the domain modules, never from the model.
 - **Two kinds of checks.** Unit tests use `fake_claude`: scripted replies, offline, the same every run. The eval calls the real model and prints a score that can change from run to run.
 
@@ -71,7 +74,7 @@ The workflow every sheet follows. [`tasks/00-how-we-work.md`](../tasks/00-how-we
 
 - **Two ways in, one function.** The page and the API build the same `QuoteRequest` and call the same `orders.quote()`. The page doesn't call the JSON API; `web.py` calls Python directly.
 - **Shape checks and fact checks live in different places.** `models.py` checks the request's shape, positive quantities and the 8-ticket limit. Domain functions check facts: does the tier belong to this night, are enough seats left, is the promo valid today?
-- **Errors depend on the door.** In the API, a bad request shape is 422 and domain errors are 400, 404 or 409. The form handlers catch errors and show the form again with status 400.
+- **Errors depend on the door.** In the API, a bad request shape is JSON 422 and domain errors are JSON 400, 404 or 409. Cart errors on an existing performance show the form again as HTML 400. A missing performance returns JSON 404, even from a form submission; a nonnumeric performance ID in the URL returns JSON 422 before the handler runs.
 
 **Check your understanding:** Where should a new "promo is exhausted" rule live? In `promos.py`, so page and API purchases both enforce it.
 
@@ -80,7 +83,7 @@ The workflow every sheet follows. [`tasks/00-how-we-work.md`](../tasks/00-how-we
 <img src="img/8-test-harness.svg" alt="Tests replace get_db with a fresh seeded in-memory database, get_now with a movable clock and get_llm with FakeClaude. All three feed TestClient, so the real routes, validation, domain rules and SQL still run." width="1000">
 
 - **The real code still runs.** Tests replace three dependencies; routes, models, domain functions and SQL are the same as in the running app.
-- **Every test gets a fresh database,** built and seeded in memory by the `conn` fixture.
+- **Each test using the database gets a fresh one,** built and seeded in memory by the `conn` fixture, requested directly or through another fixture such as `client`. Pure pricing tests need no database.
 - **Move time with `clock.now`.** It starts at noon on November 1, 2026, before the seeded nights. Never sleep.
 - **Script Claude with `fake_claude.queue()`,** and read `fake_claude.calls` to see what your feature asked for. This only works if your feature takes the injected client instead of building its own.
 

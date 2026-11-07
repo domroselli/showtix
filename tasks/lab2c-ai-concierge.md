@@ -57,7 +57,7 @@ Here is the relevant background about the feature you'll be building:
 - **Testing without the network:** every test runs with a fake Claude automatically, so no test can reach the real API. Take the `fake_claude` fixture (`FakeClaude`, in `tests/fakes.py`) whenever you need to queue replies or check calls. Queue scripted replies with `fake_claude.queue(...)`: a string is a final text answer, `{"tool_use": "name", "input": {...}}` is a tool call. Check what was sent with `fake_claude.calls`. A separate eval file checks the recommended show ids against the real API.
 - **A real reply can contain thinking blocks** as well as `text` and `tool_use` blocks. In the tool loop, send Claude's reply back exactly as it came (`{"role": "assistant", "content": response.content}`) rather than rebuilding it from the text, and read the final answer only from blocks whose `type` is `text`. Code that assumes every block has `.text` crashes on the first real call, so test it: `fake_claude.queue({"thinking": "Let me check.", "tool_use": "name", "input": {...}})` puts a thinking block before the tool call. For a timeout, queue `timeout_error()` from `tests/fakes.py`.
 
-- **Already decided for you,** so the proposal round stays short: a budget like "under $100 each" means the per-ticket total from `orders.quote()`, fees and tax included; the endpoint returns at most 3 recommendations, in the order Claude gave them, and is API only (no UI box); the eval is `tests/evals/concierge.json`, a list of cases with `question`, `now` and `expected_show_ids`, run by `tests/evals/run_concierge.py` through the shared runner (see the README).
+- **Already decided for you,** so the proposal round stays short: a budget like "under $100 each" means the per-ticket total from `orders.quote()`, fees and tax included; the endpoint returns at most 3 recommendations, in the order Claude gave them, and is API only (no UI box); the eval is `tests/evals/concierge.json`, a list of cases with `question`, `now` and `expected_show_ids`, run by `tests/evals/run_concierge.py` through the shared runner (see the Evals section of README.md).
 
 **For an illustration of how the pieces fit, see [How a Lab 2 feature fits](../docs/architecture.md#4-how-a-lab-2-feature-fits).**
 
@@ -79,7 +79,7 @@ Unit tests and evals check different things:
 
 Work out each expected answer yourself from the seed data. That's the point: the eval encodes what *you* know is right. Aim for 10 cases; 5 is fine if you're short on time.
 
-**The runner:** use the shared runner, `run()` from `tests/evals/runner.py` (see the README). You write the cases file and a `check(case)` function that returns whether the case passed and a short detail; it prints one line per case and a score. Run it with `--repeat 2`; a score that changes between runs is normal for a model.
+**The runner:** use the shared runner, `run()` from `tests/evals/runner.py` (see the Evals section of README.md). You write the cases file and a `check(case)` function that returns whether the case passed and a short detail; it prints one line per case and a score. Run it with `--repeat 2`; a score that changes between runs is normal for a model.
 
 **No working key?** Build and unit-test everything with `fake_claude`; for the eval and trying it in /docs, pair with someone whose key works.
 
@@ -264,7 +264,7 @@ If you change anything the tests don't need, tell me what and why. Read
 tasks/lab2c-ai-concierge.md for context. After each slice, run the full suite,
 show me the output, and stop so I can review and commit it. When every slice
 is done, write tests/evals/run_concierge.py, which runs those eval cases with
-the shared runner (see the README). Don't run it.
+the shared runner (see the Evals section of README.md). Don't run it.
 ```
 
 Claude shouldn't touch any test file.

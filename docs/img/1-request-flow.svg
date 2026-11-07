@@ -109,7 +109,7 @@
   <rect x="728" y="902" width="344" height="112" rx="12" fill="#eeeafa" class="card"/>
   <text x="750" y="938" class="heading">app/llm.py • Lab 2</text>
   <text x="750" y="969" class="body">Claude API client for AI features</text>
-  <text x="750" y="996" class="small">Support replies, search, concierge</text>
+  <text x="750" y="996" class="small">AI features added in Lab 2</text>
   <path d="M1072 958H1096V397H1072" class="injected"/>
 
   <path d="M48 1040H1072" stroke="#bdcbd3"/>

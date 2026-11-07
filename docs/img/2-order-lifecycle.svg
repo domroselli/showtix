@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1120" height="1400" viewBox="0 0 1120 1400" role="img" aria-labelledby="title description">
 <title id="title">Quote, order, cancel</title>
-<desc id="description">A compact six-participant sequence of route calls to orders, inventory, promos, pricing and SQLite. Quote checks the performance, reads seats, checks the promo and calculates money without writes. Create starts BEGIN IMMEDIATE, repeats quote, saves a paid order and price snapshots, records promo use and commits before loading the saved order. Failures inside the transaction roll back. Cancellation changes status; inventory excludes cancelled orders and releases their seats.</desc>
+<desc id="description">A compact six-participant sequence of route calls to orders, inventory, promos, pricing and SQLite. Quote checks the performance, reads seats, checks the promo and calculates money without writes. Create starts BEGIN IMMEDIATE, repeats quote, saves a paid order and price snapshots, records promo use and commits before loading the saved order. Failures inside the transaction roll back. Quote and purchase have separate API and browser form URLs. Cancellation is API only; it changes status, and inventory excludes cancelled orders and releases their seats.</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#526677"/></marker></defs>
 <style>text{font-family:Arial,Helvetica,sans-serif;fill:#172f43}.edge{fill:none;stroke:#526677;stroke-width:2;stroke-linejoin:round}</style>
 <rect width="1120" height="1400" fill="#fbfaf6"/>
@@ -15,13 +15,13 @@
 <path d="M1020 178V1314" stroke="#bdcbd3" stroke-width="1.2" stroke-dasharray="4 5"/>
 <rect x="48" y="204" width="1024" height="32" rx="5" fill="#e2f0e9" stroke="none" stroke-width="1.2"/>
 <text x="62" y="226" font-size="17" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">1  QUOTE</text>
-<text x="248" y="226" font-size="17" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">POST /orders/quote • checks only; no writes</text>
+<text x="248" y="226" font-size="17" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">API: POST /orders/quote • Form: POST /performances/{id}/quote</text>
 <rect x="48" y="734" width="1024" height="32" rx="5" fill="#fff1d5" stroke="none" stroke-width="1.2"/>
 <text x="62" y="756" font-size="17" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">2  ORDER</text>
-<text x="248" y="756" font-size="17" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">POST /orders • recheck under a write lock</text>
+<text x="248" y="756" font-size="17" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">API: POST /orders • Form: POST /performances/{id}/orders</text>
 <rect x="48" y="1130" width="1024" height="32" rx="5" fill="#eaf1fa" stroke="none" stroke-width="1.2"/>
 <text x="62" y="1152" font-size="17" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">3  CANCEL</text>
-<text x="248" y="1152" font-size="17" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">POST /orders/{id}/cancel</text>
+<text x="248" y="1152" font-size="17" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">API only: POST /orders/{id}/cancel</text>
 <rect x="28" y="132" width="144" height="44" rx="7" fill="#eaf1fa" stroke="#bdcbd3" stroke-width="1.2"/>
 <text x="100" y="160" font-size="19" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="middle">Routes</text>
 <rect x="212" y="132" width="144" height="44" rx="7" fill="#e2f0e9" stroke="#bdcbd3" stroke-width="1.2"/>

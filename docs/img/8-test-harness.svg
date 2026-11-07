@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1120" height="850" viewBox="0 0 1120 850" role="img" aria-labelledby="title description">
   <title id="title">How tests control the app</title>
-  <desc id="description">Three dependencies are replaced in tests/conftest.py. get_db becomes the conn fixture, a fresh seeded in-memory database. get_now becomes the clock fixture, starting at noon on November 1, 2026; set clock.now to move time. get_llm becomes a fresh FakeClaude, applied to every test, which plays back queued replies. All three feed TestClient, so the real routes, validation, domain rules and SQL still run. This makes exact cents, errors, seat release and scripted model replies repeatable.</desc>
+  <desc id="description">Three dependencies are replaced in tests/conftest.py. Tests using conn, directly or through client, get a fresh seeded in-memory database; client overrides get_db and get_now. The clock fixture starts at noon on November 1, 2026; set clock.now to move time. get_llm becomes a fresh FakeClaude, applied to every test, which plays back queued replies. All three feed TestClient, so the real routes, validation, domain rules and SQL still run. Pure pricing tests need no database. This makes exact cents, errors, seat release and scripted model replies repeatable.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0 0 10 5 0 10Z" fill="#526677"/>
@@ -32,7 +32,7 @@
   <rect x="632" y="160" width="440" height="118" rx="12" fill="#fff1d5" class="card"/>
   <text x="654" y="196" class="heading">get_db override</text>
   <text x="654" y="227" class="small">conn fixture → :memory:</text>
-  <text x="654" y="253" class="small">Fresh schema + seed for each test</text>
+  <text x="654" y="253" class="small">Fresh per test using conn or client</text>
   <polyline points="488,219 632,219" class="edge dash" marker-end="url(#arrow)"/>
   <text x="560" y="206" class="tag" text-anchor="middle">replaced by</text>
   <polyline points="1072,219 1096,219" class="edge"/>
@@ -50,7 +50,7 @@
   <rect x="48" y="452" width="440" height="118" rx="12" fill="#eeeafa" class="card"/>
   <text x="70" y="488" class="heading">get_llm()</text>
   <text x="70" y="519" class="small">llm.py → configured Claude client</text>
-  <text x="70" y="545" class="small">Used by Lab 2 feature routes</text>
+  <text x="70" y="545" class="small">For feature routes added in Lab 2</text>
   <rect x="632" y="452" width="440" height="118" rx="12" fill="#eeeafa" class="card"/>
   <text x="654" y="488" class="heading">get_llm override</text>
   <text x="654" y="519" class="small">_fake_llm → fresh FakeClaude</text>

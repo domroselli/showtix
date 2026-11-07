@@ -67,7 +67,7 @@ Unit tests and the eval check different things:
 
 - **Unit tests check *your code*,** with scripted tool calls: fast, offline, the same every run.
 - **The eval checks *the real model's behavior*:** does Claude turn real phrases into the right filters? It calls the API, answers vary, and you get a score, not a guaranteed pass.
-- **Use the shared runner,** `run()` from `tests/evals/runner.py` (see the README): you write the cases file and a `check(case)` function that returns whether the case passed and a short detail; it prints one line per case and a score. Run it with `--repeat 2`; a score that changes between runs is normal for a model.
+- **Use the shared runner,** `run()` from `tests/evals/runner.py` (see the Evals section of README.md): you write the cases file and a `check(case)` function that returns whether the case passed and a short detail; it prints one line per case and a score. Run it with `--repeat 2`; a score that changes between runs is normal for a model.
 
 When a case fails, look at the filters Claude produced before changing anything. If *every* case fails with `Search unavailable`, that's not an outage: criterion 7 turns any API error into that 502, including the API rejecting your request (a bad tool schema, for example). Ask Claude for the underlying error before changing anything.
 
@@ -239,7 +239,7 @@ Make the new tests from my last commit pass (see git show HEAD). Don't change
 any test. If you change anything the tests don't need, tell me what and why.
 Read tasks/lab2b-nl-search.md for context. Run the full suite and show me the
 output. Then write tests/evals/run_nl_search.py, which runs those eval cases
-with the shared runner (see the README). Don't run it.
+with the shared runner (see the Evals section of README.md). Don't run it.
 ```
 
 Claude shouldn't touch any test file you committed.

@@ -1,11 +1,18 @@
 flowchart TB
-  You["Request, e.g. POST /orders/{id}/support-reply"] --> R["app/main.py route"]
-  R --> F["Your feature module<br/>e.g. app/support.py"]
-  F -- "1. look up the real facts" --> Dom["Domain modules<br/>orders.py, shows.py, inventory.py"]
-  F -- "2. prompt + facts" --> L["app/llm.py: get_llm, MODEL<br/>key from SHOWTIX_CLAUDE_KEY in .env"]
-  L --> API(("Claude API"))
-  API -- "3. text or a tool call" --> F
-  F -- "4. your code checks the output" --> Out["Response<br/>prices and seats come from the domain modules, never from the model"]
+  You["Request to a planned Lab 2 endpoint"] --> R["New app/main.py route"]
+  L["Existing app/llm.py<br/>get_llm() configures the SDK client<br/>also supplies MODEL"] -. "FastAPI injects client" .-> R
+  R -- "pass conn, now and client as needed" --> F["New feature module<br/>e.g. app/support.py<br/>calls client.messages.create() and validates output"]
+  F -- "read facts or run validated tools" --> Dom["Existing domain modules<br/>orders.py, shows.py, inventory.py"]
+  Dom -- "real facts and tool results" --> F
+  F -- "prompt, facts or tool results via injected client" --> API(("Claude API"))
+  API -- "text or proposed tool calls" --> F
+  F -- "checked result through the route" --> Out["HTTP response<br/>prices and seats come from the domain modules"]
+
+  subgraph Sequences["Call order depends on the lab"]
+    S["2a Support: facts, model, grounding check"]
+    N["2b Search: model, validate filters, domain search"]
+    C["2c Concierge: model, domain tools, model; repeat as needed"]
+  end
 
   subgraph Checks["How it's checked"]
     direction LR

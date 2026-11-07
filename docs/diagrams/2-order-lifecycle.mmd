@@ -8,7 +8,7 @@ sequenceDiagram
   participant $ as pricing.py
   participant DB as SQLite
 
-  Note over You,DB: Quote: POST /orders/quote. Prices a cart and writes nothing.
+  Note over You,DB: Quote: API POST /orders/quote; form POST /performances/{id}/quote. Writes nothing.
   You->>R: cart + optional promo code
   R->>O: quote(req, now)
   O->>I: tiers_for_performance()
@@ -20,7 +20,7 @@ sequenceDiagram
   $-->>O: subtotal, discount, fees, tax, total
   O-->>You: Quote with pricing_lines
 
-  Note over You,DB: Order: POST /orders. Prices through quote(), then writes.
+  Note over You,DB: Order: API POST /orders; form POST /performances/{id}/orders. Prices through quote(), then writes.
   You->>R: cart + promo + email
   R->>O: create_order(req, now)
   O->>DB: lock (BEGIN IMMEDIATE)
@@ -31,7 +31,7 @@ sequenceDiagram
   O->>DB: COMMIT
   O-->>You: Order
 
-  Note over You,DB: Cancel: POST /orders/{id}/cancel
+  Note over You,DB: Cancel: API only, POST /orders/{id}/cancel. No browser cancellation form.
   You->>R: order id
   R->>O: cancel_order(id) (409 if already cancelled)
   O->>DB: UPDATE status = cancelled

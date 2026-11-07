@@ -1,62 +1,100 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="1020" viewBox="0 0 1120 1020" role="img" aria-labelledby="title description">
-<title id="title">How a Lab 2 feature fits</title>
-<desc id="description">The Lab 2 design connects an HTTP request to a thin main.py route and a feature module. The feature reads real facts from orders, shows and inventory, uses the Claude client injected by get_llm from llm.py to send a prompt and facts to the Claude API, receives text or proposed tool calls and validates the output before returning a response. Unit tests replace the client with scripted FakeClaude replies. Feature evals use the real model and report a variable score.</desc>
-<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#526677"/></marker></defs>
-<style>text{font-family:Arial,Helvetica,sans-serif;fill:#172f43}.edge{fill:none;stroke:#526677;stroke-width:2;stroke-linejoin:round}</style>
-<rect width="1120" height="1020" fill="#fbfaf6"/>
-<rect width="8" height="1020" fill="#172f43"/>
-<text x="48" y="56" font-size="32" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">How a Lab 2 feature fits</text>
-<text x="48" y="92" font-size="19" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Connect existing domain facts to Claude; your feature code coordinates and validates the result.</text>
-<rect x="48" y="144" width="250" height="82" rx="10" fill="#eaf1fa" stroke="#bdcbd3" stroke-width="1.2"/>
-<text x="68" y="178" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">HTTP request</text>
-<text x="68" y="208" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">e.g. support-reply</text>
-<rect x="386" y="144" width="320" height="82" rx="10" fill="#eaf1fa" stroke="#bdcbd3" stroke-width="1.2"/>
-<text x="406" y="178" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">main.py route</text>
-<text x="406" y="208" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Inject conn, now and llm</text>
-<polyline points="298,185 386,185" class="edge" marker-end="url(#arrow)"/>
-<polyline points="546,226 546,282" class="edge" marker-end="url(#arrow)"/>
-<rect x="386" y="282" width="320" height="90" rx="10" fill="#eeeafa" stroke="#bdcbd3" stroke-width="1.2"/>
-<text x="406" y="316" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">Your feature module</text>
-<text x="406" y="346" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">e.g. app/support.py</text>
-<rect x="48" y="438" width="260" height="116" rx="10" fill="#e2f0e9" stroke="#bdcbd3" stroke-width="1.2"/>
-<text x="68" y="472" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">Domain modules</text>
-<text x="68" y="502" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">orders.py, shows.py,</text>
-<text x="68" y="527" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">inventory.py</text>
-<text x="48" y="413" font-size="18" fill="#176650" style="fill:#176650" font-weight="700" text-anchor="start">1  Read the real facts</text>
-<polyline points="386,327 338,327 338,496 308,496" class="edge" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
-<rect x="804" y="282" width="268" height="90" rx="10" fill="#eeeafa" stroke="#bdcbd3" stroke-width="1.2"/>
-<text x="824" y="316" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">app/llm.py</text>
-<text x="824" y="346" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">get_llm() + MODEL</text>
-<polyline points="706,327 804,327" class="edge" marker-end="url(#arrow)"/>
-<text x="804" y="257" font-size="17" fill="#65499b" style="fill:#65499b" font-weight="700" text-anchor="start">2  Use injected Claude client</text>
-<polyline points="938,372 938,438" class="edge" marker-end="url(#arrow)"/>
-<text x="958" y="409" font-size="16" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Prompt + facts</text>
-<rect x="804" y="438" width="268" height="90" rx="10" fill="#eeeafa" stroke="#bdcbd3" stroke-width="1.2"/>
-<text x="824" y="472" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">Claude API</text>
-<text x="824" y="502" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Text or proposed tool calls</text>
-<polyline points="938,528 938,574 660,574 660,372" class="edge" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
-<text x="770" y="603" font-size="17" fill="#65499b" style="fill:#65499b" font-weight="700" text-anchor="start">3  Model output</text>
-<polyline points="546,372 546,650" class="edge" marker-end="url(#arrow)"/>
-<text x="566" y="625" font-size="18" fill="#176650" style="fill:#176650" font-weight="700" text-anchor="start">4  Check the output</text>
-<rect x="386" y="650" width="320" height="82" rx="10" fill="#eaf1fa" stroke="#bdcbd3" stroke-width="1.2"/>
-<text x="406" y="684" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">HTTP response</text>
-<text x="406" y="714" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Return through the route</text>
-<text x="48" y="600" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Concierge tool calls run</text>
-<text x="48" y="626" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">through domain functions;</text>
-<text x="48" y="652" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">send real results back to Claude.</text>
-<polyline points="546,732 546,764 278,764 278,820" class="edge" marker-end="url(#arrow)"/>
-<polyline points="546,764 842,764 842,820" class="edge" marker-end="url(#arrow)"/>
-<text x="546" y="800" font-size="15" fill="#445d6d" style="fill:#445d6d" font-weight="700" text-anchor="middle">TWO WAYS TO CHECK THE BEHAVIOR</text>
-<rect x="48" y="820" width="460" height="122" rx="10" fill="#fcebe5" stroke="#bdcbd3" stroke-width="1.2"/>
-<text x="68" y="854" font-size="21" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">Unit tests • fake client</text>
-<text x="68" y="884" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">fake_claude replaces get_llm; queue replies.</text>
-<text x="68" y="909" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Offline, repeatable: uv run pytest</text>
-<text x="68" y="934" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Checks your code with scripted model output.</text>
-<rect x="612" y="820" width="460" height="122" rx="10" fill="#eeeafa" stroke="#bdcbd3" stroke-width="1.2"/>
-<text x="632" y="854" font-size="21" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">Evals • real model</text>
-<text x="632" y="884" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Feature cases + tests/evals/runner.py</text>
-<text x="632" y="909" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Run separately with an API key; score varies.</text>
-<text x="632" y="934" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Checks what the real model produces.</text>
-<polyline points="48,968 1072,968" class="edge"/>
-<text x="48" y="992" font-size="17" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Prices and seats come from domain code. llm.py configures the client using SHOWTIX_CLAUDE_KEY.</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="1130" viewBox="0 0 1120 1130" role="img" aria-labelledby="title description">
+  <title id="title">How a Lab 2 feature fits</title>
+  <desc id="description">Planned Lab 2 routes pass injected dependencies to new feature modules. Existing llm.py configures the SDK client through get_llm and supplies MODEL; feature code calls the injected client's messages.create method. Support replies load domain facts before calling Claude and checking amounts. Search calls Claude for filters, validates them, then searches the domain modules. Concierge alternates model calls with validated domain tools and sends their real results back to Claude. Unit tests replace the client with FakeClaude; feature evals call the real model separately.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10Z" fill="#526677"/>
+    </marker>
+    <marker id="injected-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10Z" fill="#6c549a"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: Arial, Helvetica, sans-serif; fill: #172f43; }
+    .title { font-size: 32px; font-weight: 700; }
+    .heading { font-size: 22px; font-weight: 700; }
+    .body { font-size: 19px; fill: #445d6d; }
+    .small { font-size: 18px; fill: #445d6d; }
+    .note { font-size: 17px; fill: #445d6d; }
+    .label { font-size: 15px; font-weight: 700; letter-spacing: 1px; }
+    .edge { fill: none; stroke: #526677; stroke-width: 2; stroke-linejoin: round; }
+    .injected { fill: none; stroke: #6c549a; stroke-width: 2; stroke-dasharray: 6 5; }
+    .card { stroke: #bdcbd3; stroke-width: 1.2; }
+  </style>
+  <rect width="1120" height="1130" fill="#fbfaf6"/>
+  <rect width="8" height="1130" fill="#172f43"/>
+  <text x="48" y="56" class="title">How a Lab 2 feature fits</text>
+  <text x="48" y="92" class="body">Planned Lab 2 additions: new routes, feature modules and feature-specific evals.</text>
+
+  <text x="48" y="134" class="label" style="fill:#285e98">NEW ENDPOINT</text>
+  <rect x="48" y="152" width="260" height="108" rx="12" fill="#eaf1fa" class="card"/>
+  <text x="68" y="188" class="heading">HTTP request</text>
+  <text x="68" y="219" class="small">e.g. support-reply,</text>
+  <text x="68" y="245" class="small">search or concierge</text>
+  <polyline points="308,206 386,206" class="edge" marker-end="url(#arrow)"/>
+
+  <rect x="386" y="152" width="320" height="108" rx="12" fill="#eaf1fa" class="card"/>
+  <text x="406" y="188" class="heading">New main.py route</text>
+  <text x="406" y="219" class="small">Pass injected dependencies</text>
+  <text x="406" y="245" class="small">to the feature module</text>
+  <text x="804" y="134" class="label" style="fill:#65499b">EXISTING CLIENT SETUP</text>
+  <rect x="804" y="152" width="268" height="108" rx="12" fill="#eeeafa" class="card"/>
+  <text x="824" y="188" class="heading">app/llm.py</text>
+  <text x="824" y="219" class="small">get_llm() + MODEL</text>
+  <text x="824" y="245" class="small">Configures SDK client</text>
+  <polyline points="804,206 706,206" class="injected" marker-end="url(#injected-arrow)"/>
+  <polyline points="546,260 546,328" class="edge" marker-end="url(#arrow)"/>
+  <text x="566" y="286" class="note">Pass conn, now and</text>
+  <text x="566" y="309" class="note">client as needed</text>
+
+  <text x="48" y="306" class="small" style="fill:#176650">Read facts / run validated tools</text>
+  <rect x="48" y="328" width="260" height="150" rx="12" fill="#e2f0e9" class="card"/>
+  <text x="68" y="364" class="heading">Domain modules</text>
+  <text x="68" y="394" class="small">orders.py, shows.py,</text>
+  <text x="68" y="420" class="small">inventory.py</text>
+  <text x="68" y="451" class="small">Existing facts and rules</text>
+  <polyline points="386,403 308,403" class="edge" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+
+  <rect x="386" y="328" width="320" height="150" rx="12" fill="#eeeafa" class="card"/>
+  <text x="406" y="364" class="heading">Your feature module</text>
+  <text x="406" y="394" class="small">e.g. app/support.py</text>
+  <text x="406" y="420" class="small">Calls client; checks output</text>
+  <text x="406" y="451" class="small">New code for your lab</text>
+
+  <text x="804" y="306" class="small" style="fill:#65499b">client.messages.create()</text>
+  <rect x="804" y="328" width="268" height="150" rx="12" fill="#eeeafa" class="card"/>
+  <text x="824" y="364" class="heading">Claude API</text>
+  <text x="824" y="394" class="small">Prompt or tool results in</text>
+  <text x="824" y="425" class="small">Text or proposed</text>
+  <text x="824" y="451" class="small">tool calls back</text>
+  <polyline points="706,382 804,382" class="edge" marker-end="url(#arrow)"/>
+  <polyline points="804,440 706,440" class="edge" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+
+  <polyline points="546,478 546,536" class="edge" marker-end="url(#arrow)"/>
+  <text x="566" y="513" class="small" style="fill:#176650">Checked result</text>
+  <rect x="386" y="536" width="320" height="82" rx="12" fill="#eaf1fa" class="card"/>
+  <text x="406" y="571" class="heading">HTTP response</text>
+  <text x="406" y="601" class="small">Return through the route</text>
+
+  <text x="48" y="662" class="label" style="fill:#176650">CALL ORDER DEPENDS ON THE LAB</text>
+  <rect x="48" y="680" width="1024" height="166" rx="12" fill="#f1f7f3" class="card"/>
+  <text x="68" y="718" class="body">2a Support: load order facts → call Claude → check amounts.</text>
+  <text x="68" y="764" class="body">2b Search: call Claude → validate filters → search domain data.</text>
+  <text x="68" y="810" class="body">2c Concierge: call Claude → run domain tools → send results back; repeat as needed.</text>
+
+  <text x="48" y="890" class="label">TWO WAYS TO CHECK THE BEHAVIOR</text>
+  <rect x="48" y="908" width="460" height="122" rx="12" fill="#fcebe5" class="card"/>
+  <text x="68" y="942" class="heading">Unit tests • fake client</text>
+  <text x="68" y="972" class="small">fake_claude replaces get_llm; queue replies.</text>
+  <text x="68" y="997" class="small">Offline, repeatable: uv run pytest</text>
+  <text x="68" y="1022" class="small">Checks your code with scripted model output.</text>
+  <rect x="612" y="908" width="460" height="122" rx="12" fill="#eeeafa" class="card"/>
+  <text x="632" y="942" class="heading">Evals • real model</text>
+  <text x="632" y="972" class="small">Feature cases + tests/evals/runner.py</text>
+  <text x="632" y="997" class="small">Run separately with an API key; score varies.</text>
+  <text x="632" y="1022" class="small">Checks what the real model produces.</text>
+
+  <path d="M48 1056H1072" stroke="#bdcbd3"/>
+  <text x="48" y="1082" class="note">Purple dashed arrow: injected client. Gray dashed arrow: model output.</text>
+  <text x="48" y="1108" class="note">Prices and seats come from domain code. llm.py reads SHOWTIX_CLAUDE_KEY to configure the client.</text>
 </svg>

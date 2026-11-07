@@ -4,7 +4,7 @@ A small ticketing backend for fictional Las Vegas shows.
 
 ## How it fits together
 
-[`docs/architecture.md`](docs/architecture.md) has five diagrams: how a request flows through the app, quote → order → cancel, how a price is built, how a Lab 2 feature fits, and the workflow. Start there if the code is new to you. [`docs/seed-data.md`](docs/seed-data.md) lists the data the app starts with: every show, night, price, seat count, promo code and seeded order.
+[`docs/architecture.md`](docs/architecture.md) has eight diagrams: request flow, the order lifecycle, pricing, Lab 2 features, the workflow, the data model, a quote through the code, and the test harness. Start there if the code is new to you. [`docs/seed-data.md`](docs/seed-data.md) lists the data the app starts with: every show, night, price, seat count, promo code and seeded order.
 
 ## Setup
 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     run("tests/evals/support_reply.json", check)
 ```
 
-Run it with `uv run python -m tests.evals.run_support_reply`, and add `--repeat 3` to run every case three times. It prints one line per case and a total score, such as `Score: 8/10`.
+Run it with `uv run python -m tests.evals.run_support_reply`, and add `--repeat 2` to run every case twice. It prints one line per case and a total score, such as `Score: 8/10`.
 
 ## Endpoints
 

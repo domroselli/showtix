@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="896" viewBox="0 0 1120 896" role="img" aria-labelledby="title description">
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="940" viewBox="0 0 1120 940" role="img" aria-labelledby="title description">
   <title id="title">Follow a quote through the code</title>
-  <desc id="description">A browser form posts to /performances/{id}/quote, where web.py builds a QuoteRequest from the form fields. A JSON client posts to /orders/quote, where FastAPI builds the same QuoteRequest and models.py checks it. Both call orders.quote with a database connection and the injected time. It checks the performance, merges repeated tiers, validates tiers, seats and the promo, and prices the cart. The in-memory Quote is rendered as HTML by looping over pricing_lines, or returned as JSON with integer cents. API model validation errors are 422, domain errors are 400, 404 or 409, and caught form errors render as HTML with status 400.</desc>
+  <desc id="description">A browser form posts to /performances/{id}/quote, where web.py builds a QuoteRequest from the form fields. A JSON client posts to /orders/quote, where FastAPI builds the same QuoteRequest and models.py checks it. Both call orders.quote with a database connection and the injected time. It checks the performance, merges repeated tiers, validates tiers, seats and the promo, and prices the cart. The in-memory Quote is rendered as HTML by looping over pricing_lines, or returned as JSON with integer cents. API model validation errors are 422, domain errors are 400, 404 or 409, and cart errors on an existing performance render as HTML with status 400. Missing performances return JSON 404, including form submissions; nonnumeric performance IDs in the URL return JSON 422 before the handler runs.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0 0 10 5 0 10Z" fill="#526677"/>
@@ -19,8 +19,8 @@
       .card { stroke: #bdcbd3; stroke-width: 1.3; }
     </style>
   </defs>
-  <rect width="1120" height="896" fill="#fbfaf6"/>
-  <rect width="8" height="896" fill="#172f43"/>
+  <rect width="1120" height="940" fill="#fbfaf6"/>
+  <rect width="8" height="940" fill="#172f43"/>
   <text x="48" y="58" class="title">Follow a quote through the code</text>
   <text x="48" y="94" class="body">Two HTTP requests converge on orders.quote(). Neither saves a quote.</text>
   <text x="48" y="140" class="label" style="fill:#285e98">BROWSER FORM</text>
@@ -58,5 +58,7 @@
   <text x="582" y="760" class="heading">JSON • Quote fields</text>
   <text x="582" y="791" class="small">Return integers such as total_cents: 25044</text>
   <polyline points="48,842 1072,842" class="edge"/>
-  <text x="48" y="866" class="note">Errors: API validation → 422; domain errors → 400 / 404 / 409. Caught form errors render as HTML 400.</text>
+  <text x="48" y="866" class="note">API: request validation → JSON 422; domain errors → JSON 400 / 404 / 409.</text>
+  <text x="48" y="892" class="note">Forms: cart errors on an existing performance → HTML 400.</text>
+  <text x="48" y="918" class="note">Missing performance → JSON 404; nonnumeric performance ID in the URL → JSON 422.</text>
 </svg>
