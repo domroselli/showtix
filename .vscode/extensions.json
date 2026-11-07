@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "anthropic.claude-code",
+    "bierner.markdown-preview-github-styles",
+    "ms-python.python",
+    "qwtel.sqlite-viewer"
+  ]
+}

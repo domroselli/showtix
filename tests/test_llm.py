@@ -109,6 +109,19 @@ def test_fake_raises_queued_exception():
         fake.messages.create(model=llm.MODEL, messages=[])
 
 
+def test_fake_records_messages_as_sent_not_as_later_appended():
+    fake = FakeClaude()
+    fake.queue({"tool_use": "find_shows", "input": {}}, "Done")
+    messages = [{"role": "user", "content": "Any comedy?"}]
+    fake.messages.create(model=llm.MODEL, messages=messages)
+    messages.append({"role": "assistant", "content": "Let me check."})
+    messages.append({"role": "user", "content": "tool result"})
+    fake.messages.create(model=llm.MODEL, messages=messages)
+
+    assert len(fake.calls[0]["messages"]) == 1
+    assert len(fake.calls[1]["messages"]) == 3
+
+
 def test_api_error_builds_sdk_errors():
     err = api_error(429, "Rate limited")
     assert isinstance(err, anthropic.RateLimitError)

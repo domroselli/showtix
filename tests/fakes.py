@@ -29,10 +29,21 @@ def connection_error() -> anthropic.APIConnectionError:
     return anthropic.APIConnectionError(request=httpx2.Request("POST", "https://api.anthropic.com/v1/messages"))
 
 
+def timeout_error() -> anthropic.APITimeoutError:
+    """The SDK error for a request that timed out, for fake.queue(timeout_error())."""
+    return anthropic.APITimeoutError(request=httpx2.Request("POST", "https://api.anthropic.com/v1/messages"))
+
+
+FAKE_SIGNATURE = "sig_fake"
+
+
 class FakeClaude:
     """Shaped like anthropic.Anthropic: fake.messages.create(**kwargs) returns queued replies in order.
 
     fake.queue("text reply", {"tool_use": "name", "input": {...}}, api_error(500))
+
+    Add "thinking" to a tool call to put a thinking block before it, as the real model can:
+    {"thinking": "Let me check.", "tool_use": "name", "input": {...}}
     """
 
     def __init__(self):
@@ -55,7 +66,9 @@ class FakeClaude:
         return "\n".join(p for p in parts if p)
 
     def _create(self, **kwargs):
-        self.calls.append(kwargs)
+        # Snapshot the messages list: a tool loop appends to the same list after this call,
+        # and each record should show what was sent at the time.
+        self.calls.append({**kwargs, "messages": list(kwargs.get("messages", []))})
         if not self._replies:
             pytest.fail("FakeClaude got an unexpected call")
         item = self._replies.pop(0)
@@ -69,7 +82,11 @@ class FakeClaude:
         block = SimpleNamespace(
             type="tool_use", id=f"toolu_fake_{self._tool_ids}", name=item["tool_use"], input=item["input"]
         )
-        return SimpleNamespace(content=[block], stop_reason="tool_use", model=model)
+        content = [block]
+        if "thinking" in item:
+            thinking = SimpleNamespace(type="thinking", thinking=item["thinking"], signature=FAKE_SIGNATURE)
+            content = [thinking, block]
+        return SimpleNamespace(content=content, stop_reason="tool_use", model=model)
 
 
 def _text(content) -> str:

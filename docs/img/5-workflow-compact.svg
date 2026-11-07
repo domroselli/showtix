@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1120" height="424" viewBox="0 0 1120 424" role="img" aria-labelledby="title description">
   <title id="title">The seven-step workshop workflow at a glance</title>
-  <desc id="description">Start each lab with a fresh conversation. Follow the top row left to right: align with your own expected results; review and commit failing tests; clear then implement without changing tests; check evidence. Continue along the bottom row right to left: review the diff; assess a fresh reviewer's findings; commit when satisfied. Real findings get a failing test, then a fix, then another evidence check.</desc>
+  <desc id="description">Start each lab with a fresh conversation. Follow the top row left to right: align with your own expected results; clear then review and commit failing tests; clear then implement without changing tests; check evidence. Continue along the bottom row right to left: review the diff; assess a fresh reviewer's MUST FIX findings; commit when satisfied. Real findings get a failing test, then a fix, then steps 4 and 5 again.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0 0 10 5 0 10Z" fill="#526677"/>
@@ -23,7 +23,7 @@
 
   <rect x="304" y="72" width="240" height="84" rx="10" fill="#fcebe5" class="card"/>
   <text x="320" y="106" class="heading">2  Tests first</text>
-  <text x="320" y="136" class="body">Review, then commit tests</text>
+  <text x="320" y="136" class="body">/clear; review, commit tests</text>
 
   <rect x="576" y="72" width="240" height="84" rx="10" fill="#e2f0e9" class="card"/>
   <text x="592" y="106" class="heading">3  Implement</text>
@@ -44,7 +44,7 @@
 
   <rect x="576" y="254" width="240" height="84" rx="10" fill="#fcebe5" class="card"/>
   <text x="592" y="288" class="heading">6  Second opinion</text>
-  <text x="592" y="318" class="body">Assess reviewer findings</text>
+  <text x="592" y="318" class="body">Assess MUST FIX findings</text>
 
   <rect x="304" y="254" width="240" height="84" rx="10" fill="#e2f0e9" class="card"/>
   <text x="320" y="288" class="heading">7  Commit</text>
@@ -53,5 +53,5 @@
   <path d="M848 296H816" class="edge"/>
   <path d="M576 296H544" class="edge"/>
   <path d="M696 338V376H1104V114H1088" class="edge" stroke-dasharray="6 5"/>
-  <text x="1088" y="406" class="body" text-anchor="end">Real finding → failing test → fix → check evidence again</text>
+  <text x="1088" y="406" class="body" text-anchor="end">Real finding → failing test → fix → repeat steps 4 and 5</text>
 </svg>

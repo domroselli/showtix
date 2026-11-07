@@ -11,7 +11,7 @@ A note on words: you may read about "agent loops" elsewhere. That means somethin
 The [detailed version](../docs/architecture.md#5-the-workflow) shows what happens in each step.
 
 1. **Align: settle what "done" means.** On the harder labs, Claude first explains the code (1e, 1f, 2c) and you settle the open decisions with it. Every lab ends step 1 with your expected results, written without Claude
-2. **Tests first:** Claude writes failing tests, you check them against your expected results, then you commit them
+2. **Tests first:** `/clear`, then Claude writes failing tests, you check them against your expected results, then you commit them
 3. **Clear, then implement:** `/clear`, then Claude makes your tests pass without changing them
 4. **Check the evidence:** run the tests yourself, confirm they weren't changed, and try it in your browser
 5. **Review the diff**
@@ -26,33 +26,35 @@ Before Claude writes anything, you agree on exactly what the feature should do. 
 
 ### Explore (the Breakthrough and Advanced labs: 1e, 1f, 2c)
 
-You can't decide how to change code you've never seen. Your sheet's first prompt asks Claude to explain the part of the code you'll change, in plain words, short enough to read in 2 minutes. It also lists every route and page form that leads to that code, so the interview can ask about each. It changes nothing. For the big picture, see [`docs/architecture.md`](../docs/architecture.md).
+You can't decide how to change code you've never seen. Your sheet's first prompt asks Claude to explain the part of the code you'll change, in plain words, short enough to read in 2 minutes. It also lists every route and page form that leads to that code, so the proposal can cover each. It changes nothing. For the big picture, see [`docs/architecture.md`](../docs/architecture.md).
 
 ### Decide (the Intermediate labs and up)
 
-- **Sheets with "Decisions to make"** (1e, 1f, 2c): have Claude interview you. For example:
+- **Sheets with "Decisions to make"** (1e, 1f, 2c): have Claude propose an answer to every decision in one message, then correct the picks you disagree with. For example:
 
   ```text
-  Read tasks/lab1e-waitlist.md and the relevant code. Interview me about the
-  "Decisions to make", one question at a time. For each, give me 2-3 options and
-  your recommendation. If a question depends on how the code works, explain that
-  part in plain words first. Don't write any code or tests. When we've covered
-  every decision, imagine this shipped and a customer hit a problem: list what
-  they could still run into that our decisions don't cover, and ask me which
-  ones to make criteria. Then replace the placeholder criteria (3 onward) in
-  Acceptance criteria: one numbered, testable criterion per decision, describing
-  behavior rather than which functions to create, with exact status codes and
-  messages; under each, a "Why:" line with the reason we chose it; right after
-  them, a short "Not doing" list for what we deferred, including problems I
-  didn't make criteria; and last, a "Slices" list: the order to build it in, as
-  vertical slices (each one a piece of behavior that works end to end, small
-  enough to review in a few minutes), with the criteria each slice covers. Then
-  replace the Decisions to make list with one line: "Decided: see criteria 3
-  onward, each with its Why. Deferred items are under Not doing." Change nothing
-  else in the sheet. Show me what you changed so I can check it.
+  Read tasks/lab1e-waitlist.md and the relevant code. Work through the
+  "Decisions to make" for me in one message: for each bullet, your pick in one
+  line, why, and the alternative you rejected. If a pick depends on how the code
+  works, explain that part in plain words first. Then imagine this shipped and a
+  customer hit a problem: name the three most likely things our picks don't
+  cover and say which one, if any, you'd make a criterion. Don't write any code
+  or tests. End by asking me which picks to change. Once I've answered, replace
+  the placeholder criteria (3 onward) in Acceptance criteria with at most 5 new
+  criteria: one numbered, testable criterion each, describing behavior rather
+  than which functions to create, with exact status codes and messages; under
+  each, a "Why:" line with the reason we chose it; right after them, a short
+  "Not doing" list for everything we deferred, including problems we didn't make
+  criteria; and last, a "Slices" list of at most 3 vertical slices (each a piece
+  of behavior that works end to end, small enough to review in a few minutes),
+  in build order, with the criteria each covers. Then replace everything under
+  the Decisions to make heading (the intro sentence, the bullets and the
+  paragraph after them) with one line: "Decided: see criteria 3 onward, each
+  with its Why. Deferred items are under Not doing." Change nothing else in the
+  sheet. Show me what you changed so I can check it.
   ```
 
-  You choose; Claude only offers options. The last question is a pre-mortem: what could a customer still run into? Anything you don't make a criterion goes on Not doing. Spend about 15 minutes on exploring and the interview together. If a decision drags on, pick the simplest option and put the other on the "Not doing" list.
+  You still choose, by exception: reply with the picks to change ("Change 2 to the simplest option. Keep the rest.") or "Keep all your picks." The proposal ends with a pre-mortem: what could a customer still run into? The caps (5 new criteria, 3 slices) keep the build inside the lab; anything that doesn't fit goes on Not doing. Spend about 15 minutes on exploring and the proposal together.
 - **Sheets that ask for your own edge cases** (1c, 1d, 2b): think them through yourself first and type them into the sheet. Stuck? Ask Claude for a hint:
 
   ```text
@@ -62,7 +64,7 @@ You can't decide how to change code you've never seen. Your sheet's first prompt
   each, and I'll pick. Don't write any code or change any files.
   ```
 
-**Why the decisions go in the sheet:** a file survives `/clear`; the conversation doesn't. You'll `/clear` before implementing, so the sheet and your committed tests are everything the next session knows.
+**Why the decisions go in the sheet:** a file survives `/clear`; the conversation doesn't. You'll `/clear` before writing tests and again before implementing, so the sheet and your committed tests are everything the next session knows.
 
 ### Expected results (every lab, without Claude)
 
@@ -76,7 +78,7 @@ Acceptance criteria are the definition of "done." Turning each one into an exact
 
 ## 2. Tests first
 
-Ask Claude for the tests, and only the tests:
+Type `/clear`, then ask Claude for the tests, and only the tests:
 
 ```text
 Read tasks/lab1a-category-filter.md and the relevant code. Write a failing
@@ -116,7 +118,7 @@ Read tasks/lab1a-category-filter.md for context. Run the full suite and show
 me the output.
 ```
 
-**Big features: one vertical slice at a time.** On the Breakthrough and Advanced labs, the interview ends with a Slices list in the sheet, based on what you decided; step 3 builds them in that order, and Claude stops after each one. How many slices depends on the feature: each one should work end to end and be small enough to review in a few minutes. A *vertical* slice is a piece that works end to end, such as "customers can join the waitlist", not a layer such as "all the database code". After each slice, read its diff, commit it, then ask for the next.
+**Big features: one vertical slice at a time.** On the Breakthrough and Advanced labs, step 1 ends with a Slices list in the sheet, based on what you decided; step 3 builds them in that order, and Claude stops after each one. How many slices depends on the feature: each one should work end to end and be small enough to review in a few minutes. A *vertical* slice is a piece that works end to end, such as "customers can join the waitlist", not a layer such as "all the database code". After each slice, read its diff, commit it, then ask for the next.
 
 **Why slices?** One feature built in one go can touch seven files at once, and a diff that big is too large to review honestly. Slices keep each diff small enough to read, give you a commit to go back to if the next slice goes wrong, and catch a misunderstanding after one slice instead of after the whole feature is built on it. Tests for later slices fail until their slice is built; that's expected. On a real project, you'd usually go one step further: write and review the tests for each slice just before building it. Here, the whole feature's tests come first to save time.
 
@@ -178,22 +180,20 @@ or the database. Show me its findings as a numbered list, each with:
 - which criterion it's about
 - evidence: the file and line, or an input that gives the wrong result
 
+To keep it simple, after you categorize the findings only show MUST FIX. All
+other findings you can ignore.
+
 Then ask me which ones to fix. For each one I pick, write a failing test that
 shows the problem, then fix it. Run the full suite and show me the output.
 ```
 
 **Why "don't report style"?** A reviewer asked to find problems always finds something. If you fix every finding, you end up with extra layers of code and tests for cases that can't happen. You want bugs and unmet criteria, not someone else's taste.
 
-**What to do with the findings.** Claude shows them as a numbered list and asks which to fix. The labels are the reviewer's opinion; you decide.
+**What to do with the findings.** Claude shows the MUST FIX findings as a numbered list and asks which to fix. The labels are the reviewer's opinion, so check the evidence yourself before you answer.
 
-- **MUST FIX:** check the evidence yourself. If it's real, fix it.
-- **UNSURE:** answer "prove it with a failing test first." No failing test, no fix.
-- **OPTIONAL:** usually skip it.
-- **OUT OF SCOPE:** real, but not in your criteria (often something that was there before you started). Check the evidence, because a reviewer can wave off a real bug this way. If it holds up, write it down and move on: fixing it is a new feature, not this one.
+Answer with the numbers you want fixed, for example "1 and 3". Claude writes a failing test for each one, then fixes it. You can also decide not to fix one, or talk it through with Claude before you decide.
 
-Answer with the numbers you want fixed, for example "1 and 3". Claude writes a failing test for each one, then fixes it.
-
-Then repeat step 4. One review round is enough unless the fixes were big.
+Then repeat steps 4 and 5. One review round is enough unless the fixes were big.
 
 ## 7. Commit
 
@@ -202,6 +202,8 @@ When you're satisfied with the change:
 ```text
 ! git add -A && git commit -m "lab1a: category filter"
 ```
+
+On labs built slice by slice, your slices are already committed. If you didn't fix anything in step 6, there's nothing left to commit.
 
 **Why:** a commit is a safe point. If anything goes wrong later, you can get back here.
 
@@ -267,4 +269,4 @@ This workflow isn't ours alone. Each step follows advice from the people who bui
 - **5. Review the diff.** Addy Osmani, [The 70% Problem](https://addyosmani.com/agentic-engineering/the-70-percent-problem/): "AI gets you 70% of the way fast. The remaining 30% is where experienced engineers earn their keep." Simon Willison: "If you're fast and productive at code review you're going to have a much better time working with LLMs."
 - **6. A second opinion.** Superpowers runs code review "between tasks," reporting issues "by severity," and "critical issues block progress."
 - **7. Commit.** Simon Willison: "Being able to undo mistakes and understand when and how something was changed is even more important" with agents.
-- **Why there's no plan-mode step.** In January 2026, Boris Cherny described starting in plan mode (InfoQ, above). By September he wrote, on [Hacker News](https://news.ycombinator.com/item?id=49840054), "plan mode was useful, and is no longer useful," agreeing with Ayman Nadeem's [Plan mode is dead](https://www.aymannadeem.com/artificial/intelligence,/developer/tools/2026/09/24/plan-mode-is-dead.html) (Sep 24, 2026). In our workflow, the interview and the test review do that job.
+- **Why there's no plan-mode step.** In January 2026, Boris Cherny described starting in plan mode (InfoQ, above). By September he wrote, on [Hacker News](https://news.ycombinator.com/item?id=49840054), "plan mode was useful, and is no longer useful," agreeing with Ayman Nadeem's [Plan mode is dead](https://www.aymannadeem.com/artificial/intelligence,/developer/tools/2026/09/24/plan-mode-is-dead.html) (Sep 24, 2026). In our workflow, the proposal round and the test review do that job.

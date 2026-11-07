@@ -2,7 +2,8 @@ flowchart TB
   subgraph Before["Before Claude builds"]
     direction LR
     S0["/clear<br/>start fresh"] --> S1["1. Align<br/>harder labs: explore, decide<br/>every lab: your expected results"]
-    S1 --> S2["2. Tests first<br/>Claude writes failing tests,<br/>you check them"]
+    S1 --> CL0["/clear"]
+    CL0 --> S2["2. Tests first<br/>Claude writes failing tests,<br/>you check them"]
     S2 --> C1["commit<br/>the tests"]
   end
 
@@ -12,7 +13,7 @@ flowchart TB
     S3 --> S4["4. Check the evidence<br/>run tests, tests unchanged,<br/>eval (Lab 2), browser"]
     S4 --> S5["5. Review<br/>the diff"]
     S5 --> S6["6. Second opinion<br/>reviewer subagent"]
-    S6 -- "nothing real, or<br/>OUT OF SCOPE: note it" --> S7["7. Commit"]
+    S6 -- "nothing to fix" --> S7["7. Commit"]
     S6 -. "MUST FIX: a failing<br/>test, then the fix" .-> S4
   end
 

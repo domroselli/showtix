@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1120" height="900" viewBox="0 0 1120 900" role="img" aria-labelledby="title description">
 <title id="title">The development workflow</title>
-<desc id="description">Seven steps: align with independent expected results; write failing behavior tests and review and commit them; clear the conversation then implement without changing the tests; run the full suite and check tests are unchanged, use the browser and Lab 2 evals; review the diff; get a fresh reviewer and assess findings; commit when satisfied. Real findings get a failing test then a fix and another evidence check. Larger labs use small vertical slices reviewed and committed one at a time.</desc>
+<desc id="description">Seven steps: align with independent expected results; clear the conversation, write failing behavior tests and review and commit them; clear the conversation then implement without changing the tests; run the full suite and check tests are unchanged, use the browser and Lab 2 evals; review the diff; get a fresh reviewer and assess its MUST FIX findings; commit when satisfied. Real findings get a failing test then a fix, then steps 4 and 5 again. Larger labs use small vertical slices reviewed and committed one at a time.</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#526677"/></marker></defs>
 <style>text{font-family:Arial,Helvetica,sans-serif;fill:#172f43}.edge{fill:none;stroke:#526677;stroke-width:2;stroke-linejoin:round}</style>
 <rect width="1120" height="900" fill="#fbfaf6"/>
@@ -15,7 +15,7 @@
 <text x="68" y="288" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Exact shows, errors and cents</text>
 <rect x="412" y="174" width="296" height="136" rx="10" fill="#fcebe5" stroke="#bdcbd3" stroke-width="1.2"/>
 <text x="432" y="208" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">2  Tests first</text>
-<text x="432" y="238" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Agent writes failing behavior tests</text>
+<text x="432" y="238" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">/clear; agent writes failing tests</text>
 <text x="432" y="263" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Compare to your expected results</text>
 <text x="432" y="288" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Commit the reviewed tests</text>
 <rect x="776" y="174" width="296" height="136" rx="10" fill="#e2f0e9" stroke="#bdcbd3" stroke-width="1.2"/>
@@ -36,7 +36,7 @@
 <rect x="776" y="448" width="296" height="136" rx="10" fill="#fcebe5" stroke="#bdcbd3" stroke-width="1.2"/>
 <text x="796" y="482" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">6  Second opinion</text>
 <text x="796" y="512" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">Fresh reviewer checks the criteria</text>
-<text x="796" y="537" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">You assess the findings</text>
+<text x="796" y="537" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">You assess MUST FIX findings</text>
 <text x="796" y="562" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">For real fixes: failing test, then fix</text>
 <polyline points="344,242 412,242" class="edge" marker-end="url(#arrow)"/>
 <polyline points="708,242 776,242" class="edge" marker-end="url(#arrow)"/>
@@ -45,7 +45,7 @@
 <polyline points="344,516 412,516" class="edge" marker-end="url(#arrow)"/>
 <polyline points="708,516 776,516" class="edge" marker-end="url(#arrow)"/>
 <polyline points="924,584 924,626 196,626 196,584" class="edge" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
-<text x="560" y="660" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="middle">Real finding → failing test → fix → repeat the evidence checks</text>
+<text x="560" y="660" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="middle">Real finding → failing test → fix → repeat steps 4 and 5</text>
 <rect x="776" y="726" width="296" height="90" rx="10" fill="#e2f0e9" stroke="#bdcbd3" stroke-width="1.2"/>
 <text x="796" y="760" font-size="22" fill="#172f43" style="fill:#172f43" font-weight="700" text-anchor="start">7  Commit</text>
 <text x="796" y="790" font-size="18" fill="#445d6d" style="fill:#445d6d" font-weight="400" text-anchor="start">When you are satisfied</text>

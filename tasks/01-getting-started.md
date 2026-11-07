@@ -1,12 +1,11 @@
 # Getting started
 
-How to do the everyday things in the labs: run commands, run the tests, start the app, and save your work.
+**How to do the everyday things in the labs:** run commands, run the tests, start the app, and save your work.
 
-- After [Prerequisites](#prerequisites) and [Get the code](#get-the-code), everything here runs inside Claude Code, in a terminal or in the desktop app.
-- Every command block has a copy button. Paste it into Claude Code and press Enter.
-- Each lab sheet links straight to the section it needs.
+- After [Prerequisites](#prerequisites) and [Get the code](#get-the-code), everything here runs inside Claude Code terminal or the desktop app.
+- Every terminal command block has a copy button. Paste it into Claude Code and press Enter.
 
-New to the workflow itself? Read [`00-how-we-work.md`](00-how-we-work.md) next.
+New to the workflow itself? Read `00-how-we-work.md` if you want the full detail.
 
 ## Prerequisites
 
@@ -123,9 +122,26 @@ Claude Code works on the folder it was started in, so start it in your `showtix`
 
 You're ready when Claude Code shows a prompt waiting for you to type.
 
+## Set up VS Code (optional)
+
+ShowTix recommends four extensions. Open your `showtix` folder in VS Code (**File > Open Folder**) and click **Install** when VS Code offers them. Missed the offer? Open the Extensions panel and search for `@recommended`.
+
+| Extension | What it gives you |
+| --- | --- |
+| Claude Code | Shows Claude's proposed edits in VS Code's side-by-side diff view. |
+| Markdown Preview GitHub Styling | Makes VS Code's preview of the lab sheets look like GitHub. |
+| Python | Colors the code, flags errors, and lets you Cmd-click or Ctrl-click a function to jump to it. |
+| SQLite Viewer | Click `showtix.db` to look at the shows, orders and other tables. |
+
+To use Claude Code with VS Code, open **Terminal > New Terminal** and run `claude` there. It connects to the extension on its own.
+
+**Use the terminal, not the Claude Code chat panel.** The panel doesn't support the `!` commands in the lab sheets.
+
+To read a lab sheet, open it and press Cmd+Shift+V (Mac) or Ctrl+Shift+V (Windows).
+
 ## Run a command yourself
 
-Start a line with `!` to run a command yourself, without Claude. The output shows up in the conversation, and Claude sees it too.
+To run a terminal command yourself from Claude Code, without asking Claude to do it, start the line with `!`. The output shows up in the conversation, and Claude sees it too.
 
 ```text
 ! uv run pytest
@@ -146,7 +162,7 @@ Every command in the lab sheets starts with `!`, so you can copy it as is.
 ```
 
 - Use it at the start of every lab.
-- Use it before implementing (step 3 of the workflow), so Claude works from the sheet and your committed tests, not the chat.
+- Use it before writing tests and before implementing (steps 2 and 3 of the workflow), so Claude works from the sheet and your committed tests, not the chat.
 - Use it when a conversation has gone off track.
 
 Your files and commits aren't affected; only the conversation is cleared.
@@ -216,14 +232,14 @@ and tell me when it's ready.
 ```
 
 - Claude asks permission to run it: approve.
-- Open http://127.0.0.1:8000/ for the ticket shop, or http://127.0.0.1:8000/docs to try the API (see [Try an endpoint in /docs](#try-an-endpoint-in-docs)).
+- Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) for the ticket shop, or [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) to try the API (see [Try an endpoint in /docs](#try-an-endpoint-in-docs)).
 - `--reload` restarts the app whenever the code changes, so you don't have to.
 
 Changed the database schema? [Reset the database](#reset-the-database) first, or the pages will break even while the tests pass.
 
 ## Try an endpoint in /docs
 
-http://127.0.0.1:8000/docs lists every API endpoint and lets you call one from your browser.
+[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) lists every API endpoint and lets you call one from your browser.
 
 1. Click an endpoint, for example **GET /shows**.
 2. Click **Try it out**, fill in any parameters, then click **Execute**.
@@ -233,7 +249,7 @@ The **Request URL** box shows the link for the same request, which you can open 
 
 ## Use the web UI
 
-http://127.0.0.1:8000/ is the ShowTix site. To place an order:
+[http://127.0.0.1:8000/](http://127.0.0.1:8000/) is the ShowTix site. To place an order:
 
 1. Click a date under any show.
 2. In the **Qty** column, enter how many tickets you want. If you have a promo code, type it in **Promo code**. Click **Get quote**.
@@ -274,11 +290,13 @@ Before you commit, look at what you're about to save.
 ! git status
 ```
 
-- That lists the changed files. To see every change, including new files:
+That lists the changed files.
 
-  ```text
-  ! git add -A && git diff --staged
-  ```
+To see every change, including new files:
+
+```text
+! git add -A && git diff --staged
+```
 
 - `git add -A` only stages changes; nothing is saved until you commit.
 - In VS Code, the **Source Control** panel shows the same changes side by side.

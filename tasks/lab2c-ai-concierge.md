@@ -1,42 +1,65 @@
 # Lab 2c: AI concierge
 
-**Tier:** Advanced · **Time:** 50 minutes · Solo or with a partner
+- **Tier:** Advanced
+- **Time:** 70 minutes
+- Solo or with a partner
 
 ## Start here
 
-An AI feature you design yourself: Claude calls tools over the app's own code, and you settle the open decisions, then build it slice by slice.
+**New here?** Read [Getting started](01-getting-started.md) for running commands and the app, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
 
-1. New here? Read [Getting started](01-getting-started.md) for running commands and the app, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
-2. Run the command under [Starting branch](#starting-branch), then read [Goal](#goal), [Background](#background), [About the eval](#about-the-eval), [Acceptance criteria](#acceptance-criteria) and [Decisions to make](#decisions-to-make).
-3. Follow [The workflow](#the-workflow) step by step. Step 1 starts with Claude explaining the code you'll change, then interviewing you about the open decisions; then you write your expected results yourself.
+**This lab:** an AI feature you design yourself. Claude calls tools over the app's own code, and you settle the open decisions, then build it slice by slice.
 
-You're done when every box under [Done means](#done-means) is checked. Extra time? Pull an item off your Not doing list (step 7). Stuck? See [Hints](#hints).
+**A slice** is one small piece of behavior that works end to end, such as "the concierge recommends a real show", not a layer such as "all the database code".
+
+1. Run the command under [Starting branch](#starting-branch).
+2. Read [Goal](#goal), [Background](#background), [About the eval](#about-the-eval), [Acceptance criteria](#acceptance-criteria) and [Decisions to make](#decisions-to-make).
+3. Follow [The workflow](#the-workflow) step by step.
+
+**Step 1 starts with Claude:** it explains the code you'll change, then proposes an answer to each open decision for you to correct. Then you write out (or think about) your expected results yourself.
+
+**You're done when you can check every box under [Checklist: What Done Means](#checklist-what-done-means).**
+
+**Extra time?** Pull an item off your Not doing list (step 7). Stuck? See [Hints](#hints).
 
 ## Goal
 
-**Feature request:** "`POST /concierge` answers questions like *comedy tonight, 4 people, under $100 each* by calling Claude with tools over the app's own search, availability and quote functions. It recommends only real shows with live prices."
+#### Feature request: "`POST /concierge` answers questions like *comedy tonight, 4 people, under $100 each* by calling Claude with tools over the app's own search, availability and quote functions. It recommends only real shows with live prices."
 
 ## Starting branch
 
-Create this lab's branch from `main`, reset the database, check your API key, and run the tests:
+Copy the command below and run in Claude Code
 
 ```text
 ! git switch main && uv run python -m app.seed && uv run python -m app.llm && git switch -c lab2c-ai-concierge && uv run pytest
 ```
 
-The key check should print `OK: Claude API key works`, and every test should pass. If `git switch` stops because of unfinished Lab 1 work, see [Start a lab branch](01-getting-started.md#start-a-lab-branch). Key trouble? See [Set up your API key](01-getting-started.md#set-up-your-api-key-lab-2).
+Here's what it does:
+
+1. Switches to `main`, so the new branch starts from the original code
+2. Resets the database to the seed data
+3. Checks your Claude API key
+4. Creates new feature branch `lab2c-ai-concierge` from `main`
+5. Runs the tests
+
+The key check should print `OK: Claude API key works`, and every test should pass before you change anything.
+
+**Trouble?** If `git switch` stops because of unfinished Lab 1 work, see [Start a lab branch](01-getting-started.md#start-a-lab-branch). For key problems, see [Set up your API key](01-getting-started.md#set-up-your-api-key-lab-2).
 
 ## Background
 
-Where the code your tools will call lives:
+Here is the relevant background about the feature you'll be building:
 
 - **The tools Claude calls should be thin wrappers over code that already exists:** `shows.list_shows()` / `shows.show_detail()`, `inventory.availability()` and `orders.quote()`. No new pricing or inventory logic. `ShowSummary` includes `category`, but `GET /shows` can't filter by it (that's a different lab feature); your search tool can filter the list itself.
 - **"Tonight" means local Vegas time** from the injected `now` (`get_now` in `app/clock.py`). The seeded run is Nov 10 to Nov 23, 2026, so pin the clock inside that range.
 - **Calling Claude:** `app/llm.py` gives routes a `get_llm` dependency and the model name `MODEL` (`claude-haiku-5-5`: fast and cheap, so your credits last). It reads your key from `SHOWTIX_CLAUDE_KEY` in `.env` ([Set up your API key](01-getting-started.md#set-up-your-api-key-lab-2)), never `ANTHROPIC_API_KEY`, which keeps Claude Code on your subscription. To write cents as dollars, in a prompt for example, use `pricing.dollars()`.
 - **Never give Claude your API key.** Don't paste it into Claude Code, in a prompt or a `!` command. Paste it into `.env` yourself, in your editor: anything you type in Claude Code becomes part of the conversation, and Claude can copy it into a file and from there into a commit.
 - **Testing without the network:** every test runs with a fake Claude automatically, so no test can reach the real API. Take the `fake_claude` fixture (`FakeClaude`, in `tests/fakes.py`) whenever you need to queue replies or check calls. Queue scripted replies with `fake_claude.queue(...)`: a string is a final text answer, `{"tool_use": "name", "input": {...}}` is a tool call. Check what was sent with `fake_claude.calls`. A separate eval file checks the recommended show ids against the real API.
+- **A real reply can contain thinking blocks** as well as `text` and `tool_use` blocks. In the tool loop, send Claude's reply back exactly as it came (`{"role": "assistant", "content": response.content}`) rather than rebuilding it from the text, and read the final answer only from blocks whose `type` is `text`. Code that assumes every block has `.text` crashes on the first real call, so test it: `fake_claude.queue({"thinking": "Let me check.", "tool_use": "name", "input": {...}})` puts a thinking block before the tool call. For a timeout, queue `timeout_error()` from `tests/fakes.py`.
 
-For a picture of how the pieces fit, see [How a Lab 2 feature fits](../docs/architecture.md#4-how-a-lab-2-feature-fits).
+- **Already decided for you,** so the proposal round stays short: a budget like "under $100 each" means the per-ticket total from `orders.quote()`, fees and tax included; the endpoint returns at most 3 recommendations, in the order Claude gave them, and is API only (no UI box); the eval is `tests/evals/concierge.json`, a list of cases with `question`, `now` and `expected_show_ids`, run by `tests/evals/run_concierge.py` through the shared runner (see the README).
+
+**For an illustration of how the pieces fit, see [How a Lab 2 feature fits](../docs/architecture.md#4-how-a-lab-2-feature-fits).**
 
 ### About the eval
 
@@ -62,7 +85,9 @@ Work out each expected answer yourself from the seed data. That's the point: the
 
 ## Acceptance criteria
 
-Two criteria are given. Criteria 3 and on come from your decisions (see [Decisions to make](#decisions-to-make) below): **write them with Claude's help** before you write tests.
+In this lab, two criteria are given below. Criteria 3 and on come from your decisions (see [Decisions to make](#decisions-to-make) below): **write them with Claude's help** before you write tests.
+
+**Every criterion except the eval needs at least one test.**
 
 1. Every recommendation is real and live: its show, performance and tier exist, there are enough seats for the party, and its price comes from `orders.quote()`. A unit test whose fake client recommends a made-up show id gets no recommendation for it.
 2. Unit tests use a fake client, run offline, and keep the full suite under 5 seconds. A separate eval file (aim for 10 questions, at least 5) checks the recommended show ids, and you run it by hand against the real API.
@@ -72,35 +97,42 @@ Two criteria are given. Criteria 3 and on come from your decisions (see [Decisio
 
 ### Decisions to make
 
-Decide these with Claude, then turn each decision into a criterion. Use the explore and interview prompts in [step 1 of The workflow](#1-align-explore-settle-the-decisions-then-write-your-expected-results) below:
+Decide these with Claude, then turn each decision into a criterion. Use the explore and proposal prompts in [step 1 of The workflow](#step-1-decide-what-to-build-and-what-done-means) below:
 
 - Request and response shape: what does `POST /concierge` take, and what does each recommendation contain?
-- Does "under $100 each" mean the tier price, or the price per person including fees and tax?
 - What does the endpoint return when nothing matches? When Claude's answer can't be used?
 - What does a tool return to Claude when the app rejects the call (sold out, wrong tier, more than 8 tickets)?
 - What does `POST /concierge` return when the Claude API fails or times out, and how many tool rounds before it gives up?
-- How many recommendations, in what order? API only, or a box on the UI's home page too?
-- What does the eval file look like (question, pinned time, expected show ids), and how do you run it?
 
-50 minutes is tight. For each question, pick the simplest answer that works and note what you'd do with more time.
+Four decisions, so expect about four new criteria. Budget meaning, recommendation count and placement, and the eval file's shape are already settled in [Background](#background).
+
+70 minutes is tight. Claude proposes the simplest answer that works for each; change a pick only when you have a reason, and note what you'd do with more time.
 
 ## The workflow
 
-Explore the code and settle the decisions with Claude, write your expected results, then have Claude write the tests, check them yourself, and let Claude build it slice by slice.
+#### Workflow Overview
 
-- Steps that use Claude have a prompt to copy; commands start with `!`.
-- Why each step matters: [How we work](00-how-we-work.md).
-- Start with a fresh conversation:
+1. Start a fresh conversation. Claude explains the code and proposes the decisions; you correct them. Then you write your expected results (without Claude).
+2. Start a fresh conversation. Claude writes failing tests and the eval cases. You check them against your expected results, then commit.
+3. Start a fresh conversation. Claude makes the tests pass without changing them, one slice at a time, then writes the eval runner. You review and commit each slice.
+4. Check the evidence: run the tests, confirm your tests didn't change, run the eval twice, try it in the browser.
+5. Review the whole diff.
+6. A subagent reviews the change. For each real bug, Claude writes a failing test and fixes it, then you repeat steps 4 and 5.
+7. Commit.
 
-  ```text
-  /clear
-  ```
+Why each step matters: [How we work](00-how-we-work.md).
 
-### 1. Align: explore, settle the decisions, then write your expected results
+### Step 1. Decide what to build and what "done" means
 
-Get oriented in the code you'll change, decide with Claude, then write down what "done" means without Claude.
+#### 1a. Start with a fresh conversation
 
-First, have Claude explain the code:
+```text
+/clear
+```
+
+#### 1b. Have Claude explain the code
+
+Get oriented in the code you'll change before you decide anything.
 
 ```text
 Read tasks/lab2c-ai-concierge.md. Before we decide anything, explain how the
@@ -110,48 +142,67 @@ them today. Plain words, file names included, short enough to read in 2
 minutes. Don't change anything.
 ```
 
-Then have Claude interview you about [Decisions to make](#decisions-to-make):
+#### 1c. Have Claude propose the decisions, then correct it
+
+This covers [Decisions to make](#decisions-to-make). Claude proposes one answer per bullet in a single message, capped at 5 new criteria and 3 slices; you keep the picks you agree with and change the rest. You still choose, by exception.
 
 ```text
-Read tasks/lab2c-ai-concierge.md and the relevant code. Interview me about the
-"Decisions to make", one question at a time. For each, give me 2-3 options and
-your recommendation. If a question depends on how the code works, explain that
-part in plain words first. Don't write any code or tests. When we've covered
-every decision, imagine this shipped and a customer hit a problem: list what
-they could still run into that our decisions don't cover, and ask me which
-ones to make criteria. Then replace the placeholder criteria (3 onward) in
-Acceptance criteria: one numbered, testable criterion per decision, describing
-behavior rather than which functions to create, with exact status codes and
-messages; under each, a "Why:" line with the reason we chose it; right after
-them, a short "Not doing" list for what we deferred, including problems I
-didn't make criteria; and last, a "Slices" list: the order to build it in, as
-vertical slices (each one a piece of behavior that works end to end, small
-enough to review in a few minutes), with the criteria each slice covers. Then
-replace the Decisions to make list with one line: "Decided: see criteria 3
-onward, each with its Why. Deferred items are under Not doing." Change nothing
-else in the sheet. Show me what you changed so I can check it.
+Read tasks/lab2c-ai-concierge.md and the relevant code. Work through the
+"Decisions to make" for me in one message: for each bullet, your pick in one
+line, why, and the alternative you rejected. If a pick depends on how the code
+works, explain that part in plain words first. Then imagine this shipped and a
+customer hit a problem: name the three most likely things our picks don't
+cover and say which one, if any, you'd make a criterion. Don't write any code
+or tests. End by asking me which picks to change. Once I've answered, replace
+the placeholder criteria (3 onward) in Acceptance criteria with at most 5 new
+criteria: one numbered, testable criterion each, describing behavior rather
+than which functions to create, with exact status codes and messages; under
+each, a "Why:" line with the reason we chose it; right after them, a short
+"Not doing" list for everything we deferred, including problems we didn't make
+criteria; and last, a "Slices" list of at most 3 vertical slices (each a piece
+of behavior that works end to end, small enough to review in a few minutes),
+in build order, with the criteria each covers. Then replace everything under
+the Decisions to make heading (the intro sentence, the bullets and the
+paragraph after them) with one line: "Decided: see criteria 3 onward, each
+with its Why. Deferred items are under Not doing." Change nothing else in the
+sheet. Show me what you changed so I can check it.
 ```
 
-**Short on time?** Add this to the end of the prompt:
+**Reply with your changes**, or none. For example:
 
 ```text
-Keep the scope small enough to build and test in about 20 minutes; anything
-bigger goes on the Not doing list.
+Change 2 to the simplest option you listed. Keep the rest.
 ```
 
-You choose; Claude only offers options. ⏱ About 15 minutes for exploring and the interview together: if a decision drags on, pick the simplest option and put the other on the "Not doing" list.
+```text
+Keep all your picks.
+```
 
-Then, without Claude, write your expected results:
+**⏱ About 15 minutes for exploring and the proposal together.** Disagree with a pick but can't settle it quickly? Take Claude's pick and put yours on the "Not doing" list.
 
-- Go through [Acceptance criteria](#acceptance-criteria) one by one, including the ones you just added: which status code, the exact message, the exact cents, and which show ids each eval question should get.
-- Look up anything you need in [`docs/seed-data.md`](../docs/seed-data.md): every show, night, price, seat count, promo code and seeded order, plus how a price is built.
+#### 1d. Review the acceptance criteria (without Claude)
+
+This is how Claude knows when the feature is complete. Think through exactly what each criterion should return before Claude writes anything.  
+Make a note of this somewhere to refer to later (like notes, notepad, or an empty text file. Whatever works for you).
+
+**Go through [Acceptance criteria](#acceptance-criteria) one by one, including the ones you just added:** which status code, the exact message, the exact cents, and which show ids each eval question should get.
+
+**Note:**
+
+- Every show, night, price, seat count, promo code and seeded order, plus how a price is built, is in [`docs/seed-data.md`](../docs/seed-data.md) for your convenience.
 - Want to see it in the running app? See [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-You'll compare Claude's tests against these expected results in step 2.
+### Step 2. Implement tests first
 
-### 2. Tests first
+#### 2a. Start with a fresh conversation
 
-Have Claude write failing tests and the eval cases, then check them against your expected results.
+Your decisions are saved in the sheet, so clearing doesn't lose them.
+
+```text
+/clear
+```
+
+#### 2b. Have Claude write failing tests and the eval cases. Check them against your expected results
 
 ```text
 Read tasks/lab2c-ai-concierge.md and the relevant code. Write a failing test
@@ -163,34 +214,48 @@ new functions or exact HTML. Don't change anything in app/. Run the tests and
 show me which ones fail.
 ```
 
-Compare each test, and each eval case, with your expected results. The eval cases are the model's expected results, so they must be right too. Check especially:
+#### 2c. Manually check the tests and eval cases Claude just created
 
-- **Tests check behavior through the API or the page**, not functions that don't exist yet. A test that calls a new function is designing the code for Claude.
-- **One test's fake client recommends a made-up show id**, and the response leaves it out (criterion 1).
-- **Every criterion you added from your decisions has a test.**
+- **Compare each test and each eval case with your expected results from step 1.** The eval cases are the model's expected results, so they must be right too.
+- **Tests must check behavior through the API or the page**, **<ins>not functions that don't exist yet</ins>**.   
+A test that calls a new function is designing the code for Claude.
+- **One test's fake client must recommend a made-up show id**, and the response must leave it out (criterion 1).
+- **Every criterion you added from your decisions must have a test.**
 
-If a test doesn't match your expected results, tell Claude what it should be and why:
+#### 2d. If a test or case doesn't match your expected results, tell Claude what it should be and why
 
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
 that test.
 ```
 
-When every test and eval case matches your expected results, commit them:
+**Example:**
+
+```text
+The test for criterion 1 expects the made-up show id in the response, but it
+should be left out because every recommendation must be a real show. Fix that
+test.
+```
+
+#### 2e. Commit the tests and eval cases
+
+When every test and case matches your expected results, commit them:
 
 ```text
 ! git add -A && git commit -m "lab2c: tests"
 ```
 
-### 3. Clear, then implement, one slice at a time
+### Step 3. Make the tests pass, one slice at a time (write the code)
 
-Clear the conversation, so Claude builds from the sheet and your committed tests, not the chat:
+#### 3a. Clear the conversation
+
+To get good results, Claude should build from the "spec" and your committed tests (not all the context from that chat):
 
 ```text
 /clear
 ```
 
-Then ask:
+#### 3b. Ask Claude to make the tests pass
 
 ```text
 Make the new tests from my last commit pass (see git show HEAD), one slice at
@@ -202,7 +267,11 @@ is done, write tests/evals/run_concierge.py, which runs those eval cases with
 the shared runner (see the README). Don't run it.
 ```
 
-After each slice:
+Claude shouldn't touch any test file.
+
+We don't want to rewrite tests we've already verified to make them pass. The code alone should do that. Step 4 checks it.
+
+#### 3c. After each slice, review and commit it
 
 - Read its diff:
 
@@ -222,56 +291,75 @@ After each slice:
   ! git add -A && git commit -m "lab2c: <slice name>"
   ```
 
-Tests for later slices still fail until their slice is built; that's expected. Why slices? See [step 3 of How we work](00-how-we-work.md#3-clear-then-implement).
+Tests for later slices still fail until their slice is built; that's expected. The other way round happens too: a later slice's tests may already pass because an earlier slice covered them. Then Claude has nothing to change and `git commit` says "nothing to commit"; that's fine, move on. Why slices? See [step 3 of How we work](00-how-we-work.md#3-clear-then-implement).
 
-### 4. Check the evidence
+### Step 4. Check the evidence
 
 Don't take Claude's word for it; check for yourself.
 
-- Run the tests. The last line should say only `passed`, with no `skipped`, `deselected` or `xfailed`:
+#### 4a. Run the tests
 
-  ```text
-  ! uv run pytest
-  ```
+The last line should say only `passed`, with no `skipped`, `deselected` or `xfailed`:
 
-- Check that Claude only changed app code. Every file this lists should be under `app/`:
+```text
+! uv run pytest
+```
 
-  ```text
-  ! git status --short
-  ```
+#### 4b. Check that Claude only changed app code
 
-  A file in `tests/` (changed, or new with `??`), a `conftest.py`, or `pyproject.toml` means Claude touched your tests or how they run: ask why before going on. After step 6's fixes, the only test changes should be the new tests you asked for.
+You committed each slice, so this shows only what's changed since your last commit. It may list nothing.  
+Any file it lists should be under `app/`:
 
-- Check that no slice commit changed your tests. This lists the commits on this branch that touched them, and should show only your "lab2c: tests" commit and the one that adds `tests/evals/run_concierge.py` (a new file, so only `+` lines):
+```text
+! git status --short
+```
 
-  ```text
-  ! git log --oneline --stat main..HEAD -- tests/ conftest.py pyproject.toml
-  ```
+A file in `tests/` (changed, or new with `??`), a `conftest.py`, or `pyproject.toml` means Claude touched your tests or how they run: ask why before going on. If there are any fixes in step 6, the only test changes should be the new tests you asked for. Nothing existing should be modified.
 
-- Run the eval twice against the real API. A score that changes between runs is normal. Read each failing case before changing anything:
+#### 4c. Check that no slice commit changed your tests
 
-  ```text
-  ! uv run python -m tests.evals.run_concierge --repeat 2
-  ```
+This lists the commits on this branch that touched your tests. It should show only your "lab2c: tests" commit and the one that adds `tests/evals/run_concierge.py` (a new file, so only `+` lines):
 
-- Try it yourself. Start the app ([more on starting the app](01-getting-started.md#start-the-app)):
+```text
+! git log --oneline --stat main..HEAD -- tests/ conftest.py pyproject.toml
+```
 
-  ```text
-  Start the app in the background with uv run uvicorn app.main:app --reload,
-  and tell me when it's ready.
-  ```
+#### 4d. Run the eval against the real API
 
-  Then open http://127.0.0.1:8000/docs (click your endpoint, **Try it out**, **Execute**) or [the UI](01-getting-started.md#use-the-web-ui) at http://127.0.0.1:8000/, and use values from your expected results. When you're done, stop it:
+Run it twice. A score that changes between runs is normal; read each failing case before changing anything:
 
-  ```text
-  Stop the app.
-  ```
+```text
+! uv run python -m tests.evals.run_concierge --repeat 2
+```
 
-Something doesn't match? Tell Claude which criterion failed and what you saw.
+#### 4e. Visual tests in the browser
 
-### 5. Review the diff
+Ask Claude to start the app in the background ([more on starting the app](01-getting-started.md#start-the-app)):
 
-You read each slice as it went in. Now read the whole feature together, before you accept it:
+```text
+Start the app in the background with uv run uvicorn app.main:app --reload,
+and tell me when it's ready.
+```
+
+Then open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) (click your endpoint, **Try it out**, **Execute**) or [the UI](01-getting-started.md#use-the-web-ui) at [http://127.0.0.1:8000/](http://127.0.0.1:8000/). Use values from your expected results.
+
+**The running app uses the real date**, not the pinned `now` in your tests. The seeded run is Nov 10 to 23, 2026: before Nov 10, "tonight" and "this weekend" find nothing, even when your code is right. Ask about a date in the run ("comedy on November 14 for 2") or leave the date out ("magic under $80").
+
+When you're done, stop the app:
+
+```text
+Stop the app.
+```
+
+#### 4f. Something doesn't match?
+
+Tell Claude which criterion failed and what you saw.
+
+### Step 5. Review the diff
+
+#### 5a. Read the whole feature together before you accept it
+
+You read each slice as it went in. This shows everything Claude changed in `app/` on this branch:
 
 ```text
 ! git diff main -- app/
@@ -281,48 +369,56 @@ You read each slice as it went in. Now read the whole feature together, before y
 - Was anything touched that has nothing to do with the concierge?
 - Prefer side by side? Use VS Code's **Source Control** panel.
 
-This shows everything Claude changed in `app/` on this branch; your tests and eval are in `tests/`.
+Your tests and eval are in `tests/`, so this shows only the app code Claude wrote.
 
-### 6. Get a second opinion
+### Step 6. Get a second opinion
 
-A reviewer that hasn't seen your conversation checks the change against this sheet.
+**Short on time?** This step is optional in this lab. If you have less than 10 minutes left, skip to [Step 7](#step-7-commit) and commit what you have; come back to the review if time allows.
+
+#### 6a. Create a code reviewer for your changes
+
+Ask Claude to create a reviewer subagent. It hasn't seen your conversation, and it checks the change against this sheet.
 
 ```text
 Use a subagent to review this branch's changes (git diff main) against
-tasks/lab2c-ai-concierge.md. It hasn't seen our conversation. It should check
-every acceptance criterion, not report style, and not change any files or the
-database. Show me its findings as a numbered list, each with:
+tasks/lab2c-ai-concierge.md. It hasn't seen our conversation. It should
+check every acceptance criterion, not report style, and not change any files
+or the database. Show me its findings as a numbered list, each with:
 - a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but
   not in the criteria, or already there before this branch), UNSURE, or
   OPTIONAL
 - which criterion it's about
 - evidence: the file and line, or an input that gives the wrong result
 
+To keep it simple, after you categorize the findings only show MUST FIX. All
+other findings you can ignore.
+
 Then ask me which ones to fix. For each one I pick, write a failing test that
 shows the problem, then fix it. Run the full suite and show me the output.
 ```
 
-Claude shows the findings and asks which to fix. The labels are the reviewer's opinion; decide for yourself before you answer:
+Claude shows the MUST FIX findings and asks which to fix. The labels are the reviewer's opinion, so check the evidence yourself before you answer.
 
-- **MUST FIX** and **OUT OF SCOPE:** check the evidence yourself. A reviewer can wave off a real bug as out of scope.
-- **UNSURE:** answer "prove it with a failing test first." **OPTIONAL:** usually skip.
-- **OUT OF SCOPE** that holds up: write it down and move on. Fixing it is a new feature, not this one.
+#### 6b. Answer with the numbers you want fixed
 
-Answer with the numbers you want fixed, for example "1 and 3".
+For example "1 and 3". Then repeat steps 4 and 5.   
+Or you can decide you don't want to fix it, or you want to have a chat with Claude about it before you decide.
 
-Then repeat step 4. Why "don't report style"? See [step 6 of How we work](00-how-we-work.md#6-get-a-second-opinion).
+Why "don't report style"? See [step 6 of How we work](00-how-we-work.md#6-get-a-second-opinion).
 
-### 7. Commit
+### Step 7. Commit
 
-Commit when you're satisfied with the change:
+Commit when you're satisfied with the change. If you didn't fix anything in step 6, your slices are already committed and there's nothing left to commit.
 
 ```text
 ! git add -A && git commit -m "lab2c: AI concierge"
 ```
 
-**Finished with time to spare?** Pull an item off your Not doing list and run it through the workflow, starting at step 2.
+### Finished with time to spare?
 
-## Done means
+Pull an item off your Not doing list and run it through the workflow, starting at step 2.
+
+## Checklist: What Done Means
 
 - [ ] Every decision you made is written down as a criterion with a test
 - [ ] The tests you committed in step 2 weren't changed to make them pass
