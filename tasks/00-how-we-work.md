@@ -87,7 +87,7 @@ or functions that already exist, not new functions or exact HTML. Don't change
 anything in app/. Run the tests and show me which ones fail.
 ```
 
-Compare each test with your expected results. Same shows, same status code, same message, same cents? A test that checks "the total got smaller" instead of "the total is 25044" is a weak test. And a test should check behavior through the API or the page, not call a function that doesn't exist yet: a test like that designs the code for Claude, and step 3 won't let Claude change it. If one is wrong, tell Claude what it should be and why:
+Compare each test with your expected results. Same shows, same status code, same message, same cents? A test that checks "the total got smaller" instead of "the total is 25044 ($250.44)" is a weak test. And a test should check behavior through the API or the page, not call a function that doesn't exist yet: a test like that designs the code for Claude, and step 3 won't let Claude change it. If one is wrong, tell Claude what it should be and why:
 
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix

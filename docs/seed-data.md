@@ -51,9 +51,9 @@ The seed creates 3 paid orders, all on that tier, so **the first order you place
 
 | Order | Email | Tickets | Subtotal | Fees | Tax | Total |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | group1@example.com | 4 × VIP | `79996` | `3000` | `7200` | `90196` ($901.96) |
-| 2 | group2@example.com | 4 × VIP | `79996` | `3000` | `7200` | `90196` ($901.96) |
-| 3 | group3@example.com | 4 × VIP | `79996` | `3000` | `7200` | `90196` ($901.96) |
+| 1 | group1@example.com | 4 × VIP | `79996` ($799.96) | `3000` ($30.00) | `7200` ($72.00) | `90196` ($901.96) |
+| 2 | group2@example.com | 4 × VIP | `79996` ($799.96) | `3000` ($30.00) | `7200` ($72.00) | `90196` ($901.96) |
+| 3 | group3@example.com | 4 × VIP | `79996` ($799.96) | `3000` ($30.00) | `7200` ($72.00) | `90196` ($901.96) |
 
 ## Promo codes
 
@@ -75,7 +75,7 @@ All in integer cents, in this order (`app/pricing.py`):
 4. **Tax:** 9% of the subtotal after the discount (not the fees), rounded half up to the cent.
 5. **Total:** discounted subtotal + fees + tax.
 
-For example, 2 GA with no promo: subtotal `13800`, fees `1500`, tax `1242` (9% of 13800), total `16542` ($165.42).
+For example, 2 GA with no promo: subtotal `13800` ($138.00), fees `1500` ($15.00), tax `1242` ($12.42, 9% of 13800), total `16542` ($165.42).
 
 An order can have at most 8 tickets.
 

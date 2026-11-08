@@ -62,7 +62,7 @@ In this lab, the full criteria are given below.
 1. `GET /orders/{id}/receipt` returns 200 with `order_id`, `status`, `email`, `show_title`, `venue_name`, `starts_at`, `promo_code` and `lines`. `starts_at` uses the same format `GET /shows/{id}` returns.
 2. `lines` is a list of `{"label": str, "amount_cents": int}` in this order: one line per tier bought, labelled like `2 × Premium` (the × sign, U+00D7, not the letter x); then `Subtotal`, `Discount`, `Service fees`, `Tax`, `Total`.
 3. The discount line is negative. Its label names the promo when one was used (`Discount (LOCALS10)`); with no promo, it's `Discount` with amount 0.
-4. Every amount comes from the stored order, not from recalculating. 2 Premium with LOCALS10 gives: `2 × Premium` 24000, `Subtotal` 24000, `Discount (LOCALS10)` -2400, `Service fees` 1500, `Tax` 1944, `Total` 25044.
+4. Every amount comes from the stored order, not from recalculating. 2 Premium with LOCALS10 gives: `2 × Premium` 24000 ($240.00), `Subtotal` 24000 ($240.00), `Discount (LOCALS10)` -2400 (-$24.00), `Service fees` 1500 ($15.00), `Tax` 1944 ($19.44), `Total` 25044 ($250.44).
 5. The tier lines add up to `Subtotal`, and `Subtotal + Discount + Service fees + Tax` equals `Total`.
 6. If the tier's price changes after the order, the receipt still shows the price paid.
 7. A cancelled order still has a receipt, with `status` `cancelled`.
@@ -333,9 +333,9 @@ Open [http://127.0.0.1:8000/orders/4/receipt](http://127.0.0.1:8000/orders/4/rec
 | Criterion | You should see |
 | --- | --- |
 | 1 | `order_id`, `status` (`paid`), `email`, `show_title`, `venue_name`, `starts_at`, `promo_code` (`LOCALS10`) and `lines`. `starts_at` has the same format as in [http://127.0.0.1:8000/shows/1](http://127.0.0.1:8000/shows/1) |
-| 2, 4 | `lines` in this order: `2 × Premium` 24000, `Subtotal` 24000, `Discount (LOCALS10)` -2400, `Service fees` 1500, `Tax` 1944, `Total` 25044 |
+| 2, 4 | `lines` in this order: `2 × Premium` 24000 ($240.00), `Subtotal` 24000 ($240.00), `Discount (LOCALS10)` -2400 (-$24.00), `Service fees` 1500 ($15.00), `Tax` 1944 ($19.44), `Total` 25044 ($250.44) |
 | 3 | The discount is negative and names the promo. Place a second order with no promo code: its receipt shows `Discount` with amount 0 |
-| 5 | 24000 = 24000, and 24000 − 2400 + 1500 + 1944 = 25044 |
+| 5 | 24000 = 24000, and 24000 − 2400 + 1500 + 1944 = 25044 ($250.44) |
 
 Criterion 6 (the price changes after the order) needs a database change, so your test is the check. You don't need to try it by hand.
 

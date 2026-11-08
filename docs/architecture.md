@@ -33,9 +33,9 @@ Eight pictures of the app and the way we work on it. Read this before your first
 - **The order of these five steps is the core rule of the app.** It's also in `CLAUDE.md`.
 - **The promo discounts the subtotal only.** The $7.50 service fee is never discounted.
 - **Tax is 9% of the discounted subtotal, not the fees,** rounded half up to the cent once.
-- **Every amount is integer cents.** Use this example to check your own expected results: 2 Premium with LOCALS10 totals 25044.
+- **Every amount is integer cents.** Use this example to check your own expected results: 2 Premium with LOCALS10 totals 25044 ($250.44).
 
-**Check your understanding:** In this example, is tax charged on 24000, 21600 or 23100 cents? On 21600, the discounted subtotal, which gives 1944.
+**Check your understanding:** In this example, is tax charged on 24000 ($240.00), 21600 ($216.00) or 23100 ($231.00) cents? On 21600, the discounted subtotal, which gives 1944 ($19.44).
 
 ## 4. How a Lab 2 feature fits
 

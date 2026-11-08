@@ -72,14 +72,14 @@ In this lab, most criteria are given below. **Add one or two edge cases of your 
 
 **Edge cases to think about:** ties (no seeded promo can tie, so a test needs its own promo), the 8-ticket limit, a fixed promo, which discount the breakdown reports when one loses.
 
-**Worked examples (cents):**
+**Worked examples (cents, dollars in parentheses):**
 
 | Cart | Subtotal | Discount that wins | Fees | Tax | Total |
 | --- | --- | --- | --- | --- | --- |
-| 6 GA, no promo | 41400 | group 6210 | 4500 | 3167 | 42857 |
-| 6 GA + LOCALS10 | 41400 | group 6210 (promo would be 4140) | 4500 | 3167 | 42857 |
-| 6 GA + 2 VIP + LOCALS10 | 81398 | promo 8140 (group would be 6210) | 6000 | 6593 | 85851 |
-| 7 VIP, no promo | 139993 | group 20999 | 5250 | 10709 | 134953 |
+| 6 GA, no promo | 41400 ($414.00) | group 6210 ($62.10) | 4500 ($45.00) | 3167 ($31.67) | 42857 ($428.57) |
+| 6 GA + LOCALS10 | 41400 ($414.00) | group 6210 ($62.10); promo would be 4140 ($41.40) | 4500 ($45.00) | 3167 ($31.67) | 42857 ($428.57) |
+| 6 GA + 2 VIP + LOCALS10 | 81398 ($813.98) | promo 8140 ($81.40); group would be 6210 ($62.10) | 6000 ($60.00) | 6593 ($65.93) | 85851 ($858.51) |
+| 7 VIP, no promo | 139993 ($1,399.93) | group 20999 ($209.99) | 5250 ($52.50) | 10709 ($107.09) | 134953 ($1,349.53) |
 
 ## The workflow
 
