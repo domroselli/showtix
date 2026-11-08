@@ -2,7 +2,7 @@
 
 **How to do the everyday things in the labs:** run commands, run the tests, start the app, and save your work.
 
-- After [Prerequisites](#prerequisites) and [Get the code](#get-the-code), everything here runs inside Claude Code terminal or the desktop app.
+- After [Prerequisites](#prerequisites) and [Get the code](#get-the-code), everything here runs inside Claude Code in a terminal. Not the desktop app: it runs your code in a cloud sandbox, so the app you start there isn't on your laptop and `/clear` isn't available.
 - Every terminal command block has a copy button. Paste it into Claude Code and press Enter.
 
 New to the workflow itself? Read `00-how-we-work.md` if you want the full detail.
@@ -16,7 +16,7 @@ Install these once, before the workshop. It takes about 20 minutes.
 | A Claude Pro or Max plan | Claude Code runs on it. The free plan doesn't include Claude Code. | [claude.com/pricing](https://claude.com/pricing) |
 | git | Downloads the code and saves your work. On Windows, it also gives Claude Code the shell the lab commands run in. | Mac: [git-scm.com/downloads/mac](https://git-scm.com/downloads/mac) · Windows: [Git for Windows](https://git-scm.com/downloads/win) |
 | uv | Installs Python and the app's packages, and runs the tests. You don't need to install Python yourself. | [docs.astral.sh/uv](https://docs.astral.sh/uv/getting-started/installation/) |
-| Claude Code | The coding agent you'll work with. Use it in a terminal, or in the desktop app. | [Install Claude Code](https://code.claude.com/docs/en/setup) · [Desktop app](https://claude.com/download) |
+| Claude Code | The coding agent you'll work with. Use the terminal version; the desktop app doesn't work for these labs. | [Install Claude Code](https://code.claude.com/docs/en/setup) |
 | A code editor, such as VS Code | Read the code and review Claude's changes side by side. | [code.visualstudio.com](https://code.visualstudio.com/download) |
 
 ### Install on a Mac
@@ -104,7 +104,7 @@ Download your own copy of ShowTix and check that it works. Install the [Prerequi
 
 3. Your copy is in `C:\Users\<your name>\showtix`.
 
-The last line should say something like `112 passed`. A "not found" error means a prerequisite isn't installed yet: see [Check](#check).
+The last line should say something like `113 passed`. A "not found" error means a prerequisite isn't installed yet: see [Check](#check).
 
 ## Open ShowTix in Claude Code
 
@@ -117,7 +117,7 @@ Claude Code works on the folder it was started in, so start it in your `showtix`
   claude
   ```
 
-- **In the desktop app:** start a new session and choose your `showtix` folder (where [Get the code](#get-the-code) put it).
+- **Not the desktop app.** It runs commands in a cloud sandbox, so the app wouldn't be at `127.0.0.1:8000` on your laptop, and `/clear` doesn't exist there. If it's what you have installed, install the terminal version too (see [Prerequisites](#prerequisites)).
 - **Sign in** with your own Claude Pro or Max plan, not a Console account.
 
 You're ready when Claude Code shows a prompt waiting for you to type.
@@ -264,7 +264,7 @@ Stop the app when you're done checking, or before starting it again.
 Stop the app.
 ```
 
-- You can also stop it yourself: type `/tasks` in a terminal, or use **Background tasks** in the ⋮ menu in the desktop app.
+- You can also stop it yourself: type `/tasks` and stop it from the list.
 - Quitting Claude Code stops it too.
 - "Address already in use" means the app is still running: stop it, then start it again.
 
