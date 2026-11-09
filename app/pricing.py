@@ -1,12 +1,6 @@
 """All money math lives here. Every amount is an integer number of cents.
 
-Order of operations:
-  1. Subtotal: sum of qty x tier price
-  2. Discount: promo applied to the subtotal, never more than the subtotal
-  3. Service fee: $7.50 per ticket, never discounted
-  4. Tax: 9% of the discounted subtotal only, rounded half up once
-  5. Total: discounted subtotal + fees + tax
-
+The order of operations is the "Pricing order" section of CLAUDE.md.
 Formatting: dollars() is the only place cents become "$250.44", for pages and prompts alike.
 """
 

@@ -1,78 +1,77 @@
 # Lab 1c: Group discount
 
-- **Tier:** Intermediate
-- **Time:** 50 minutes
-- Solo or with a partner
+- **Tier**: Intermediate
+- **Time**: 50 minutes
+- **Format**: solo or with a partner
 
 ## Start here
 
-**New here?** Read [Getting started](01-getting-started.md) for running commands and the app, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
+If you're new to the labs, read [Getting started](01-getting-started.md) for how to run commands and the app, and then [How we work](00-how-we-work.md) for the workflow. Each page takes about 5 minutes to read.
 
-**This lab:** a new pricing rule that has to fit the existing pricing order, built with the full workflow.
+In this lab, you add a pricing rule that must fit the existing pricing order, and you build it with the full workflow.
 
-1. Run the command under [Starting branch](#starting-branch).
-2. Read [Goal](#goal), [Background](#background) and [Acceptance criteria](#acceptance-criteria).
-3. Follow [The workflow](#the-workflow) step by step.
+To do this lab, follow these steps:
 
-**Step 1 starts with you:** think through your edge cases, then write out (or think about) your expected results yourself.
+1. Type `/clear` in Claude Code to start a fresh conversation.
+2. Run the command in the [Starting branch](#starting-branch) section of this document.
+3. Read the [Goal](#goal), [Background](#background), and [Acceptance criteria](#acceptance-criteria) sections.
+4. Follow the [Workflow](#workflow) section step by step.
 
-**You're done when you can check every box under [Checklist: What Done Means](#checklist-what-done-means).**
+Step 1 starts with you. Think through your edge cases, and then write out your expected results yourself.
 
-**Stuck?** See [Hints](#hints).
+The lab is done when every statement in the [Completion checklist](#completion-checklist) section of this document is true. If you're stuck, see the [Hints](#hints) section.
 
 ## Goal
 
-#### Reward groups: 6 or more tickets in one tier get 15% off that tier.
+Reward groups. When a customer buys 6 or more tickets in one tier, that tier gets 15% off.
 
 ## Starting branch
 
-Copy the command below and run in Claude Code
+To start the lab, enter the following command in Claude Code:
 
 ```text
 ! git switch main && uv run python -m app.seed && git switch -c lab1c-group-discount && uv run pytest
 ```
 
-Here's what it does:
+The command does the following, in order:
 
-1. Switches to `main`, so the new branch starts from the original code
-2. Resets the database to the seed data
-3. Creates new feature branch `lab1c-group-discount` from `main`
-4. Runs the tests
+1. Switches to the `main` branch, so that the new branch starts from the original code.
+2. Resets the database to the seed data.
+3. Creates the `lab1c-group-discount` feature branch from `main`.
+4. Runs the tests.
 
-Every test should pass before you change anything.
-
-**Trouble?** See [Start a lab branch](01-getting-started.md#start-a-lab-branch).
+Every test passes before you change anything. If the command fails, see [Start a lab branch](01-getting-started.md#start-a-lab-branch).
 
 ## Background
 
-Here is the relevant background about the feature you'll be building:
+The following list describes the code that this feature touches:
 
-- **Pricing happens in `pricing.price_order()`** in `app/pricing.py`, in a fixed order (see CLAUDE.md): subtotal, discount, service fee, tax, total. `orders.quote()` merges cart items by tier, so each `pricing.Line` it passes in is one tier.
-- **A promo discount is computed by `pricing.discount()`.** Quotes and orders carry a single `discount_cents` today. `pricing.pricing_lines()` turns a breakdown into the ordered lines (Subtotal, Discount, Service fees, Tax, Total) that quotes and orders return as `pricing_lines`. The UI's quote and confirmation pages loop over that list, so a line you add there shows up in the UI with no template changes.
-- **Quotes (`Quote`) and stored orders (`Order`, `orders` table) must show the same numbers.** Tests use an in-memory database, but the running app uses a local SQLite file. If you change the schema, [reset the database](01-getting-started.md#reset-the-database), or the UI will break even while tests pass.
-- **Leave `CLAUDE.md` and `docs/` as they are.** They'll still describe a promo-only discount after this change. That's fine: they describe `main`, and every lab starts from `main`.
+- **Pricing**: the `price_order` function in the `app/pricing.py` file builds a price in a fixed order (see the `CLAUDE.md` file): subtotal, discount, service fee, tax, total. The `orders.quote` function merges cart items by tier, so each `pricing.Line` that it passes in is one tier.
+- **Promo discount**: the `pricing.discount` function computes a promo discount. Quotes and orders carry a single `discount_cents` today. The `pricing.pricing_lines` function turns a breakdown into the ordered lines (Subtotal, Discount, Service fees, Tax, Total) that quotes and orders return as `pricing_lines`. The web UI's quote and confirmation pages loop over that list, so a line that you add there appears in the UI with no template changes.
+- **Quotes and stored orders**: quotes (`Quote`) and stored orders (`Order`, the `orders` table) must show the same numbers. Tests use an in-memory database, but the running app uses a local SQLite file. If you change the schema, [reset the database](01-getting-started.md#reset-the-database), or the web UI breaks even though the tests pass.
+- **The `CLAUDE.md` file and the `docs/` folder**: leave them as they are. They still describe a promo-only discount after this change, and that's fine, because they describe the `main` branch and every lab starts from `main`.
 
-**For an illustration of the pricing order, see [How a price is built](../docs/architecture.md#3-how-a-price-is-built).**
+For an illustration of the pricing order, see [How a price is built](../docs/architecture.md#3-how-a-price-is-built).
 
 ## Acceptance criteria
 
-In this lab, most criteria are given below. **Add one or two edge cases of your own as criteria 8 and 9** before you write tests.
+This lab gives most of the criteria. Before you write tests, add one or two edge cases of your own as criteria 8 and 9.
 
-**Every criterion needs at least one test.**
+Every criterion needs at least one test.
 
-1. 6 or more tickets in the same tier get 15% off that tier's subtotal (rounded half up to the cent).
-2. 5 tickets get no discount; exactly 6 do.
-3. If a promo code also applies, the customer gets whichever discount is larger. They never stack.
-4. The quote breakdown shows the group discount as its own line: its own field, `group_discount_cents`, and its own entry in `pricing_lines` (labelled exactly `Group discount (15%)`, negative, right after `Subtotal`, and only when it's non-zero).
-5. All amounts stay in integer cents; tax follows the existing pricing order (9% of the subtotal after the discount that won).
+1. 6 or more tickets in the same tier get 15% off that tier's subtotal, rounded half up to the cent.
+2. 5 tickets get no discount, and exactly 6 do.
+3. If a promo code also applies, the customer gets whichever discount is larger. The two discounts never stack.
+4. The quote breakdown shows the group discount as its own line: its own field, `group_discount_cents`, and its own entry in `pricing_lines`, labeled exactly `Group discount (15%)`, negative, right after `Subtotal`, and only when it's non-zero.
+5. All amounts stay in integer cents, and tax follows the existing pricing order: 9% of the subtotal after the discount that won.
 6. The stored order matches the quote, including the group discount line.
-7. If the group discount beats a promo, the promo isn't applied: the order doesn't record the promo code, and the promo's use count doesn't go up.
+7. If the group discount beats a promo, the promo isn't applied: the order doesn't record the promo code, and the promo's use count doesn't go up. The use count is the `uses` column of the `promo_codes` table. No endpoint shows it, so a test reads it from the database.
 8. _Your edge case_
 9. _Your edge case_ (optional)
 
-**Edge cases to think about:** ties (no seeded promo can tie, so a test needs its own promo), the 8-ticket limit, a fixed promo, which discount the breakdown reports when one loses.
+Edge cases to think about include ties, the 8-ticket limit, a fixed promo, and which discount the breakdown reports when one loses. No seeded promo can tie, so a tie test needs its own promo, inserted through the `conn` fixture in the `tests/conftest.py` file. When one discount loses, decide what the breakdown shows for it, which makes a good criterion 8 or 9, or accept the existing `Discount` line at $0.00.
 
-**Worked examples (cents, dollars in parentheses):**
+The following table shows worked examples, in cents with dollars in parentheses:
 
 | Cart | Subtotal | Discount that wins | Fees | Tax | Total |
 | --- | --- | --- | --- | --- | --- |
@@ -81,53 +80,51 @@ In this lab, most criteria are given below. **Add one or two edge cases of your 
 | 6 GA + 2 VIP + LOCALS10 | 81398 ($813.98) | promo 8140 ($81.40); group would be 6210 ($62.10) | 6000 ($60.00) | 6593 ($65.93) | 85851 ($858.51) |
 | 7 VIP, no promo | 139993 ($1,399.93) | group 20999 ($209.99) | 5250 ($52.50) | 10709 ($107.09) | 134953 ($1,349.53) |
 
-## The workflow
+## Workflow
 
-#### Introduction
+### About the workflow
 
-There are many workflows out there.
+There are many workflows. Engineers experiment to find what works for them, and the models change fast enough that a practice can stop working within months. You'll probably settle on your own workflow eventually, if you don't have one already. This lab introduces one way to build good software reliably with a coding agent like Claude.
 
-Engineers are still experimenting and finding what works for them. The models are changing and improving so rapidly that what works great today may get discarded 3 months from now (or, next week). You'll probably come up with your own workflow eventually (or maybe you already have one). All we're doing here is introducing you to one way you can build good software reliably with a coding agent like Claude.  
+The main takeaway is that there's no single correct way:
 
-The main takeaway is this: there is no "correct" way right now.
+- There are practices that help.
+- There are practices that hurt.
+- There are practices that work in some situations with some models.
 
-- There are things you should do.
-- There are things you shouldn't do. 
-- There are things that seem to work in certain situations with the models we have right now.
+The workflow in this lab combines software engineering principles that are decades old with practices that Anthropic and others recommend. Use what works for you, and share your results.
 
-The workflow in this lab is based on general software engineering principles that have been around for decades, combined with best practices given by Anthropic (and others).
+**Note**: People who work with Claude or another coding agent often align on an idea first, have Claude write it into a spec, and create work items such as user stories or issues before steps 2 to 7. This lab has limited time, so it focuses on the coding and review parts of the flow. We recommend that you get experience with the spec step on your own time.
 
-We encourage you to use what works for you and share your results.
+### Workflow overview
 
-**<ins>One thing to note:</ins>** Often people who work with Claude (or Codex, etc...) first get alignment on an idea, have Claude put that into a spec, and create work items (user stories, issues, etc...) for Claude to work on *before* steps 2-7. Since this is a lab and we have limited time, we're focusing on the coding and review aspects of the flow. But we highly recommend you get experience with this on your own time.
+The workflow has the following seven steps, and each of steps 1 to 3 starts with a fresh conversation:
 
-#### Workflow Overview
-
-1. Start a fresh conversation. Find your edge cases, then write your expected results (without Claude).
-2. Start a fresh conversation. Claude writes failing tests. You check them against your expected results, then commit.
-3. Start a fresh conversation. Claude makes the tests pass without changing them.
-4. Check the evidence: run the tests, confirm only app/ changed, try it in the browser.
+1. Find your edge cases, and then write your expected results without Claude.
+2. Claude writes failing tests. You check them against your expected results, and then you commit them.
+3. Claude makes the tests pass without changing them.
+4. Check the evidence: run the tests, confirm that only the `app/` folder changed, and try the feature in the web UI.
 5. Review the diff.
-6. A subagent reviews the change. For each real bug, Claude writes a failing test and fixes it, then you repeat steps 4 and 5.
+6. A subagent, a separate Claude that starts with no memory of this conversation, reviews the change. For each real bug, Claude writes a failing test and fixes it, and then you repeat steps 4 and 5.
 7. Commit.
 
-Why each step matters: [How we work](00-how-we-work.md).
+For more information about why each step matters, see [How we work](00-how-we-work.md).
 
-### Step 1. Alignment on what "done" means
+### Step 1: Align on what done means
 
-#### 1a. Start with a fresh conversation
+#### 1a: Start a fresh conversation
+
+Start a fresh conversation:
 
 ```text
 /clear
 ```
 
-#### 1b. Find your edge cases
+#### 1b: Find your edge cases
 
-This sheet asks for one or two edge cases of your own.
+This sheet asks for one or two edge cases of your own. Think them through yourself first: what can a customer do that the criteria don't answer? Type your edge cases into the [Acceptance criteria](#acceptance-criteria) section as criteria 8 and 9.
 
-Think them through yourself first: what could a customer do that the criteria don't answer? Type yours into [Acceptance criteria](#acceptance-criteria), as criteria 8 and 9.
-
-**Stuck?** Ask Claude for a hint:
+If you're stuck, ask Claude for a hint:
 
 ```text
 Read tasks/lab1c-group-discount.md and the relevant code. I'm stuck finding edge cases
@@ -136,29 +133,27 @@ edge case itself. If I say "just tell me", suggest 3 edge cases, one sentence
 each, and I'll pick. Don't write any code or change any files.
 ```
 
-#### 1c. Review the acceptance criteria (without Claude)
+#### 1c: Review the acceptance criteria without Claude
 
-This is how Claude knows when the feature is complete. Think through exactly what each criterion should return before Claude writes anything.  
-Make a note of this somewhere to refer to later (like notes, notepad, or an empty text file. Whatever works for you).
+The acceptance criteria are how Claude knows when the feature is complete. Before Claude writes anything, think through exactly what each criterion returns, and write your answers where you can refer to them later, such as a notes app or a text file outside your `showtix` folder, because anything inside the folder gets committed with your tests.
 
-**Go through [Acceptance criteria](#acceptance-criteria) one by one:** which status code, the exact message, the exact cents.
+For each criterion in the [Acceptance criteria](#acceptance-criteria) section, write down the exact cents, and the status code and message where a criterion has one. Check that you get the same numbers as the worked examples.
 
-**Check you get the same numbers as the worked examples.**
+**Note**: Prices, fees, tax rules, and promo codes are in the [`docs/seed-data.md`](../docs/seed-data.md) file. To see the values in the running app, see [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-**Note:**
+### Step 2: Write the tests first
 
-- Prices, fees, tax rules and promo codes are in [`docs/seed-data.md`](../docs/seed-data.md) for your convenience.
-- Want to see it in the running app? See [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
+#### 2a: Start a fresh conversation
 
-### Step 2. Implement tests first
-
-#### 2a. Start with a fresh conversation
+Start a fresh conversation:
 
 ```text
 /clear
 ```
 
-#### 2b. Have Claude write failing tests. Check them against your expected results
+#### 2b: Ask Claude for failing tests
+
+Ask Claude to write a failing test for each criterion:
 
 ```text
 Read tasks/lab1c-group-discount.md and the relevant code. Write a failing test
@@ -167,9 +162,11 @@ functions that already exist, not new functions or exact HTML. Don't change
 anything in app/. Run the tests and show me which ones fail.
 ```
 
-#### 2c. Manually check the tests Claude just created
+Then check the tests against your expected results, as described in the next step.
 
-Claude's reply is your checklist: one line per test with the criterion it covers, what it expects and whether it passes today. If the reply doesn't give you that, ask:
+#### 2c: Check the tests yourself
+
+Claude's reply is your checklist: one line per test with the criterion it covers, what it expects, and whether it passes today. If the reply doesn't give you that, ask for a table:
 
 ```text
 For each new or updated test, give me one table: the criterion it covers, the
@@ -177,35 +174,37 @@ route or app function it calls and whether that already exists in app/, the
 exact value it expects, the values that failed, and pass or fail right now.
 ```
 
-Then check. Claude may write more tests than you expect; check these first, then the rest as time allows:
+Then check the tests. Claude might write more tests than you expect. Check the following items first, and then the rest as time allows:
 
-- **Each expected value matches your step 1 table.** Claude wrote the tests and the summary, so the table you wrote without Claude is the thing to trust. A value you can't find there: work it out yourself, or use 2d.
-- **Every route or function a test calls already exists in `app/`.** `client.get(...)` and `client.post(...)` are the API. A test that calls a function that doesn't exist yet is designing the code for Claude: use 2d.
-- **The four worked examples are tests**, with every line asserted in exact cents.
+- **Each expected value matches your step 1 table.** Claude wrote the tests and the summary, so the table that you wrote without Claude is the thing to trust. If you can't find a value there, work it out yourself, or use 2d.
+- **Every route or function that a test calls already exists in the `app/` folder.** Calls to the `client.get(...)` and `client.post(...)` methods are the API. A test that calls a function that doesn't exist yet is designing the code for Claude. Use 2d.
+- **The four worked examples are tests.** Every line is asserted in exact cents.
 - **Your own edge cases have tests too.**
 
-#### 2d. If a test doesn't match your expected results, tell Claude what it should be and why
+#### 2d: Correct a test that doesn't match
+
+If a test doesn't match your expected results, tell Claude the right value and the reason:
 
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
 that test.
 ```
 
-If a test calls a function that doesn't exist yet:
+If a test calls a function that doesn't exist yet, ask for a rewrite:
 
 ```text
 The test ___ calls ___, which doesn't exist yet. Rewrite it to check the same
 behavior through the API or the page.
 ```
 
-**Example:**
+For example:
 
 ```text
 The test for criterion 4 expects the label "Group discount", but it should be
 "Group discount (15%)" because the label has to match exactly. Fix that test.
 ```
 
-#### 2e. Commit the test code
+#### 2e: Commit the tests
 
 When every test matches your expected results, commit them:
 
@@ -213,17 +212,19 @@ When every test matches your expected results, commit them:
 ! git add -A && git commit -m "lab1c: tests"
 ```
 
-### Step 3. Make the tests pass (write the code)
+### Step 3: Make the tests pass
 
-#### 3a. Clear the conversation
+#### 3a: Clear the conversation
 
-To get good results, Claude should build from the "spec" and your committed tests (not all the context from that chat):
+Claude builds better from the sheet and your committed tests than from the context of the test-writing chat. Start a fresh conversation:
 
 ```text
 /clear
 ```
 
-#### 3b. Ask Claude to make the tests pass
+#### 3b: Ask Claude to make the tests pass
+
+Ask Claude to write the code:
 
 ```text
 Make the new tests from my last commit pass (see git show HEAD). Don't change
@@ -232,58 +233,66 @@ Read tasks/lab1c-group-discount.md for context. Run the full suite and show me
 the output.
 ```
 
-Claude shouldn't touch any test file.
+Claude must not touch any test file. You verified the tests, so the code alone must make them pass, and step 4 checks that.
 
-We don't want to rewrite tests we've already verified to make them pass. The code alone should do that. Step 4 checks it.
+### Step 4: Check the evidence
 
-### Step 4. Check the evidence
+Don't take Claude's word for it. Check for yourself.
 
-Don't take Claude's word for it; check for yourself.
+#### 4a: Run the tests
 
-#### 4a. Run the tests
-
-The last line should say only `passed`, with no `skipped`, `deselected` or `xfailed`:
+Run the tests. The last line must say only `passed`, with no `skipped`, `deselected`, or `xfailed`:
 
 ```text
 ! uv run pytest
 ```
 
-#### 4b. Check that Claude only changed app code
+#### 4b: Check that Claude changed only app code
 
-This shows the files that have changed since the last commit.  
-Every file this lists should be under `app/`:
+List the files that changed since the last commit:
 
 ```text
 ! git status --short
 ```
 
-A file in `tests/` (changed, or new with `??`), a `conftest.py`, or `pyproject.toml` means Claude touched your tests or how they run: ask why before going on. If there are any fixes in step 6, the only test changes should be the new tests you asked for. Nothing existing should be modified.
+Every listed file must be under the `app/` folder. A file in the `tests/` folder (changed, or new with `??`), a `conftest.py` file, or the `pyproject.toml` file means that Claude touched your tests or how they run. Ask Claude why before you go on. If step 6 adds fixes, the only test changes are the new tests that you asked for, and no existing test changes.
 
-#### 4c. Visual tests in the browser
+#### 4c: Check the feature in your browser
 
-**First, reset the database.** Storing the group discount on orders needs a new column, but the app's `showtix.db` file was created before that column existed, so placing or viewing an order would fail.
+First, reset the database. Storing the group discount on orders needs a new column, but the app's `showtix.db` file was created before that column existed, so placing or viewing an order fails until you reset.
 
-The tests still pass because each one builds a fresh in-memory database. Resetting rebuilds the file with the new column and puts back the starting data. In production you'd run a migration to keep real data, but this is local practice data, so a reset is fine:
+The tests still pass because each one builds a fresh in-memory database. The reset rebuilds the file with the new column and restores the starting data. In production, you'd run a migration to keep real data, but this is local practice data, so a reset is fine.
+
+Reset the database:
 
 ```text
 ! uv run python -m app.seed
 ```
 
-**Then start the app.** Ask Claude to start it in the background ([more on starting the app](01-getting-started.md#start-the-app)):
+Then ask Claude to start the app in the background:
 
 ```text
 Start the app in the background with uv run uvicorn app.main:app --reload,
 and tell me when it's ready.
 ```
 
-**Then check the worked examples in the UI:**
+For more information, see [Start the app](01-getting-started.md#start-the-app).
 
-1. Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) and click a date under **Laugh Lines Live**.
-2. In the **Qty** column, enter the tickets for one worked example, such as `6` for **GA**. If it has a promo, type it in **Promo code**. Click **Get quote** and compare every line with your expected results.
-3. Go back to the date page and repeat for the other worked examples.
-4. For one of them, enter any email and click **Place order**. The page you land on should show the same lines.
+To check the worked examples in the web UI, follow these steps:
 
-Prefer the API? Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) (click your endpoint, **Try it out**, **Execute**).
+1. Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/), and then click a date under **Laugh Lines Live**.
+2. In the **Qty** column, enter the tickets for one worked example, such as `6` for **GA**. If the example has a promo, type it in **Promo code**.
+3. Click **Get quote**.
+4. Compare every line with your expected results.
+5. Go back to the date page, and repeat for the other worked examples.
+6. For one example, enter any email and click **Place order**. The order page shows the same lines.
+
+To use the API instead, follow these steps:
+
+1. Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs), and then click your endpoint.
+2. Click **Try it out**.
+3. Enter the values for one worked example, and then click **Execute**.
+4. Compare the response with your expected results.
 
 When you're done, stop the app:
 
@@ -291,31 +300,32 @@ When you're done, stop the app:
 Stop the app.
 ```
 
-#### 4d. Something doesn't match?
+#### 4d: Report a mismatch
 
-Tell Claude which criterion failed and what you saw.
+If something doesn't match, tell Claude which criterion failed and what you saw.
 
-### Step 5. Review the diff
+### Step 5: Review the diff
 
-#### 5a. Read every change Claude made before you accept it
+#### 5a: Read every change
 
-These commands stage the changes and then show the diff between these staged changes and the latest commit on your branch.
+Before you accept the changes, read every one. The following command stages the changes and shows the diff between the staged changes and the latest commit on your branch:
 
 ```text
 ! git add -A && git diff --staged
 ```
 
+Your tests are already committed, so the diff shows only the code that Claude wrote. As you read, ask the following questions:
+
 - Can you explain every change?
-- Was anything touched that has nothing to do with the group discount?
-- Prefer side by side? Use VS Code's **Source Control** panel.
+- Did anything change that has nothing to do with the group discount?
 
-Your tests are already committed, so this shows only the code Claude wrote.
+To see the diff side by side, use the **Source Control** panel in VS Code.
 
-### Step 6. Get a second opinion
+### Step 6: Get a second opinion
 
-#### 6a. Create a code reviewer for your changes
+#### 6a: Create a code reviewer
 
-Ask Claude to create a reviewer subagent. It hasn't seen your conversation, and it checks the change against this sheet.
+Ask Claude to create a reviewer subagent. The subagent hasn't seen your conversation, and it checks the change against this sheet:
 
 ```text
 Use a subagent to review this branch's changes (git diff main) against
@@ -335,37 +345,38 @@ Then ask me which ones to fix. For each one I pick, write a failing test that
 shows the problem, then fix it. Run the full suite and show me the output.
 ```
 
-Claude shows the MUST FIX findings and asks which to fix. The labels are the reviewer's opinion, so check the evidence yourself before you answer.
+Claude shows the MUST FIX findings and asks which ones to fix. The labels are the reviewer's opinion, so check the evidence yourself before you answer.
 
-#### 6b. Answer with the numbers you want fixed
+#### 6b: Answer with the numbers to fix
 
-For example "1 and 3". Then repeat steps 4 and 5.   
-Or you can decide you don't want to fix it, or you want to have a chat with Claude about it before you decide.
+Reply with the numbers of the findings to fix, for example "1 and 3", and then repeat steps 4 and 5. You can also decide not to fix a finding, or discuss it with Claude before you decide. Claude might also list UNSURE or OPTIONAL findings. Those are yours to decide, and the lab doesn't need them. If Claude reports no MUST FIX findings, there's nothing to answer. Repeat steps 4 and 5 once, and then go on to step 7. If Claude asks how to fix something, answer with the behavior that you want and let Claude choose the code.
 
-Why "don't report style"? See [step 6 of How we work](00-how-we-work.md#6-get-a-second-opinion).
+For more information about why the prompt says not to report style, see [step 6 of How we work](00-how-we-work.md#6-get-a-second-opinion).
 
-### Step 7. Commit
+### Step 7: Commit
 
-Commit when you're satisfied with the change:
+When you're satisfied with the change, commit it:
 
 ```text
 ! git add -A && git commit -m "lab1c: group discount"
 ```
 
-## Checklist: What Done Means
+## Completion checklist
 
-- [ ] A test for each given criterion and for your own edge cases, all passing
-- [ ] The tests you committed in step 2 weren't changed to make them pass
-- [ ] The four worked examples are tests, with every line asserted in exact cents
-- [ ] The quote, the stored order and the UI agree on every line
-- [ ] The group discount appears on the UI's quote and confirmation pages with no template changes
-- [ ] Every test asserts exact values (exact cents for money), not "smaller" or "not empty"
-- [ ] `uv run pytest` is fully green and still finishes in under 5 seconds
-- [ ] All money math is in `app/pricing.py`, in integer cents; no floats
-- [ ] Routes in `main.py` and `web.py` only call into domain modules
-- [ ] You tried it by hand in the UI or /docs with values you worked out yourself
-- [ ] You can explain every line of `git diff main`, and nothing unrelated changed
+The lab is complete when the following statements are true:
+
+- [ ] A test exists for each given criterion and for your own edge cases, and all of the tests pass.
+- [ ] The tests that you committed in step 2 weren't changed to make them pass.
+- [ ] The four worked examples are tests, with every line asserted in exact cents.
+- [ ] The quote, the stored order, and the web UI agree on every line.
+- [ ] The group discount appears on the web UI's quote and confirmation pages with no template changes.
+- [ ] Every test asserts exact values, with exact cents for money, not "smaller" or "not empty".
+- [ ] The `uv run pytest` command passes and finishes in less than 5 seconds.
+- [ ] All money math is in the `app/pricing.py` file, in integer cents, with no floats.
+- [ ] Routes in the `main.py` and `web.py` files only call into domain modules.
+- [ ] You tried the feature by hand in the web UI or the `/docs` page with values that you worked out yourself.
+- [ ] You can explain every line of the `git diff main` output, and nothing unrelated changed.
 
 ## Hints
 
-Stuck? Hints (nudge, stronger nudge, near-answer) are on the [workshop hints page](https://www.notion.so/409be0acdc238156b855d22a8fe01f48). Open one level at a time.
+If you're stuck, open the [workshop hints page](https://www.notion.so/409be0acdc238156b855d22a8fe01f48). It lists the places where students get stuck in this lab, each with what to check and what to tell Claude. Open the section whose heading matches what you see.

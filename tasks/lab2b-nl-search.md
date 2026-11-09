@@ -1,75 +1,78 @@
 # Lab 2b: Natural-language search
 
-- **Tier:** Intermediate
-- **Time:** 50 minutes
+- **Tier**: Intermediate
+- **Time**: 50 minutes
 - Solo or with a partner
 
 ## Start here
 
-**New here?** Read [Getting started](01-getting-started.md) for running commands, the app and your API key, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
+If this is your first lab, read [Getting started](01-getting-started.md) for how to run commands, the app, and your API key, and then read [How we work](00-how-we-work.md) for the workflow. Each page takes about 5 minutes to read.
 
-**This lab:** Claude turns a customer's words into search filters; your code checks them and runs the search.
+In this lab, Claude turns a customer's words into search filters, and your code checks the filters and runs the search.
 
-1. Run the command under [Starting branch](#starting-branch).
-2. Read [Goal](#goal), [Background](#background) and [Acceptance criteria](#acceptance-criteria).
-3. Follow [The workflow](#the-workflow) step by step.
+To run this lab, follow these steps:
 
-**Step 1 starts with you:** think through your edge cases, then write out (or think about) your expected results yourself.
+1. Type `/clear` in Claude Code to start a fresh conversation.
+2. Run the command in the [Starting branch](#starting-branch) section of this document.
+3. Read the [Goal](#goal), [Background](#background), and [Acceptance criteria](#acceptance-criteria) sections.
+4. Follow the [Workflow](#workflow) section step by step.
 
-**You're done when you can check every box under [Checklist: What Done Means](#checklist-what-done-means).**
+Step 1 starts with you. Think through your edge cases, and then write out your expected results yourself.
 
-**Extra time?** Try the [Optional stretch](#optional-stretch). Stuck? See [Hints](#hints).
+The lab is complete when you can check every box in the [Completion checklist](#completion-checklist) section of this document. If you have time left, try the [Optional stretch](#optional-stretch) section. If you're stuck, see the [Hints](#hints) section.
 
 ## Goal
 
-#### Add `POST /search`: a customer types `{"query": "comedy this weekend under $80"}`, Claude turns it into search filters, and your code checks those filters and runs the search itself. The model parses; your code decides.
+Add the `POST /search` endpoint. A customer sends `{"query": "comedy this weekend under $80"}`, Claude turns the query into search filters, and your code checks those filters and runs the search itself. The model parses, and your code decides.
 
 ## Starting branch
 
-Copy the command below and run in Claude Code
+To create your lab branch, copy the following command and run it in Claude Code:
 
 ```text
 ! git switch main && uv run python -m app.seed && uv run python -m app.llm && git switch -c lab2b-nl-search && uv run pytest
 ```
 
-Here's what it does:
+The command does the following, in order:
 
-1. Switches to `main`, so the new branch starts from the original code
-2. Resets the database to the seed data
-3. Checks your Claude API key
-4. Creates new feature branch `lab2b-nl-search` from `main`
-5. Runs the tests
+1. Switches to `main`, so the new branch starts from the original code.
+2. Resets the database to the seed data.
+3. Checks your Claude API key.
+4. Creates the feature branch `lab2b-nl-search` from `main`.
+5. Runs the tests.
 
-The key check should print `OK: Claude API key works`, and every test should pass before you change anything.
+The key check prints `OK: Claude API key works`. Every test passes before you change anything.
 
-**Trouble?** If `git switch` stops because of unfinished Lab 1 work, see [Start a lab branch](01-getting-started.md#start-a-lab-branch). For key problems, see [Set up your API key](01-getting-started.md#set-up-your-api-key-lab-2).
+If `git switch` stops because of unfinished Lab 1 work, see [Start a lab branch](01-getting-started.md#start-a-lab-branch). For key problems, see [Set up your API key](01-getting-started.md#set-up-your-api-key-lab-2).
 
 ## Background
 
-Here is the relevant background about the feature you'll be building, including the rules that keep the model in its place:
+The following list describes the feature and the rules that keep the model in its place:
 
-- **Filters:** `category`, `start_date`, `end_date` and `max_price_cents`. Any of them may be `null`, meaning "no filter".
-- **Existing search:** `shows.list_shows()` in `app/shows.py` filters by `start_date` and `end_date` (both inclusive) and orders by title. It can't filter by category or price (category filtering is a different lab feature), so filter those yourself in Python on its results.
-- **Categories:** `magic`, `comedy`, `music`, `acrobatics` (see the `shows` table in `app/db.py`). The seed has 2 shows per category, playing nightly from Tue Nov 10 to Mon Nov 23, 2026 (all of it is in [`docs/seed-data.md`](../docs/seed-data.md)).
-- **Prices and seats:** `inventory.tiers_for_performance()` gives each tier's `price_cents` and `seats_left`. `shows.show_detail()` lists a show's performances. Every seeded show has GA $69.00, Premium $120.00 and VIP $199.99.
-- **Time is injected.** "Tonight" and "this weekend" depend on the current time, which routes get from the `get_now` dependency (`app/clock.py`). Never call `datetime.now()`. Claude can't know today's date unless you tell it.
-- **Calling Claude:** `app/llm.py` gives routes a `get_llm` dependency and the model name `MODEL` (`claude-haiku-5-5`). It reads your key from `SHOWTIX_CLAUDE_KEY` in `.env` (see [Set up your API key](01-getting-started.md#set-up-your-api-key-lab-2)). Your code never reads the key itself; `get_llm` does. To write cents as dollars, in a prompt for example, use `pricing.dollars()`.
-- **Never give Claude your API key.** Don't paste it into Claude Code, in a prompt or a `!` command. Paste it into `.env` yourself, in your editor: anything you type in Claude Code becomes part of the conversation, and Claude can copy it into a file and from there into a commit.
-- **Structured output with a tool:** give Claude one tool whose input schema *is* the filters, with `"strict": true`, so its arguments match the schema. Strict mode gets you the right shape, not the right meaning. A date can still be `2026-02-30`, or come after the end date, so your code validates every field. In strict mode, don't combine `enum` with a nullable type (the API rejects the schema); name the allowed categories in the field's description instead.
-- **Testing without the network:** every test runs with a fake Claude automatically, so no test can reach the real API. Take the `fake_claude` fixture (`FakeClaude`, in `tests/fakes.py`) whenever you need to queue replies or check calls. Queue the tool call you want with `fake_claude.queue({"tool_use": "search_filters", "input": {...}})`, call your endpoint, then check what was sent with `fake_claude.calls` or `fake_claude.last_prompt`. To simulate an API failure, queue `api_error()` from `tests/fakes.py`: it's a real `anthropic.APIError`, as the SDK would raise it.
-- **The model is never the source of truth for shows, prices or seats.** Claude only produces filters; every show in the response comes from the database.
+- **Filters**: the filters are `category`, `start_date`, `end_date`, and `max_price_cents`. Any of them can be `null`, which means "no filter".
+- **Existing search**: `shows.list_shows()` in the `app/shows.py` file filters by `start_date` and `end_date` (both inclusive) and orders by title. It can't filter by category or price, because category filtering is a different lab feature, so filter those yourself in Python on its results.
+- **Categories**: the categories are `magic`, `comedy`, `music`, and `acrobatics` (see the `shows` table in the `app/db.py` file). The seed has two shows per category, playing nightly from Tuesday, November 10 to Monday, November 23, 2026. For the full data, see [`docs/seed-data.md`](../docs/seed-data.md).
+- **Prices and seats**: `inventory.tiers_for_performance()` gives each tier's `price_cents` and `seats_left`, and `shows.show_detail()` lists a show's performances that haven't started yet. For the price check in criterion 5, query the performances in the date range yourself, or add a small helper to the `app/shows.py` file. Every seeded show has GA at $69.00, Premium at $120.00, and VIP at $199.99.
+- **Time is injected**: "tonight" and "this weekend" depend on the current time, which routes get from the `get_now` dependency in the `app/clock.py` file. Never call `datetime.now()`. Claude can't know today's date unless you tell it.
+- **Calling Claude**: the `app/llm.py` file gives routes a `get_llm` dependency and the model name `MODEL` (`claude-haiku-5-5`). It reads your key from `SHOWTIX_CLAUDE_KEY` in the `.env` file. Your code never reads the key itself, because `get_llm` does. To write cents as dollars, in a prompt for example, use `pricing.dollars()`. For more information, see [Set up your API key](01-getting-started.md#set-up-your-api-key-lab-2).
+- **Structured output with a tool**: give Claude one tool whose input schema is the filters, with `"strict": true`, so its arguments match the schema. Strict mode gets you the right shape, not the right meaning. A date can still be `2026-02-30`, or come after the end date, so your code validates every field. A nullable field is written as `{"type": ["string", "null"], "description": "..."}`. In strict mode, don't combine `enum` with a nullable type, because the API rejects the schema. Name the allowed categories in the field's description instead. For more information, see [Strict tool use](https://platform.claude.com/docs/en/agents-and-tools/tool-use/strict-tool-use) in the Claude docs.
+- **Testing without the network**: every test runs with a fake Claude automatically, so no test can reach the real API. Take the `fake_claude` fixture (the `FakeClaude` class in the `tests/fakes.py` file) whenever you need to queue replies or check calls. Queue the tool call you want with `fake_claude.queue({"tool_use": "search_filters", "input": {...}})`, call your endpoint, and then check what was sent with `fake_claude.calls` or `fake_claude.last_prompt`. To pin the time in a test, see the `now` and `clock` fixtures in the `tests/conftest.py` file. To simulate an API failure, queue `api_error()` from the `tests/fakes.py` file. It's a real `anthropic.APIError`, as the SDK raises it.
+- **New status codes**: the `app/errors.py` file has no class for an HTTP `422` or `502` status code yet. Adding one there is part of this feature, so update the `app/errors.py` line in the `CLAUDE.md` file when you commit.
+- **The model is never the source of truth**: Claude only produces filters. Every show in the response comes from the database, and so does any price or seat that your code compares against.
 
-**For an illustration of where Claude fits between your route and the domain modules, see [How a Lab 2 feature fits](../docs/architecture.md#4-how-a-lab-2-feature-fits).**
+**Warning**: Don't give Claude your API key. Don't paste it into Claude Code, in a prompt or a `!` command. Paste it into the `.env` file yourself, in your editor. Anything you type in Claude Code becomes part of the conversation, and Claude can copy it into a file and from there into a commit.
 
-### About the eval
+For more information about where Claude fits between your route and the domain modules, see [How a Lab 2 feature fits](../docs/architecture.md#4-how-a-lab-2-feature-fits).
 
-Unit tests and the eval check different things:
+### Unit tests and the eval
 
-- **Unit tests check *your code*,** with scripted tool calls: fast, offline, the same every run.
-- **The eval checks *the real model's behavior*:** does Claude turn real phrases into the right filters? It calls the API, answers vary, and you get a score, not a guaranteed pass.
-- **Use the shared runner,** `run()` from `tests/evals/runner.py` (see the Evals section of README.md): you write the cases file and a `check(case)` function that returns whether the case passed and a short detail; it prints one line per case and a score. Run it with `--repeat 2`; a score that changes between runs is normal for a model.
+Unit tests and the evaluation (eval) check different things:
 
-When a case fails, look at the filters Claude produced before changing anything. If *every* case fails with `Search unavailable`, that's not an outage: criterion 7 turns any API error into that 502, including the API rejecting your request (a bad tool schema, for example). Ask Claude for the underlying error before changing anything.
+- **Unit tests**: these tests check your code with scripted tool calls. They're fast and offline, and they return the same result on every run.
+- **Eval**: the eval checks the real model's behavior. Does Claude turn real phrases into the right filters? The eval calls the API, the answers vary, and you get a score, not a guaranteed pass.
+- **Shared runner**: use `run()` from the `tests/evals/runner.py` file (see the Evals section of the `README.md` file). Claude writes the cases file in step 2 and a `check(case)` function in step 3. The `check(case)` function returns whether the case passed and a short detail, and the runner prints one line per case and a score. Run it with `--repeat 2`. A score that changes between runs is normal for a model.
+
+When a case fails, look at the filters Claude produced before you change anything. If _every_ case fails with `Search unavailable`, that's not an outage. Criterion 7 turns any API error into that HTTP `502 Bad Gateway` status code, including the API rejecting your request because of a bad tool schema. Ask Claude for the underlying error before you change anything.
 
 An eval case pins the time, because "this weekend" means different dates on different days:
 
@@ -80,34 +83,34 @@ An eval case pins the time, because "this weekend" means different dates on diff
               "end_date": "2026-11-15", "max_price_cents": 8000}}
 ```
 
-**No working key?** Build and unit-test everything with `fake_claude`; for the eval and trying it in /docs, pair with someone whose key works.
+If you don't have a working key, build and unit-test everything with `fake_claude`. For the eval and for trying the endpoint on the `/docs` page, pair with someone whose key works.
 
 ## Acceptance criteria
 
-In this lab, most criteria are given below. **Add one or two edge cases of your own as criteria 10 and 11** before you write tests.
+The following list gives most of the criteria. Before you write tests, add one or two edge cases of your own as criteria 10 and 11.
 
-**Every criterion except 9 (the eval) needs at least one test.**
+Every criterion except 9 (the eval) needs at least one test:
 
-1. `POST /search` with `{"query": "..."}` returns 200 with `filters` (all four fields, `null` where unused) and `shows` (the matching shows, ordered by title, in the same shape as `GET /shows`).
-2. The request to Claude uses `MODEL` and offers one tool, `search_filters`, with `"strict": true`. Its schema has exactly the four fields, each required and nullable, and no others. The prompt includes a line built from the injected `now` in exactly this form: `Today is Thursday, 2026-11-12, 15:00`, and the customer's query goes in the user message.
-3. Relative dates follow `now` (unit-test this by checking the rules are in `fake_claude.last_prompt`; the eval checks Claude actually follows them):
-   - **"Tonight"** is today only.
-   - **"This weekend"** is Friday through Sunday. If today is already Friday, Saturday or Sunday, it's today through Sunday.
-4. Your code validates the filters before searching. Any of these returns 422 and never runs the search:
-   - `category` is not one of the four, lowercase
-   - a date that isn't a real `YYYY-MM-DD` date
-   - `start_date` after `end_date`
-5. The search uses existing code: dates go through `shows.list_shows()`, and category and price are filtered in Python. A show matches `max_price_cents` if any of its performances in the date range has a tier at or under that price.
-6. All four filters `null` returns all 8 shows. Valid filters that match nothing return 200 with `"shows": []`.
-7. An empty or whitespace-only query returns 400 without calling Claude (`fake_claude.calls` stays empty). If the Claude call fails, the endpoint returns 502 with the detail `Search unavailable`.
-8. Unit tests use `fake_claude`, never touch the network, and the full suite stays under 5 seconds.
-9. A separate eval file (aim for 10 phrases, at least 5) gives each a pinned `now` and the exact expected filters. A case passes only if all four fields match exactly. At least two cases use "this weekend" with different `now` values, one of them on a weekend day. You run it by hand against the real API.
+1. `POST /search` with `{"query": "..."}` returns an HTTP `200 OK` status code with `filters` (all four fields, `null` where unused) and `shows` (the matching shows, ordered by title, in the same shape as `GET /shows`, with `id`, `title`, `category`, and `venue`).
+2. The request to Claude uses `MODEL` and offers one tool, `search_filters`, with `"strict": true`. Its schema has exactly the four fields, each required and nullable, and no others. The prompt includes a line built from the injected `now` in exactly this form: `Today is Thursday, 2026-11-12, 15:00`. The customer's query goes in the user message.
+3. Relative dates follow `now`. Unit-test this criterion by checking that the rules are in `fake_claude.last_prompt`. The eval checks that Claude follows them. The rules are the following:
+   - "Tonight" is today only.
+   - "This weekend" is Friday through Sunday. If today is already Friday, Saturday, or Sunday, it's today through Sunday.
+4. Your code validates the filters before searching. Any of the following returns an HTTP `422 Unprocessable Entity` status code and never runs the search:
+   - `category` is not one of the four, lowercase.
+   - A date that isn't a real `YYYY-MM-DD` date.
+   - `start_date` after `end_date`.
+5. The search uses existing code. Dates go through `shows.list_shows()`, and category and price are filtered in Python. A show matches `max_price_cents` if any of its performances in the date range has a tier at or under that price.
+6. All four filters `null` returns all 8 shows. Valid filters that match nothing return an HTTP `200` status code with `"shows": []`.
+7. An empty or whitespace-only query returns an HTTP `400 Bad Request` status code without calling Claude, so `fake_claude.calls` stays empty. If the Claude call fails, the endpoint returns an HTTP `502` status code with the detail `Search unavailable`.
+8. Unit tests use `fake_claude`, never access the network, and the full suite finishes in less than 5 seconds.
+9. A separate eval file (aim for 10 phrases, at least 5) gives each phrase a pinned `now` and the exact expected filters. A case passes only if all four fields match exactly. At least two cases use "this weekend" with different `now` values, one of them on a weekend day. You run the eval by hand against the real API.
 10. _Your edge case_
 11. _Your edge case_ (optional)
 
-**Edge cases to think about:** what the 400 for an empty query says, not just its code.
+One edge case to think about is what the HTTP `400` response for an empty query says, not only its code.
 
-**Worked example:** filters, with `now` pinned to Thursday, Nov 12, 2026 at 3:00 PM.
+The following table shows the expected filters, with `now` pinned to Thursday, November 12, 2026 at 3:00 PM:
 
 | Query | `category` | `start_date` | `end_date` | `max_price_cents` |
 | --- | --- | --- | --- | --- |
@@ -117,39 +120,39 @@ In this lab, most criteria are given below. **Add one or two edge cases of your 
 | music this weekend, max $70 | `music` | `2026-11-13` | `2026-11-15` | `7000` |
 | anything under $125 tonight | `null` | `2026-11-12` | `2026-11-12` | `12500` |
 
-With the first row's filters, the search returns `Laugh Lines Live` and `Stand-Up Saloon` (GA is $69.00). The same query "under $60" returns `[]`. The last row returns all 8 shows: every show plays nightly, and GA ($69.00) and Premium ($120.00) are both under $125.
+With the first row's filters, the search returns `Laugh Lines Live` and `Stand-Up Saloon`, because GA is $69.00. The same query with "under $60" returns an empty `shows` list. The last row returns all 8 shows, because every show plays nightly, and GA ($69.00) and Premium ($120.00) are both under $125.
 
-Work these out yourself before you trust any test. If `now` were Saturday, Nov 14, "this weekend" would be Nov 14 to Nov 15.
+Work these out yourself before you trust any test. If `now` is Saturday, November 14, "this weekend" is November 14 to November 15.
 
-## The workflow
+## Workflow
 
-#### Workflow Overview
+The workflow has the following seven steps:
 
-1. Start a fresh conversation. Find your edge cases, then write your expected results (without Claude).
-2. Start a fresh conversation. Claude writes failing tests and the eval cases. You check them against your expected results, then commit.
-3. Start a fresh conversation. Claude makes the tests pass without changing them, then writes the eval runner.
-4. Check the evidence: run the tests, confirm only app/ and the eval runner changed, run the eval twice, try it in /docs.
+1. Start a fresh conversation. Find your edge cases, and then write your expected results without Claude.
+2. Start a fresh conversation. Claude writes failing tests and the eval cases. You check them against your expected results, and then you commit.
+3. Start a fresh conversation. Claude makes the tests pass without changing them, and then writes the eval runner.
+4. Check the evidence. Run the tests, confirm that only `app/` and the eval runner changed, run the eval twice, and try the endpoint on the `/docs` page.
 5. Review the diff.
-6. A subagent reviews the change. For each real bug, Claude writes a failing test and fixes it, then you repeat steps 4 and 5.
+6. A subagent, a separate Claude that starts with no memory of this conversation, reviews the change. For each real bug, Claude writes a failing test and fixes it, and then you repeat steps 4 and 5.
 7. Commit.
 
-Why each step matters: [How we work](00-how-we-work.md).
+For more information about why each step matters, see [How we work](00-how-we-work.md).
 
-### Step 1. Alignment on what "done" means
+### Step 1: Align on what done means
 
-#### 1a. Start with a fresh conversation
+#### 1a: Start a fresh conversation
+
+Start a new conversation:
 
 ```text
 /clear
 ```
 
-#### 1b. Find your edge cases
+#### 1b: Find your edge cases
 
-This sheet asks for one or two edge cases of your own.
+This sheet asks for one or two edge cases of your own. Think them through yourself first. What can a customer do that the criteria don't answer? Type yours into the [Acceptance criteria](#acceptance-criteria) section as criteria 10 and 11.
 
-Think them through yourself first: what could a customer do that the criteria don't answer? Type yours into [Acceptance criteria](#acceptance-criteria), as criteria 10 and 11.
-
-**Stuck?** Ask Claude for a hint:
+If you're stuck, ask Claude for a hint:
 
 ```text
 Read tasks/lab2b-nl-search.md and the relevant code. I'm stuck finding edge cases
@@ -158,29 +161,31 @@ edge case itself. If I say "just tell me", suggest 3 edge cases, one sentence
 each, and I'll pick. Don't write any code or change any files.
 ```
 
-#### 1c. Review the acceptance criteria (without Claude)
+#### 1c: Write your expected results without Claude
 
-This is how Claude knows when the feature is complete. Think through exactly what each criterion should return before Claude writes anything.  
-Make a note of this somewhere to refer to later (like notes, notepad, or an empty text file. Whatever works for you).
+The acceptance criteria are how Claude knows when the feature is complete. Before Claude writes anything, think through exactly what each criterion returns, and write the results down somewhere you can refer to later, such as a notes app or a text file outside your `showtix` folder, because anything inside the folder gets committed with your tests.
 
-**Go through [Acceptance criteria](#acceptance-criteria) one by one:** which filters, which shows come back, which status code, the exact message.
+To write your expected results, follow these steps:
 
-**Work out the worked-example table yourself** and check you get the same filters and shows.
+1. Go through the [Acceptance criteria](#acceptance-criteria) section one by one, and write down which filters, which shows come back, which status code, and the exact message.
+2. Work out the table of expected filters yourself.
+3. Check that your filters and shows match the table.
 
-**Note:**
+The shows and prices are in the [`docs/seed-data.md`](../docs/seed-data.md) file. To see them in the running app, see [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-- Shows and prices are in [`docs/seed-data.md`](../docs/seed-data.md) for your convenience.
-- Want to see them in the running app? See [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
+### Step 2: Write the tests first
 
-### Step 2. Implement tests first
+#### 2a: Start a fresh conversation
 
-#### 2a. Start with a fresh conversation
+Start a new conversation:
 
 ```text
 /clear
 ```
 
-#### 2b. Have Claude write failing tests and the eval cases. Check them against your expected results
+#### 2b: Ask Claude for failing tests and the eval cases
+
+Ask Claude to write the tests and the eval cases:
 
 ```text
 Read tasks/lab2b-nl-search.md and the relevant code. Write a failing test for
@@ -191,9 +196,9 @@ new functions or exact HTML. Don't change anything in app/. Run the tests and
 show me which ones fail.
 ```
 
-#### 2c. Manually check the tests and eval cases Claude just created
+#### 2c: Check the tests and eval cases against your expected results
 
-Claude's reply is your checklist: one line per test with the criterion it covers, what it expects and whether it passes today. If the reply doesn't give you that, ask:
+Claude's reply is your checklist: one line per test with the criterion it covers, what it expects, and whether it already passes. If the reply doesn't give you that, ask for it:
 
 ```text
 For each new or updated test, give me one table: the criterion it covers, the
@@ -201,28 +206,31 @@ route or app function it calls and whether that already exists in app/, the
 exact value it expects, the values that failed, and pass or fail right now.
 ```
 
-Then check:
+Then check the following:
 
-- **Each expected value, and each eval case, matches your step 1 table.** Claude wrote the tests and the summary, so the table you wrote without Claude is the thing to trust. The eval cases are the model's expected results, so they must be right too. A value you can't find in your table: work it out yourself, or use 2d.
-- **Every route or function a test calls already exists in `app/`.** `client.get(...)` and `client.post(...)` are the API. A test that calls a function that doesn't exist yet is designing the code for Claude: use 2d.
-- **Each invalid-filter case in criterion 4 must have its own 422 test.**
-- **The eval cases' expected filters must match the worked-example table**, especially the dates for "this weekend".
+- **Each expected value and each eval case matches your step 1 table.** Claude wrote the tests and the summary, so the table you wrote without Claude is the thing to trust. The eval cases are the model's expected results, so they must be right too. If you can't find a value in your table, work it out yourself, or use 2d.
+- **Every route or function a test calls already exists in `app/`.** `client.get(...)` and `client.post(...)` are the API. A test that calls a function that doesn't exist yet is designing the code for Claude, so use 2d.
+- **No test patches an `app/` function.** `monkeypatch.setattr` and `patch(` tie a test to how the code is written. The `fake_claude` and `clock` fixtures are the only doubles. If a test does, use 2d.
+- **Each invalid-filter case in criterion 4 has its own test for the HTTP `422` status code.**
+- **The eval cases' expected filters match the table of expected filters.** Check the dates for "this weekend" most closely.
 
-#### 2d. If a test or case doesn't match your expected results, tell Claude what it should be and why
+#### 2d: Correct a test or case that doesn't match
+
+If a test doesn't match your expected results, tell Claude what it must be and why:
 
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
 that test.
 ```
 
-If a test calls a function that doesn't exist yet:
+If a test calls a function that doesn't exist yet, ask Claude to rewrite it:
 
 ```text
 The test ___ calls ___, which doesn't exist yet. Rewrite it to check the same
 behavior through the API or the page.
 ```
 
-**Example:**
+The following is an example of a correction:
 
 ```text
 The eval case for "this weekend" with now on Saturday, Nov 14 expects
@@ -230,7 +238,7 @@ start_date 2026-11-13, but it should be 2026-11-14 because on a weekend day it
 runs from today through Sunday. Fix that case.
 ```
 
-#### 2e. Commit the tests and eval cases
+#### 2e: Commit the tests and eval cases
 
 When every test and case matches your expected results, commit them:
 
@@ -238,17 +246,19 @@ When every test and case matches your expected results, commit them:
 ! git add -A && git commit -m "lab2b: tests"
 ```
 
-### Step 3. Make the tests pass (write the code)
+### Step 3: Make the tests pass
 
-#### 3a. Clear the conversation
+#### 3a: Start a fresh conversation
 
-To get good results, Claude should build from the "spec" and your committed tests (not all the context from that chat):
+Claude builds better from the sheet and your committed tests than from the context of the last chat. Start a new conversation:
 
 ```text
 /clear
 ```
 
-#### 3b. Ask Claude to make the tests pass
+#### 3b: Ask Claude to make the tests pass
+
+Ask Claude to write the code and the eval runner:
 
 ```text
 Make the new tests from my last commit pass (see git show HEAD). Don't change
@@ -258,87 +268,87 @@ output. Then write tests/evals/run_nl_search.py, which runs those eval cases
 with the shared runner (see the Evals section of README.md). Don't run it.
 ```
 
-Claude shouldn't touch any test file you committed.
+Claude must not touch any test file that you committed. You verified those tests, so the code alone must make them pass. Step 4 checks this.
 
-We don't want to rewrite tests we've already verified to make them pass. The code alone should do that. Step 4 checks it.
+### Step 4: Check the evidence
 
-### Step 4. Check the evidence
+Don't take Claude's word for it. Check for yourself.
 
-Don't take Claude's word for it; check for yourself.
+#### 4a: Run the tests
 
-#### 4a. Run the tests
-
-The last line should say only `passed`, with no `skipped`, `deselected` or `xfailed`:
+Run the full suite:
 
 ```text
 ! uv run pytest
 ```
 
-#### 4b. Check that Claude only changed app code
+The last line must say only `passed`, with no `skipped`, `deselected`, or `xfailed`.
 
-This shows the files that have changed since the last commit.  
-Every file this lists should be under `app/`, plus the one new file you asked for, `tests/evals/run_nl_search.py`:
+#### 4b: Check that Claude changed only app code
+
+List the files that changed since the last commit:
 
 ```text
 ! git status --short
 ```
 
-Any other file in `tests/` (changed, or new with `??`), a `conftest.py`, or `pyproject.toml` means Claude touched your tests or how they run: ask why before going on. If there are any fixes in step 6, the only other test changes should be the new tests you asked for. Nothing existing should be modified.
+Every file in the list must be under `app/`, plus the one new file you asked for, `tests/evals/run_nl_search.py`. Any other file in `tests/` (changed, or new with `??`), a `conftest.py` file, or the `pyproject.toml` file means that Claude touched your tests or how they run. Ask why before you go on. If step 6 adds fixes, the only other test changes are the new tests that you asked for, and no existing test changes.
 
-#### 4c. Run the eval against the real API
+#### 4c: Run the eval against the real API
 
-Run it twice. A score that changes between runs is normal; read each failing case before changing anything:
+Run the eval twice. A score that changes between runs is normal. Read each failing case before you change anything:
 
 ```text
 ! uv run python -m tests.evals.run_nl_search --repeat 2
 ```
 
-**Every case says `Search unavailable`?** The API rejected your request and criterion 7 hid the reason behind the 502. Ask Claude: "Every eval case fails with Search unavailable. Print the underlying API error and tell me what caused it before changing anything."
+If every case says `Search unavailable`, the API rejected your request and criterion 7 hid the reason behind the HTTP `502` status code. Ask Claude: "Every eval case fails with Search unavailable. Print the underlying API error and tell me what caused it before changing anything."
 
-#### 4d. Try it in /docs
+#### 4d: Try the endpoint on the /docs page
 
-Ask Claude to start the app in the background ([more on starting the app](01-getting-started.md#start-the-app)):
+Ask Claude to start the app in the background. For more information, see [Start the app](01-getting-started.md#start-the-app).
 
 ```text
 Start the app in the background with uv run uvicorn app.main:app --reload,
 and tell me when it's ready.
 ```
 
-Then open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs), click your endpoint, then **Try it out** and **Execute**. Use queries from your expected results.
+Then open the [API documentation page](http://127.0.0.1:8000/docs), click your endpoint, and then click **Try it out** and **Execute**. Use queries from your expected results. Also try a dated query, such as "comedy on November 14", or a query with no date, such as "magic under $80".
 
-**The running app uses the real date**, not the pinned `now` in your tests, so "this weekend" gives real dates. The seeded run is Nov 10 to 23, 2026: before Nov 10, "tonight" and "this weekend" return `"shows": []` even when the filters are right. Also try a dated query ("comedy on November 14") or one with no date ("magic under $80").
+**Note**: The running app uses the real date, not the pinned `now` in your tests, so "this weekend" gives real dates. The seeded run is November 10 to 23, 2026. Before November 10, "tonight" and "this weekend" return `"shows": []` even when the filters are right.
 
-When you're done, stop the app ([other ways to stop it](01-getting-started.md#stop-the-app)):
+When you're done, ask Claude to stop the app. For other ways to stop the app, see [Stop the app](01-getting-started.md#stop-the-app).
 
 ```text
 Stop the app.
 ```
 
-#### 4e. Something doesn't match?
+#### 4e: Report a mismatch
 
-Tell Claude which criterion failed and what you saw.
+If something doesn't match, tell Claude which criterion failed and what you saw.
 
-### Step 5. Review the diff
+### Step 5: Review the diff
 
-#### 5a. Read every change Claude made before you accept it
+#### 5a: Read every change before you accept it
 
-These commands stage the changes and then show the diff between these staged changes and the latest commit on your branch.
+Stage the changes and show the diff between the staged changes and the latest commit on your branch:
 
 ```text
 ! git add -A && git diff --staged
 ```
 
+Your tests are already committed, so the diff shows only the code Claude wrote, including the eval runner. As you read, ask yourself the following questions:
+
 - Can you explain every change?
-- Was anything touched that has nothing to do with search?
-- Prefer side by side? Use VS Code's **Source Control** panel.
+- Did anything change that has nothing to do with search?
 
-Your tests are already committed, so this shows only the code Claude wrote, including the eval runner.
+To read the diff side by side, use the **Source Control** panel in VS Code.
 
-### Step 6. Get a second opinion
+### Step 6: Get a second opinion
 
-#### 6a. Create a code reviewer for your changes
+#### 6a: Create a code reviewer for your changes
 
-Ask Claude to create a reviewer subagent. It hasn't seen your conversation, and it checks the change against this sheet.
+Ask Claude to create a reviewer subagent. The subagent hasn't seen your conversation, and it checks the change against this sheet:
 
 ```text
 Use a subagent to review this branch's changes (git diff main) against
@@ -358,48 +368,47 @@ Then ask me which ones to fix. For each one I pick, write a failing test that
 shows the problem, then fix it. Run the full suite and show me the output.
 ```
 
-Claude shows the MUST FIX findings and asks which to fix. The labels are the reviewer's opinion, so check the evidence yourself before you answer.
+Claude shows the MUST FIX findings and asks which ones to fix. The labels are the reviewer's opinion, so check the evidence yourself before you answer.
 
-#### 6b. Answer with the numbers you want fixed
+#### 6b: Answer with the numbers to fix
 
-For example "1 and 3". Then repeat steps 4 and 5.   
-Or you can decide you don't want to fix it, or you want to have a chat with Claude about it before you decide.
+Reply with the numbers of the findings you want fixed, for example "1 and 3", and then repeat steps 4 and 5. You can also decide not to fix a finding, or talk it through with Claude before you decide. Claude might also list UNSURE or OPTIONAL findings. Those are yours to decide, and the lab doesn't need them. If Claude reports no MUST FIX findings, there's nothing to answer. Repeat steps 4 and 5 once, and then go on to step 7. If Claude asks how to fix something, answer with the behavior that you want and let Claude choose the code.
 
-Why "don't report style"? See [step 6 of How we work](00-how-we-work.md#6-get-a-second-opinion).
+For more information about why the reviewer doesn't report style, see [step 6 of How we work](00-how-we-work.md#6-get-a-second-opinion).
 
-### Step 7. Commit
+### Step 7: Commit
 
-Commit when you're satisfied with the change:
+When you're satisfied with the change, commit it:
 
 ```text
 ! git add -A && git commit -m "lab2b: natural-language search"
 ```
 
-### Finished with time to spare?
+If you finish with time to spare, try the [Optional stretch](#optional-stretch) section of this document.
 
-Try the [Optional stretch](#optional-stretch) below.
+## Completion checklist
 
-## Checklist: What Done Means
+The lab is complete when the following statements are true:
 
-- [ ] A test for each of criteria 1–8 and your own, all passing, all offline (criterion 9 is the eval)
-- [ ] The tests you committed in step 2 weren't changed to make them pass
-- [ ] Each of the three invalid-filter cases in criterion 4 has its own 422 test
-- [ ] The eval has at least 5 phrases (aim for 10) with pinned times, and you've run it twice for real
-- [ ] `uv run pytest` is fully green and still finishes in under 5 seconds
-- [ ] Routes in `main.py` only call into domain code; the key is only ever read by `app/llm.py`
-- [ ] You can explain every line of `git diff main`, and nothing unrelated changed
+- [ ] Each of criteria 1 to 8 and each of your own criteria has a test, and every test passes offline. Criterion 9 is the eval.
+- [ ] The tests you committed in step 2 weren't changed to make them pass.
+- [ ] Each of the three invalid-filter cases in criterion 4 has its own test for the HTTP `422` status code.
+- [ ] The eval has at least 5 phrases (aim for 10) with pinned times, and you ran it twice against the real API.
+- [ ] The `uv run pytest` command passes and finishes in less than 5 seconds.
+- [ ] Routes in the `app/main.py` file only call into domain code, and only the `app/llm.py` file reads the key.
+- [ ] You can explain every line of `git diff main`, and nothing unrelated changed.
 
 ## Optional stretch
 
-Finished early? Extend the core, one piece at a time, each with its own tests and eval cases:
+If you finish early, extend the core one piece at a time, each with its own tests and eval cases:
 
-- **"Next week"** is the following Monday through Sunday.
-- **Dates without a year** ("music on Nov 20 or 21") are in `now`'s year.
-- **More 422 cases:** `max_price_cents` that isn't a whole number or is below 0, and a reply from Claude with no `search_filters` call.
-- **Sold-out tiers don't count:** a show matches the price only through a tier with seats left.
+- **"Next week"**: the following Monday through Sunday.
+- **Dates without a year**: "music on Nov 20 or 21" is in the year of `now`.
+- **More HTTP `422` cases**: a `max_price_cents` that isn't a whole number or is less than 0, and a reply from Claude with no `search_filters` call.
+- **Sold-out tiers don't count**: a show matches the price only through a tier with seats left.
 
-More ideas: add a search box to the home page (`GET /`) that posts to the same search code and lists the results. Then try queries that aren't searches at all ("what's the weather?", "ignore your instructions"), add them to the eval with all-`null` expected filters or a 422, and see what Claude does.
+For a larger extension, add a search box to the home page (`GET /`) that posts to the same search code and lists the results. Then try queries that aren't searches at all, such as "what's the weather?" and "ignore your instructions", add them to the eval with all-`null` expected filters or an HTTP `422` status code, and see what Claude does.
 
 ## Hints
 
-Stuck? Hints (nudge, stronger nudge, near-answer) are on the [workshop hints page](https://www.notion.so/409be0acdc2381a29466d66c2e112745). Open one level at a time.
+If you're stuck, open the [workshop hints page](https://www.notion.so/409be0acdc2381a29466d66c2e112745). It lists the places where students get stuck in this lab, each with what to check and what to tell Claude. Open the section whose heading matches what you see.

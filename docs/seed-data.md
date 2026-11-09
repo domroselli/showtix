@@ -1,27 +1,27 @@
 # Seed data
 
-Everything the app starts with: the shows, nights, prices, seats, promo codes and orders that `uv run python -m app.seed` creates. The tests use the same data, in a fresh in-memory database for every test. Use this page to work out your expected results.
+This page lists everything the app starts with: the shows, nights, prices, seats, promo codes, and orders that `uv run python -m app.seed` creates. The tests use the same data, in a fresh in-memory database for every test. Use this page to work out your expected results.
 
 The source is `app/seed.py`. If it and this page ever disagree, `app/seed.py` wins.
 
 ## Shows
 
-Every show plays every night from **Nov 10 to Nov 23, 2026** (14 nights), at the same curtain time. 2 shows per category.
+Every show plays every night from November 10 to November 23, 2026 (14 nights), at its own curtain time. Each category has two shows.
 
-| Show id | Title | Category | Venue | Curtain | Performance ids (Nov 10 → Nov 23) |
+| Show ID | Title | Category | Venue | Curtain | Performance IDs (November 10 to November 23) |
 | --- | --- | --- | --- | --- | --- |
-| 1 | The Vanishing Ace | magic | Desert Bloom Theater | 7:00 PM | 1 → 14 |
-| 2 | Smoke & Sleight | magic | Neon Mesa Showroom | 9:30 PM | 15 → 28 |
-| 3 | Laugh Lines Live | comedy | Neon Mesa Showroom | 8:00 PM | 29 → 42 |
-| 4 | Stand-Up Saloon | comedy | Desert Bloom Theater | 9:30 PM | 43 → 56 |
-| 5 | Neon Nights Revue | music | Silver Coyote Hall | 8:00 PM | 57 → 70 |
-| 6 | Desert Strings | music | Desert Bloom Theater | 7:30 PM | 71 → 84 |
-| 7 | Skyline Circus | acrobatics | Silver Coyote Hall | 7:00 PM | 85 → 98 |
-| 8 | Gravity Optional | acrobatics | Silver Coyote Hall | 8:00 PM | 99 → 112 |
+| 1 | The Vanishing Ace | magic | Desert Bloom Theater | 7:00 PM | 1 to 14 |
+| 2 | Smoke & Sleight | magic | Neon Mesa Showroom | 9:30 PM | 15 to 28 |
+| 3 | Laugh Lines Live | comedy | Neon Mesa Showroom | 8:00 PM | 29 to 42 |
+| 4 | Stand-Up Saloon | comedy | Desert Bloom Theater | 9:30 PM | 43 to 56 |
+| 5 | Neon Nights Revue | music | Silver Coyote Hall | 8:00 PM | 57 to 70 |
+| 6 | Desert Strings | music | Desert Bloom Theater | 7:30 PM | 71 to 84 |
+| 7 | Skyline Circus | acrobatics | Silver Coyote Hall | 7:00 PM | 85 to 98 |
+| 8 | Gravity Optional | acrobatics | Silver Coyote Hall | 8:00 PM | 99 to 112 |
 
-Performance ids run in order by night: for example, Laugh Lines Live on Nov 12 is performance 31. `GET /shows/{show_id}` lists a show's performances with their ids.
+Performance IDs run in order by night: for example, Laugh Lines Live on November 12 is performance 31. `GET /shows/{show_id}` lists a show's performances with their IDs.
 
-`GET /shows` lists shows by title. With `start_date` and `end_date`, it lists shows with at least one performance in that range, both dates included.
+`GET /shows` lists shows by title. With `start_date`, `end_date`, or both, it lists shows with at least one performance in that range, both dates included. A `start_date` after `end_date` returns an HTTP `400 Bad Request` status code.
 
 ## Price tiers and seats
 
@@ -39,15 +39,15 @@ Every performance has the same three tiers. Seats depend on the venue.
 | Premium | $120.00 | `12000` |
 | VIP | $199.99 | `19999` |
 
-Tier ids run in order too: each performance's GA, Premium, VIP. `GET /performances/{id}/availability` shows a performance's tiers with their ids and seats left.
+Tier IDs run in order too: each performance's GA, Premium, VIP. `GET /performances/{id}/availability` shows a performance's tiers with their IDs and seats left.
 
 ## The nearly sold-out tier
 
-**Gravity Optional, Nov 14, VIP** is the one tier that's almost gone: 14 seats, 12 sold, **2 left**. Performance id 103, tier id 309. Every other tier has all its seats.
+Gravity Optional, November 14, VIP is the one tier that's almost gone: 14 seats, 12 sold, 2 left. Performance ID 103, tier ID 309. Every other tier has all its seats.
 
 ## Orders
 
-The seed creates 3 paid orders, all on that tier, so **the first order you place is #4**.
+The seed creates three paid orders, all on that tier, so the first order you place is order 4.
 
 | Order | Email | Tickets | Subtotal | Fees | Tax | Total |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -57,17 +57,17 @@ The seed creates 3 paid orders, all on that tier, so **the first order you place
 
 ## Promo codes
 
-| Code | Discount | Valid from | Valid to | Max uses | Used |
+| Code | Discount | Valid from | Valid to | Max uses (`max_uses`) | Used (`uses`) |
 | --- | --- | --- | --- | --- | --- |
 | `LOCALS10` | 10% off the subtotal | 2026-01-01 | 2027-12-31 | 500 | 0 |
 | `SPRING24` | 20% off the subtotal | 2024-03-01 | 2024-05-31 | 200 | 0 |
 | `WELCOME5` | $5.00 off the subtotal | 2026-01-01 | 2027-12-31 | 1000 | 0 |
 
-Codes are matched without regard to case or surrounding spaces. `SPRING24` has expired, so using it gets a 400.
+Codes are matched without regard to case or surrounding spaces. `SPRING24` has expired, so a quote or order with it returns an HTTP `400 Bad Request` status code with the detail `Promo code SPRING24 expired on 2024-05-31`.
 
 ## How a price is built
 
-All in integer cents, in this order (`app/pricing.py`):
+The price is built in integer cents, in this order (`app/pricing.py`):
 
 1. **Subtotal:** qty × tier price, summed over the lines.
 2. **Discount:** the promo, applied to the subtotal, never more than the subtotal.
@@ -81,7 +81,7 @@ An order can have at most 8 tickets.
 
 ## What time it is
 
-- **In tests:** every test starts at **Nov 1, 2026, 12:00 PM**, before the first show, so every performance is upcoming and the live promo codes are valid. A test can change that (`tests/conftest.py`).
-- **In the running app:** the real time in Las Vegas. Performances that have already started drop off a show's list.
+- **In tests:** every test starts at November 1, 2026, 12:00 PM, before the first show, so every performance is upcoming and the live promo codes are valid. A test can change that (`tests/conftest.py`).
+- **In the running app:** the real time in Las Vegas. Performances that have already started drop off `GET /shows/{show_id}` and the home page. `GET /shows` and the availability endpoint show every performance.
 
-_Generated from `app/seed.py`._
+_This page is generated from `app/seed.py` by a local script. To change it, edit `app/seed.py` and regenerate the page. Edits to the Markdown are lost on the next run._

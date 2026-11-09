@@ -1,27 +1,28 @@
 # Getting started
 
-**How to do the everyday things in the labs:** run commands, run the tests, start the app, and save your work.
+This page explains the everyday tasks in the labs: how to run commands, run the tests, start the app, and save your work.
 
-- After [Prerequisites](#prerequisites) and [Get the code](#get-the-code), everything here runs inside Claude Code in a terminal. Not the desktop app: it runs your code in a cloud sandbox, so the app you start there isn't on your laptop and `/clear` isn't available.
-- Every terminal command block has a copy button. Paste it into Claude Code and press Enter.
+After you complete the [Prerequisites](#prerequisites) and [Get the code](#get-the-code) sections, everything on this page runs inside Claude Code in a terminal, not in the desktop app or the VS Code chat panel. For the reasons, see the [Open ShowTix in Claude Code](#open-showtix-in-claude-code) section of this document.
 
-New to the workflow itself? Read `00-how-we-work.md` if you want the full detail.
+On GitHub, every command block on this page has a copy button. To run a command, paste it into Claude Code and press Enter.
+
+For the workflow that every lab follows, see [How we work](00-how-we-work.md).
 
 ## Prerequisites
 
-Install these once, before the workshop. It takes about 20 minutes.
+Install the following tools once, before the workshop. The installation takes about 20 minutes.
 
 | You need | Why | Get it |
 | --- | --- | --- |
-| A Claude Pro or Max plan | Claude Code runs on it. The free plan doesn't include Claude Code. | [claude.com/pricing](https://claude.com/pricing) |
-| git | Downloads the code and saves your work. On Windows, it also gives Claude Code the shell the lab commands run in. | Mac: [git-scm.com/downloads/mac](https://git-scm.com/downloads/mac) · Windows: [Git for Windows](https://git-scm.com/downloads/win) |
+| A Claude Pro or Max plan | Claude Code is included in these plans. The free plan doesn't include Claude Code. | [claude.com/pricing](https://claude.com/pricing) |
+| git | Downloads the code and saves your work. On Windows, it also gives Claude Code the shell that the lab commands run in. | Mac: [git-scm.com/downloads/mac](https://git-scm.com/downloads/mac). Windows: [Git for Windows](https://git-scm.com/downloads/win) |
 | uv | Installs Python and the app's packages, and runs the tests. You don't need to install Python yourself. | [docs.astral.sh/uv](https://docs.astral.sh/uv/getting-started/installation/) |
-| Claude Code | The coding agent you'll work with. Use the terminal version; the desktop app doesn't work for these labs. | [Install Claude Code](https://code.claude.com/docs/en/setup) |
-| A code editor, such as VS Code | Read the code and review Claude's changes side by side. | [code.visualstudio.com](https://code.visualstudio.com/download) |
+| Claude Code | The coding agent that you work with. Use the terminal version, because the desktop app doesn't work for these labs. | [Install Claude Code](https://code.claude.com/docs/en/setup) |
+| A code editor, such as VS Code | Lets you read the code and review Claude's changes side by side. | [code.visualstudio.com](https://code.visualstudio.com/download) |
 
 ### Install on a Mac
 
-In **Terminal** (press Cmd+Space, type `Terminal`, press Enter). The first line offers to install git if you don't have it: accept.
+Open Terminal: press Cmd+Space, type `Terminal`, and press Enter. Then install git, uv, and Claude Code:
 
 ```sh
 git --version
@@ -29,9 +30,11 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 curl -fsSL https://claude.ai/install.sh | bash
 ```
 
+If git isn't installed, the first line offers to install it. Accept the offer.
+
 ### Install on Windows
 
-Install [Git for Windows](https://git-scm.com/downloads/win) first, with its default options. Then, in **PowerShell** (press the Windows key, type `PowerShell`, press Enter):
+Install [Git for Windows](https://git-scm.com/downloads/win) first, with its default options. Then open PowerShell: press the Windows key, type `PowerShell`, and press Enter. Install uv and Claude Code:
 
 ```powershell
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
@@ -40,7 +43,7 @@ irm https://claude.ai/install.ps1 | iex
 
 ### Check
 
-Open a **new** Terminal or PowerShell window, so it sees what you just installed, and run:
+Open a new Terminal or PowerShell window, so that it detects the tools that you installed. Then print the version of each tool:
 
 ```sh
 git --version
@@ -48,13 +51,17 @@ uv --version
 claude --version
 ```
 
-Each line should print a version number. Then start Claude Code once and sign in with your Pro or Max account, not a Console account (type `/exit` to leave):
+Each line prints a version number.
+
+Next, start Claude Code and sign in with your Pro or Max account, not a Console account:
 
 ```sh
 claude
 ```
 
-Last, make sure `ANTHROPIC_API_KEY` isn't set. If it is, Claude Code bills that key instead of your plan. Each of these should print an empty line:
+To leave Claude Code, type `/exit`.
+
+Last, confirm that the `ANTHROPIC_API_KEY` variable isn't set. If it's set, Claude Code offers to use that key instead of your plan, and an accepted offer is remembered. Print the variable for your system:
 
 - Mac:
 
@@ -68,15 +75,17 @@ Last, make sure `ANTHROPIC_API_KEY` isn't set. If it is, Claude Code bills that 
   echo $env:ANTHROPIC_API_KEY
   ```
 
-If it prints a key, remove it (on a Mac, the `export ANTHROPIC_API_KEY=...` line in `~/.zshrc`) and open a new window.
+The command prints an empty line. If it prints a key, remove the key and open a new window. On a Mac, look for an `export ANTHROPIC_API_KEY=...` line in the `~/.zshrc` file, or in the `~/.zprofile` or `~/.zshenv` file.
 
 ## Get the code
 
-Download your own copy of ShowTix and check that it works. Install the [Prerequisites](#prerequisites) first.
+This section explains how to download your own copy of ShowTix and check that it works. Install the [Prerequisites](#prerequisites) first.
 
 ### Mac
 
-1. Open **Terminal** (press Cmd+Space, type `Terminal`, press Enter).
+To get the code on a Mac, follow these steps:
+
+1. Open Terminal: press Cmd+Space, type `Terminal`, and press Enter.
 2. Copy the code into a `showtix` folder in your home folder, install what it needs, and run the tests:
 
    ```sh
@@ -87,11 +96,13 @@ Download your own copy of ShowTix and check that it works. Install the [Prerequi
    uv run pytest
    ```
 
-3. Your copy is in `/Users/<your name>/showtix`.
+   Your copy is in the `/Users/<your name>/showtix` folder.
 
 ### Windows
 
-1. Open **PowerShell** (press the Windows key, type `PowerShell`, press Enter).
+To get the code on Windows, follow these steps:
+
+1. Open PowerShell: press the Windows key, type `PowerShell`, and press Enter.
 2. Copy the code into a `showtix` folder in your user folder, install what it needs, and run the tests:
 
    ```powershell
@@ -102,113 +113,126 @@ Download your own copy of ShowTix and check that it works. Install the [Prerequi
    uv run pytest
    ```
 
-3. Your copy is in `C:\Users\<your name>\showtix`.
+   Your copy is in the `C:\Users\<your name>\showtix` folder.
 
-The last line should say something like `113 passed`. A "not found" error means a prerequisite isn't installed yet: see [Check](#check).
+The last line of the test output says something like `113 passed`. A "not found" error means that a prerequisite isn't installed yet. For more information, see the [Check](#check) section of this document.
 
 ## Open ShowTix in Claude Code
 
-Claude Code works on the folder it was started in, so start it in your `showtix` folder.
+Claude Code works on the folder that it starts in, so start it in your `showtix` folder.
 
-- **In a terminal** (Terminal on a Mac, PowerShell on Windows): go to the folder and start Claude Code. Type `/exit` to leave.
+To open ShowTix in Claude Code, follow these steps:
 
-  ```sh
-  cd ~/showtix
-  claude
-  ```
+1. In a terminal (Terminal on a Mac, PowerShell on Windows), go to the folder and start Claude Code:
 
-- **Not the desktop app.** It runs commands in a cloud sandbox, so the app wouldn't be at `127.0.0.1:8000` on your laptop, and `/clear` doesn't exist there. If it's what you have installed, install the terminal version too (see [Prerequisites](#prerequisites)).
-- **Sign in** with your own Claude Pro or Max plan, not a Console account.
+   ```sh
+   cd ~/showtix
+   claude
+   ```
 
-You're ready when Claude Code shows a prompt waiting for you to type.
+2. Sign in with your own Claude Pro or Max plan, not a Console account.
 
-## Set up VS Code (optional)
+You're ready when Claude Code shows a prompt that waits for you to type.
 
-ShowTix recommends four extensions. Open your `showtix` folder in VS Code (**File > Open Folder**) and click **Install** when VS Code offers them. Missed the offer? Open the Extensions panel and search for `@recommended`.
+**Caution**: Don't use the desktop app or the VS Code chat panel for the labs. The lab sheets rely on the terminal's `!` commands, which those two don't support, and on an app that runs at `127.0.0.1:8000` on your laptop. If the desktop app is what you have installed, also install the terminal version. For more information, see the [Prerequisites](#prerequisites) section of this document.
+
+## Optional: Set up VS Code
+
+ShowTix recommends four extensions. To install them, open your `showtix` folder in VS Code (**File > Open Folder**) and click **Install** when VS Code offers them. If you missed the offer, open the **Extensions** panel and search for `@recommended`.
+
+The following table describes the extensions:
 
 | Extension | What it gives you |
 | --- | --- |
 | Claude Code | Shows Claude's proposed edits in VS Code's side-by-side diff view. |
 | Markdown Preview GitHub Styling | Makes VS Code's preview of the lab sheets look like GitHub. |
 | Python | Colors the code, flags errors, and lets you Cmd-click or Ctrl-click a function to jump to it. |
-| SQLite Viewer | Click `showtix.db` to look at the shows, orders and other tables. |
+| SQLite Viewer | Lets you click the `showtix.db` file to look at the shows, orders, and other tables. |
 
-To use Claude Code with VS Code, open **Terminal > New Terminal** and run `claude` there. It connects to the extension on its own.
+To use Claude Code with VS Code, open **Terminal > New Terminal** and run `claude` there. Claude Code connects to the extension on its own.
 
-**Use the terminal, not the Claude Code chat panel.** The panel doesn't support the `!` commands in the lab sheets.
+Use the terminal, not the Claude Code chat panel. The panel doesn't support the `!` commands in the lab sheets.
 
-To read a lab sheet, open it and press Cmd+Shift+V (Mac) or Ctrl+Shift+V (Windows).
+To read a lab sheet in VS Code, open the sheet and press Cmd+Shift+V (Mac) or Ctrl+Shift+V (Windows).
 
 ## Run a command yourself
 
-To run a terminal command yourself from Claude Code, without asking Claude to do it, start the line with `!`. The output shows up in the conversation, and Claude sees it too.
+To run a terminal command yourself from Claude Code, without asking Claude to do it, start the line with `!`. The output appears in the conversation, and Claude reads it too. For example, run the tests:
 
 ```text
 ! uv run pytest
 ```
 
+The following notes apply to `!` commands:
+
 - `&&` runs commands one after another and stops at the first one that fails.
 - A line without `!` goes to Claude as a request.
-- Pasting a line that starts with `!` switches Claude Code to command mode on its own.
+- When you paste a line that starts with `!`, Claude Code switches to command mode on its own.
 
 Every command in the lab sheets starts with `!`, so you can copy it as is.
 
 ## Start fresh
 
-`/clear` empties Claude's memory of the conversation, so it starts the next task without old ideas.
+The `/clear` command empties Claude's memory of the conversation, so Claude starts the next task without old ideas:
 
 ```text
 /clear
 ```
 
-- Use it at the start of every lab.
-- Use it before writing tests and before implementing (steps 2 and 3 of the workflow), so Claude works from the sheet and your committed tests, not the chat.
-- Use it when a conversation has gone off track.
+Use the command at the following times:
 
-Your files and commits aren't affected; only the conversation is cleared.
+- At the start of every lab.
+- Before steps 2 and 3 of the workflow, when Claude writes tests and when Claude implements. Claude then works from the sheet and your committed tests, not from the chat.
+- When a conversation has gone off track.
+
+The command clears only the conversation. Your files and commits aren't affected.
 
 ## Start a lab branch
 
-Each lab gets its own branch, made from `main`, so labs don't mix. The command also resets the database, so every lab starts from the same data. Your sheet's **Starting branch** section has the exact command. It looks like this:
+Each lab gets its own branch, made from `main`, so that labs don't mix. The starting command also resets the database, so every lab starts from the same data. Your sheet's **Starting branch** section has the exact command, which looks like this:
 
 ```text
 ! git switch main && uv run python -m app.seed && git switch -c lab1a-category-filter && uv run pytest
 ```
 
-That's four commands joined by `&&`. Here's what each one does, in order:
+The Lab 1 line is four commands joined by `&&`. Lab 2 sheets add a fifth, `uv run python -m app.llm`, which checks your API key. The following table describes each command, in order:
 
 | Command | What it does |
 | --- | --- |
-| `git switch main` | Moves you to the `main` branch, so your new branch starts from the original code, not from another lab. |
+| `git switch main` | Moves you to the `main` branch, so that your new branch starts from the original code, not from another lab. |
 | `uv run python -m app.seed` | Resets the database to the starting data. See [Reset the database](#reset-the-database). |
-| `git switch -c lab1a-category-filter` | Creates a new branch with this name and moves you onto it. `-c` means create. Your commits for this lab go here. |
-| `uv run pytest` | Runs all the tests, to prove everything works before you start. |
+| `git switch -c lab1a-category-filter` | Creates a branch with this name and moves you onto it. The `-c` flag means create. Your commits for this lab go here. |
+| `uv run pytest` | Runs all of the tests, to prove that everything works before you start. |
+| `uv run python -m app.llm` (Lab 2) | Checks that your Claude API key works. See [Set up your API key](#set-up-your-api-key-lab-2). |
 
-- Every test should pass before you change anything.
-- If you have uncommitted work from another lab, `git switch` stops and says so. [Commit](#commit) it first.
-- To see which branch you're on:
+Every test must pass before you change anything. The last line of the test run says `passed`, with no `failed`.
+
+The following notes apply to the starting command:
+
+- If you have uncommitted work from another lab, [commit](#commit) it before you run the starting command. When the changes conflict with `main`, `git switch` stops and says so. When they don't, `git switch` carries them onto the new branch, and the lab starts with another lab's edits. Run `! git status --short` first; the list must be empty.
+- To see which branch you're on, print its name:
 
   ```text
   ! git branch --show-current
   ```
 
-The last line of the test run should say `passed`, with no `failed`.
-
 ## Run the tests
 
-The full suite takes under 5 seconds, so run it often.
+The full suite takes less than 5 seconds, so run it often:
 
 ```text
 ! uv run pytest
 ```
 
-- One file:
+You can also run part of the suite:
+
+- Run one file:
 
   ```text
   ! uv run pytest tests/test_shows.py
   ```
 
-- Only tests whose name contains a word:
+- Run only the tests whose name contains a word:
 
   ```text
   ! uv run pytest -k category
@@ -220,7 +244,7 @@ The full suite takes under 5 seconds, so run it often.
   ! uv run pytest -x -v
   ```
 
-The last line counts what passed and failed. Read the first failure first; later ones often follow from it.
+The last line counts what passed and failed. Read the first failure first, because later failures often follow from it.
 
 ## Start the app
 
@@ -231,128 +255,140 @@ Start the app in the background with uv run uvicorn app.main:app --reload,
 and tell me when it's ready.
 ```
 
-- Claude asks permission to run it: approve.
-- Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) for the ticket shop, or [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) to try the API (see [Try an endpoint in /docs](#try-an-endpoint-in-docs)).
-- `--reload` restarts the app whenever the code changes, so you don't have to.
+Claude asks for permission to run the command. Approve it.
 
-Changed the database schema? [Reset the database](#reset-the-database) first, or the pages will break even while the tests pass.
+When the app is ready, open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) for the ticket shop, or [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) to try the API. For more information, see the [Try an endpoint in /docs](#try-an-endpoint-in-docs) section of this document.
+
+The `--reload` flag restarts the app whenever the code changes, so you don't have to.
+
+**Caution**: If you changed the database schema, [reset the database](#reset-the-database) before you open the app. Otherwise, the pages break even though the tests pass.
 
 ## Try an endpoint in /docs
 
-[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) lists every API endpoint and lets you call one from your browser.
+The page at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) lists every API endpoint and lets you call one from your browser.
+
+To call an endpoint, follow these steps:
 
 1. Click an endpoint, for example **GET /shows**.
-2. Click **Try it out**, fill in any parameters, then click **Execute**.
-3. Scroll down to **Server response**: **Code** is the status code (200, 400, 404 …) and **Response body** is what came back.
+2. Click **Try it out**, fill in any parameters, and then click **Execute**.
+3. Scroll down to **Server response**. **Code** is the status code, such as `200`, `400`, or `404`, and **Response body** is what came back.
 
-The **Request URL** box shows the link for the same request, which you can open directly in your browser.
+The **Request URL** box shows the link for the same request. You can open that link directly in your browser.
 
 ## Use the web UI
 
-[http://127.0.0.1:8000/](http://127.0.0.1:8000/) is the ShowTix site. To place an order:
+The ShowTix site is at [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
 
-1. Click a date under any show.
-2. In the **Qty** column, enter how many tickets you want. If you have a promo code, type it in **Promo code**. Click **Get quote**.
-3. Read the price breakdown. To try a different cart, go back to the date page.
-4. Enter any email and click **Place order**. You land on the order's page.
+To place an order, follow these steps:
+
+1. Click a night under any show.
+2. In the **Qty** column, enter how many tickets you want.
+3. If you have a promo code, type it in **Promo code**.
+4. Click **Get quote**, and read the price breakdown. To try a different cart, go back to the night's page.
+5. Enter any email and click **Place order**. You land on the order's page.
 
 ## Stop the app
 
-Stop the app when you're done checking, or before starting it again.
+Stop the app when you're done checking, or before you start it again. Ask Claude to stop it:
 
 ```text
 Stop the app.
 ```
 
-- You can also stop it yourself: type `/tasks` and stop it from the list.
-- Quitting Claude Code stops it too.
-- "Address already in use" means the app is still running: stop it, then start it again.
+You can also stop the app in the following ways:
+
+- Type `/tasks` and stop the app from the list.
+- Quit Claude Code, which stops the app too.
+
+An "Address already in use" error means that the app is still running. Stop it, and then start it again.
 
 ## Reset the database
 
-The running app keeps its data in `showtix.db`. Resetting puts back the starting data from [`docs/seed-data.md`](../docs/seed-data.md).
+The running app keeps its data in the `showtix.db` file. A reset deletes the file and rebuilds it from the `app/seed.py` file. The [Seed data](../docs/seed-data.md) page lists that data:
 
 ```text
 ! uv run python -m app.seed
 ```
 
-- Do it after a schema change (a new table or column in `app/db.py`).
-- Do it when the pages look strange, or you want a clean start.
-- It deletes everything you added in the browser. Tests aren't affected: they use their own database.
+Reset the database at the following times:
 
-The running app picks up the fresh database on its next request; no restart needed.
+- After a schema change, such as a new table or column in the `app/db.py` file.
+- When the pages look strange, or when you want a clean start.
+
+A reset deletes everything that you added in the browser. Tests aren't affected, because they use their own database. The running app picks up the fresh database on its next request, so you don't need to restart it.
 
 ## See what changed
 
-Before you commit, look at what you're about to save.
+Before you commit, look at what you're about to save. List the changed files:
 
 ```text
 ! git status
 ```
 
-That lists the changed files.
-
-To see every change, including new files:
+To see every change, including new files, stage the changes and show the diff:
 
 ```text
 ! git add -A && git diff --staged
 ```
 
-- `git add -A` only stages changes; nothing is saved until you commit.
-- In VS Code, the **Source Control** panel shows the same changes side by side.
+The `git add -A` command only stages changes. Nothing is saved until you commit. In VS Code, the **Source Control** panel shows the same changes side by side.
 
-Your tests are committed before Claude implements, so the diff after that shows only the code Claude wrote.
+Your tests are committed before Claude implements, so the diff after that point shows only the code that Claude wrote.
 
 ## Check your tests didn't change
 
-Your tests are committed before Claude implements, so a change to them, or to how they run, shows up in git.
+Your tests are committed before Claude implements, so a change to them, or to how they run, appears in git. List the changed files:
 
 ```text
 ! git status --short
 ```
 
-- Every file it lists should be under `app/`.
-- A file in `tests/` (changed, or new with `??`), a `conftest.py`, or `pyproject.toml` means Claude touched your tests or how they run. Ask Claude what it changed and why.
-- On labs built slice by slice (1e, 1f, 2c), you commit after each slice, so also run this. It should list only your tests commit:
+Check the list against the following rules:
+
+- Every file in the list must be under `app/`.
+- A changed or new (`??`) file in `tests/`, a `conftest.py` file, or the `pyproject.toml` file means that Claude touched your tests or how they run. Ask Claude what changed and why.
+- On labs built slice by slice (1e, 1f, 2c), you commit after each slice, so also list the commits that touched the tests. The list contains your tests commit, plus any commit that your sheet tells you to expect, such as the eval runner on Lab 2c or a fix to a wrong test that you asked for:
 
   ```text
   ! git log --oneline --stat main..HEAD -- tests/ conftest.py pyproject.toml
   ```
 
-Then check the last line of the test run: it should say only `passed`, with no `skipped`, `deselected` or `xfailed`. Changed tests aren't always wrong, but you decide, not Claude.
+Then check the last line of the test run. It says only `passed`, with no `skipped`, `deselected`, or `xfailed`. Changed tests aren't always wrong, but you decide, not Claude.
 
 ## Commit
 
-A commit is a safe point: if anything goes wrong later, you can get back here.
+A commit is a safe point. If anything goes wrong later, you can get back to it. Stage every change and commit it:
 
 ```text
 ! git add -A && git commit -m "lab1a: tests"
 ```
 
-- Your sheet gives the exact message for each commit.
-- `-A` includes new files, such as a new test file.
-- Commit your tests before Claude implements, and again when you're happy with the change.
+The following rules apply to commits in the labs:
 
-Committing often costs nothing, and every commit is a point you can return to.
+- Your sheet gives the exact message for each commit.
+- The `-A` flag includes new files, such as a new test file.
+- Commit your tests before Claude implements, and commit again when you're satisfied with the change.
 
 ## Set up your API key (Lab 2)
 
-Lab 2 features call the Claude API with a key of their own, kept in a file called `.env` that git never saves.
+Lab 2 features call the Claude API with a key of their own, kept in a file named `.env` that git never saves.
 
-1. Make your own `.env` from the example:
+To set up the key, follow these steps:
+
+1. Create a key in the Claude Console at platform.claude.com. Sign in with the account that holds your workshop credits, because the credits are tied to that account, not to the key. Open **API keys** and create a key. The key is shown once, so keep the page open until step 3.
+2. Make your own `.env` file from the example:
 
    ```text
    ! cp .env.example .env
    ```
 
-2. Open `.env` in your editor and paste your key after `SHOWTIX_CLAUDE_KEY=`. Use `.env`, never `.env.example`, which git does save.
-
-   **Never paste the key into Claude Code**, in a prompt or a `!` command. Anything you type there becomes part of the conversation, and Claude can copy it into a file and from there into a commit. Your editor is the only place the key should go.
-
-3. Check that the key works. It should print `OK: Claude API key works`:
+3. Open the `.env` file in your editor and paste your key after `SHOWTIX_CLAUDE_KEY=`. Use the `.env` file, never the `.env.example` file, which git does save.
+4. Check that the key works:
 
    ```text
    ! uv run python -m app.llm
    ```
 
-If the check fails, its message says what to fix (a missing key, a rejected key, no credits, no connection). The app only reads `SHOWTIX_CLAUDE_KEY`; never put the key in `ANTHROPIC_API_KEY`, or Claude Code bills that key instead of your plan.
+   The check prints `OK: Claude API key works`. If the check fails, its message says what to fix: a missing key, a rejected key, no credits, a rate limit, or no connection.
+
+**Warning**: Never paste the key into Claude Code, in a prompt or in a `!` command. Anything that you type there becomes part of the conversation, and Claude can copy it into a file and from there into a commit. Your editor is the only place that the key goes. Also, don't put the key in `ANTHROPIC_API_KEY`: the app reads only `SHOWTIX_CLAUDE_KEY`, and Claude Code offers to bill a key in `ANTHROPIC_API_KEY` instead of your plan.

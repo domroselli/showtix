@@ -6,9 +6,24 @@ A small ticketing backend for fictional Las Vegas shows.
 
 [`docs/architecture.md`](docs/architecture.md) has eight diagrams: request flow, the order lifecycle, pricing, Lab 2 features, the workflow, the data model, a quote through the code, and the test harness. Start there if the code is new to you. [`docs/seed-data.md`](docs/seed-data.md) lists the data the app starts with: every show, night, price, seat count, promo code and seeded order.
 
+## Labs
+
+Every lab runs inside Claude Code. Before your first lab, read [Getting started](tasks/01-getting-started.md) for how to get the code and run it, and [How we work](tasks/00-how-we-work.md) for the workflow that every sheet follows. [`CLAUDE.md`](CLAUDE.md) holds the project rules that Claude Code reads on every run.
+
+The instructor runs two demos:
+
+- [Demo 1: Cap the service fees](tasks/demo1-fee-cap.md) (before Lab 1, 10 minutes)
+- [Demo 2: Add a show tagline](tasks/demo2-show-tagline.md) (before Lab 2, 10 minutes)
+
+Pick one Lab 1 and one Lab 2 at your tier. Lab 1 changes the app, and Lab 2 adds a Claude API feature.
+
+- **Starter, 50 minutes:** [Lab 1a: Category filter](tasks/lab1a-category-filter.md), [Lab 1b: Itemized receipt](tasks/lab1b-itemized-receipt.md), [Lab 2a: Support reply drafter](tasks/lab2a-support-reply.md)
+- **Intermediate, 50 minutes:** [Lab 1c: Group discount](tasks/lab1c-group-discount.md), [Lab 1d: Promo usage limits](tasks/lab1d-promo-limits.md), [Lab 2b: Natural-language search](tasks/lab2b-nl-search.md)
+- **Advanced:** [Lab 1e: Waitlist](tasks/lab1e-waitlist.md) (60 minutes), [Lab 1f: Expiring seat holds](tasks/lab1f-seat-holds.md) (60 minutes), [Lab 2c: AI concierge](tasks/lab2c-ai-concierge.md) (70 minutes)
+
 ## Setup
 
-Requires [uv](https://docs.astral.sh/uv/). uv installs Python 3.12 if you don't have it.
+ShowTix requires [uv](https://docs.astral.sh/uv/). uv installs Python 3.12 if you don't have it. To clone the code first, see the "Get the code" section of [Getting started](tasks/01-getting-started.md).
 
 ```sh
 uv sync
@@ -22,14 +37,14 @@ Open http://127.0.0.1:8000/docs to browse and try every API endpoint. The databa
 
 ## API key (Lab 2)
 
-Some Lab 2 features call the Claude API. They read the key from `SHOWTIX_CLAUDE_KEY` in a `.env` file at the repo root, never from `ANTHROPIC_API_KEY`, so Claude Code keeps using your own sign-in.
+Some Lab 2 features call the Claude API. They read the key from `SHOWTIX_CLAUDE_KEY` in a `.env` file at the repository root, never from `ANTHROPIC_API_KEY`, so Claude Code keeps using your own sign-in.
 
 ```sh
 cp .env.example .env
 # then edit .env: SHOWTIX_CLAUDE_KEY=sk-ant-...
 ```
 
-`.env` is gitignored; never commit it. Without a key, those features return 503 with "Claude API key not configured: set SHOWTIX_CLAUDE_KEY in .env". Everything else works without one, and the tests never need it: they use a fake client and stay offline.
+`.env` is gitignored; never commit it. Without a key, those features return an HTTP `503` status code with the message "Claude API key not configured: set SHOWTIX_CLAUDE_KEY in .env". Everything else works without one, and the tests never need it: they use a fake client and stay offline.
 
 Check your key with one tiny call:
 
@@ -41,7 +56,7 @@ It prints `OK: Claude API key works`, or one line saying what to fix: missing ke
 
 ## Evals (Lab 2)
 
-Unit tests use a fake client; evals check the real model against the API and give a score, not a guaranteed pass. Every test gets the fake automatically, and pytest never collects `tests/evals/`.
+Unit tests use a fake client. Evals check the real model against the API and give a score, not a guaranteed pass. Every test gets the fake automatically, and pytest never collects `tests/evals/`.
 
 A feature's eval is a JSON list of cases plus a script that hands them to the shared runner:
 
@@ -61,13 +76,15 @@ Run it with `uv run python -m tests.evals.run_support_reply`, and add `--repeat 
 
 ## Endpoints
 
-| Method | Path | Does |
+The following table lists the JSON endpoints.
+
+| Method | Path | Description |
 | --- | --- | --- |
-| GET | /shows | List shows; optional `start_date` and `end_date` (YYYY-MM-DD) |
+| GET | /shows | List shows. With `start_date` and `end_date` (`YYYY-MM-DD`), only shows with a performance in that range, both dates included |
 | GET | /shows/{id} | Show detail with upcoming performances |
 | GET | /performances/{id}/availability | Seats left per tier |
 | POST | /orders/quote | Price breakdown for a cart and optional promo; writes nothing |
-| POST | /orders | Create a paid order and take the seats |
+| POST | /orders | Create a paid order and take the seats. Returns `201` |
 | POST | /orders/{id}/cancel | Cancel an order and release its seats |
 
 Example quote body:
@@ -78,28 +95,32 @@ Example quote body:
 
 ## Web pages
 
-| Path | Shows |
-| --- | --- |
-| / | Every show with its category, venue and upcoming performances |
-| /performances/{id} | Tiers, prices, seats left and a quote form |
-| /orders/{id} | Confirmation for a placed order |
+The following table lists the server-rendered pages and their form posts.
+
+| Method | Path | Description |
+| --- | --- | --- |
+| GET | / | Every show with its category, venue and upcoming performances |
+| GET | /performances/{id} | Tiers, prices, seats left and a quote form |
+| POST | /performances/{id}/quote | Price the cart in the form and show the breakdown on the same page |
+| POST | /performances/{id}/orders | Place the order and redirect to its confirmation page (303) |
+| GET | /orders/{id} | Confirmation for a placed order |
 
 ## Seed data
 
-- 8 shows (magic, comedy, music, acrobatics) at 3 venues
-- One performance per show every night, Nov 10 to Nov 23, 2026
+- Eight shows (magic, comedy, music, acrobatics) at three venues
+- One performance per show every night, November 10 to November 23, 2026
 - Three tiers per performance: GA $69, Premium $120, VIP $199.99
 - Promo codes: `LOCALS10` (10% off), `WELCOME5` ($5 off), `SPRING24` (expired)
-- Gravity Optional's VIP tier on Nov 14 has only 2 seats left
+- Three seeded orders on Gravity Optional's VIP tier for November 14 leave it with 2 seats of 14, so the first order that you place is #4
 
 ## Glossary
 
-- **Show:** a production, like a magic act or a comedy night. Runs at one venue.
+- **Show:** a production, like a magic act or a comedy night. A show runs at one venue.
 - **Performance:** one night of a show, with a start time in local Vegas time.
 - **Tier:** a price level for a performance's seats: GA (general admission), Premium or VIP. Each tier has a fixed number of seats.
 - **Quote:** the price breakdown for a cart, before buying. Nothing is saved.
 - **Order:** a purchase of tickets for one performance. Paid when created; can be cancelled.
-- **Promo code:** a discount on the ticket subtotal, either a percent (`LOCALS10`) or a fixed amount (`WELCOME5`). Promos have a valid date range.
+- **Promo code:** a discount on the ticket subtotal, either a percent (`LOCALS10`) or a fixed amount (`WELCOME5`). Promos have a valid date range and a maximum number of uses.
 - **Service fee:** $7.50 per ticket, added after any discount. Never discounted, never taxed.
 - **Tax:** a simplified 9% workshop rate on the discounted ticket subtotal.
 - **Cents:** every amount in the API is an integer number of cents. `25044` means $250.44.

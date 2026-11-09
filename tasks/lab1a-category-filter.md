@@ -1,127 +1,124 @@
 # Lab 1a: Category filter
 
-- **Tier:** Starter
-- **Time:** 50 minutes
-- Solo or with a partner
+- **Tier**: Starter
+- **Time**: 50 minutes
+- **Format**: solo or with a partner
 
 ## Start here
 
-**New here?** Read [Getting started](01-getting-started.md) for running commands and the app, then [How we work](00-how-we-work.md) for the workflow (about 5 minutes).
+If this is your first lab, read [Getting started](01-getting-started.md) for how to run commands and the app, and then read [How we work](00-how-we-work.md) for the workflow. Each page takes about 5 minutes to read.
 
-**Your first lab:** a small filter, built with the full workflow.
+In this lab, you build a small filter with the full seven-step workflow.
 
-1. Run the command under [Starting branch](#starting-branch).
-2. Read [Goal](#goal), [Background](#background) and [Acceptance criteria](#acceptance-criteria).
-3. Follow [The workflow](#the-workflow) step by step.
+To run this lab, follow these steps:
 
-**Step 1 is yours:** write out (or think about) your expected results before you ask Claude anything.
+1. Type `/clear` in Claude Code to start a fresh conversation.
+2. Run the command in the [Starting branch](#starting-branch) section of this document.
+3. Read the [Goal](#goal), [Background](#background), and [Acceptance criteria](#acceptance-criteria) sections.
+4. Follow the [Workflow](#workflow) section step by step.
 
-**You're done when you can check every box under [Checklist: What Done Means](#checklist-what-done-means).**
+Step 1 is yours: write out your expected results before you ask Claude anything.
 
-**Extra time?** Try the [Optional stretch](#optional-stretch). Stuck? See [Hints](#hints).
+You're done when you can check every box in the [Completion checklist](#completion-checklist) section of this document. If you have time left, try the [Optional stretch](#optional-stretch) section. If you're stuck, see the [Hints](#hints) section.
 
 ## Goal
 
-#### Let customers list shows by category: `GET /shows?category=comedy`.
+Let customers list shows by category with the `GET /shows?category=comedy` request.
 
 ## Starting branch
 
-Copy the command below and run in Claude Code
+To create your lab branch, enter the following command in Claude Code:
 
 ```text
 ! git switch main && uv run python -m app.seed && git switch -c lab1a-category-filter && uv run pytest
 ```
 
-Here's what it does:
+The command does the following, in order:
 
-1. Switches to `main`, so the new branch starts from the original code
-2. Resets the database to the seed data
-3. Creates new feature branch `lab1a-category-filter` from `main`
-4. Runs the tests
+1. Switches to the `main` branch, so the new branch starts from the original code.
+2. Resets the database to the seed data.
+3. Creates the `lab1a-category-filter` feature branch from `main`.
+4. Runs the tests.
 
-Every test should pass before you change anything.
-
-**Trouble?** See [Start a lab branch](01-getting-started.md#start-a-lab-branch).
+Every test passes before you change anything. If the command fails, see [Start a lab branch](01-getting-started.md#start-a-lab-branch).
 
 ## Background
 
-Here is the relevant background about the feature you'll be building:
+The following list describes the code that this feature touches:
 
-- `GET /shows` already takes `start_date` and `end_date`. The route is in `app/main.py`; the query is built in `shows.list_shows()` in `app/shows.py`.
-- Every show has one of four categories, `magic`, `comedy`, `music` or `acrobatics`, and the seed data has exactly 2 of each. Every show plays nightly from Nov 10 to Nov 23, 2026 (all of it is in [`docs/seed-data.md`](../docs/seed-data.md)).
-- Domain code reports bad input by raising `BadRequest` from `app/errors.py`, which becomes a 400.
+- The `GET /shows` endpoint already takes `start_date` and `end_date`. The route is in the `app/main.py` file, and the `shows.list_shows()` function in the `app/shows.py` file builds the query.
+- Every show has one of four categories: `magic`, `comedy`, `music`, or `acrobatics`. The seed data has exactly 2 shows in each category, and every show plays nightly from November 10 to November 23, 2026. The `docs/seed-data.md` file lists all of the seed data.
+- Domain code reports bad input by raising `BadRequest` from the `app/errors.py` file, which becomes an HTTP `400 Bad Request` status code.
 
-**For an illustration of the request flow through these files, see [`docs/architecture.md`](../docs/architecture.md).**
+For an illustration of the request flow through these files, see [Architecture](../docs/architecture.md).
 
 ## Acceptance criteria
 
-In this lab, the full criteria are given below.
+This lab gives you the full list of criteria. Every criterion needs at least one test.
 
-**Every criterion needs at least one test.**
-
-1. `GET /shows?category=comedy` returns exactly `Laugh Lines Live` and `Stand-Up Saloon`, ordered by title.
-2. Each of the four categories returns exactly its 2 shows.
+1. The `GET /shows?category=comedy` request returns exactly `Laugh Lines Live` and `Stand-Up Saloon`, ordered by title.
+2. Each of the four categories returns exactly its 2 shows, ordered by title.
 3. Matching ignores case: `?category=Comedy` returns the same 2 shows as `?category=comedy`.
-4. Without `category`, `GET /shows` returns all 8 shows, as before.
-5. Category combines with dates: `?category=music&start_date=2026-11-20` returns both music shows; `?category=music&start_date=2026-11-24` returns `[]`.
-6. An unknown category returns 400 with the detail `Unknown category 'opera'. Choose one of: acrobatics, comedy, magic, music`.
-7. `category` shows up as an optional query parameter in /docs (test it through `client.get("/openapi.json")`).
+4. Without `category`, the `GET /shows` request returns all 8 shows, as before.
+5. Category combines with dates: `?category=music&start_date=2026-11-20` returns both music shows, and `?category=music&start_date=2026-11-24` returns `[]`.
+6. An unknown category returns an HTTP `400` status code with the detail `Unknown category 'opera'. Choose one of: acrobatics, comedy, magic, music`.
+7. The `category` parameter appears on the `/docs` page as an optional query parameter, that is, with no `* required` marker, next to `start_date` and `end_date`. Claude tests this through `client.get("/openapi.json")`.
 
-## The workflow
+## Workflow
 
-#### Introduction
+### About the workflow
 
-There are many workflows out there.
+There are many workflows for working with a coding agent, and engineers are still finding out what works for them. The models change fast, so a method that works well can fall out of use within months or even weeks. You'll probably settle on your own workflow in time, if you don't have one already. This lab introduces one way to build good software reliably with a coding agent such as Claude.
 
-Engineers are still experimenting and finding what works for them. The models are changing and improving so rapidly that what works great today may get discarded 3 months from now (or, next week). You'll probably come up with your own workflow eventually (or maybe you already have one). All we're doing here is introducing you to one way you can build good software reliably with a coding agent like Claude.  
+The main point is that there's no single correct way:
 
-The main takeaway is this: there is no "correct" way right now.
+- Some things are worth doing.
+- Some things are worth avoiding.
+- Some things work in certain situations with certain models.
 
-- There are things you should do.
-- There are things you shouldn't do. 
-- There are things that seem to work in certain situations with the models we have right now.
+The workflow in this lab combines software engineering principles that have held up for decades with the practices that Anthropic and others recommend. Use what works for you, and share your results.
 
-The workflow in this lab is based on general software engineering principles that have been around for decades, combined with best practices given by Anthropic (and others).
+**Note**: People who work with Claude or another coding agent often align on an idea first, have the agent write it into a spec, and then create work items such as user stories or issues for the agent to work on, all before steps 2 to 7. This lab has limited time, so it focuses on the coding and review parts of the flow. We recommend that you try the spec and work-item parts on your own time.
 
-We encourage you to use what works for you and share your results.
+### Workflow overview
 
-**<ins>One thing to note:</ins>** Often people who work with Claude (or Codex, etc...) first get alignment on an idea, have Claude put that into a spec, and create work items (user stories, issues, etc...) for Claude to work on *before* steps 2-7. Since this is a lab and we have limited time, we're focusing on the coding and review aspects of the flow. But we highly recommend you get experience with this on your own time.
+The workflow has the following seven steps:
 
-#### Workflow Overview
-
-1. Write your expected results (no Claude yet).
-2. Start a fresh conversation. Claude writes failing tests. You check them against your expected results, then commit.
+1. Write your expected results, without Claude.
+2. Start a fresh conversation. Claude writes failing tests. You check them against your expected results, and then you commit them.
 3. Start a fresh conversation. Claude makes the tests pass without changing them.
-4. Check the evidence: run the tests, confirm only app/ changed, try it in the browser.
+4. Check the evidence: run the tests, confirm that only the `app/` directory changed, and try the feature in your browser.
 5. Review the diff.
-6. A subagent reviews the change. For each real bug, Claude writes a failing test and fixes it, then you repeat steps 4 and 5.
+6. A subagent, a separate Claude that starts with no memory of this conversation, reviews the change. For each real bug, Claude writes a failing test and fixes it, and then you repeat steps 4 and 5.
 7. Commit.
 
-Why each step matters: [How we work](00-how-we-work.md).
+For more information about why each step matters, see [How we work](00-how-we-work.md).
 
-### Step 1. Alignment on what "done" means (no Claude yet)
+### Step 1: Align on what done means
 
-#### 1a. Review the acceptance criteria
+This step has no Claude in it.
 
-This is how Claude knows when the feature is complete. Think through exactly what each criterion should return before Claude writes anything.  
-Make a note of this somewhere to refer to later (like notes, notepad, or an empty text file. Whatever works for you).
+#### 1a: Review the acceptance criteria
 
-**Go through [Acceptance criteria](#acceptance-criteria) one by one:** which shows come back, in what order, which status code, the exact message.
+The acceptance criteria are how Claude knows when the feature is complete. Before Claude writes anything, work out exactly what each criterion returns, and write it down somewhere you can find again, such as a notes app or a text file outside your `showtix` folder, because anything inside the folder gets committed with your tests.
 
-**Note:**
+To build your expected results, go through the [Acceptance criteria](#acceptance-criteria) section one by one, and write down which shows come back, in what order, which status code, and the exact message.
 
-- All seed data is in [`docs/seed-data.md`](../docs/seed-data.md) for your convenience. For example, which 2 shows are in each category.
-- Want to see it in the running app? See [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
+The `docs/seed-data.md` file has all of the seed data, including which 2 shows are in each category. To see the data in the running app, see [Start the app](01-getting-started.md#start-the-app) and [Try an endpoint in /docs](01-getting-started.md#try-an-endpoint-in-docs).
 
-### Step 2. Implement tests first
+### Step 2: Write the tests first
 
-#### 2a. Start with a fresh conversation
+#### 2a: Start a fresh conversation
+
+To start a fresh conversation, enter the following command:
 
 ```text
 /clear
 ```
 
-#### 2b. Have Claude write failing tests. Check them against your expected results
+#### 2b: Ask Claude for failing tests
+
+To have Claude write a failing test for each criterion, enter the following prompt:
 
 ```text
 Read tasks/lab1a-category-filter.md and the relevant code. Write a failing
@@ -130,9 +127,9 @@ or functions that already exist, not new functions or exact HTML. Don't change
 anything in app/. Run the tests and show me which ones fail.
 ```
 
-#### 2c. Manually check the tests Claude just created
+#### 2c: Check the tests against your expected results
 
-Claude's reply is your checklist: one line per test with the criterion it covers, what it expects and whether it passes today. If the reply doesn't give you that, ask:
+Claude's reply is your checklist. It has one line per test, with the criterion the test covers, what the test expects, and whether the test passes today. If the reply doesn't give you that, ask for it:
 
 ```text
 For each new or updated test, give me one table: the criterion it covers, the
@@ -140,29 +137,30 @@ route or app function it calls and whether that already exists in app/, the
 exact value it expects, the values that failed, and pass or fail right now.
 ```
 
-Then check:
+Then check the following points:
 
-- **Each expected value matches your step 1 table.** Claude wrote the tests and the summary, so the table you wrote without Claude is the thing to trust. A value you can't find there: work it out yourself, or use 2d.
-- **Every route or function a test calls already exists in `app/`.** `client.get(...)` and `client.post(...)` are the API. A test that calls a function that doesn't exist yet is designing the code for Claude: use 2d.
-- **Criterion 4 already passes before you build anything:** without the `category` parameter, `GET /shows` already returns all 8 shows.   
-**That's expected**; the test guards behavior your change <ins>must not</ins> break.
-- **Criterion 6's test checks the exact message**, not just the 400.
+- **Each expected value matches your step 1 notes.** Claude wrote the tests and the summary, so the notes that you wrote without Claude are the thing to trust. If a value isn't in your notes, work it out yourself or use 2d.
+- **Every route or function that a test calls already exists in `app/`.** The `client.get(...)` and `client.post(...)` calls are the API. A test that calls a function that doesn't exist yet designs the code for Claude. Use 2d.
+- **Criterion 4 already passes before you build anything.** Without the `category` parameter, the `GET /shows` request already returns all 8 shows. That result is expected. The test guards behavior that your change must not break. Criterion 5's `start_date=2026-11-24` case also passes today, because the date filter alone already returns `[]`. The `2026-11-20` case is the one that fails.
+- **Criterion 6's test checks the exact message.** The HTTP `400` status code alone isn't enough.
 
-#### 2d. If a test doesn't match your expected results, tell Claude what it should be and why
+#### 2d: Correct a test that doesn't match
+
+If a test doesn't match your expected results, tell Claude what the test must check and why:
 
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
 that test.
 ```
 
-If a test calls a function that doesn't exist yet:
+If a test calls a function that doesn't exist yet, ask Claude to rewrite the test:
 
 ```text
 The test ___ calls ___, which doesn't exist yet. Rewrite it to check the same
 behavior through the API or the page.
 ```
 
-**Example:**
+The following prompt is an example of a correction:
 
 ```text
 The test for criterion 6 expects the error message to be "Unknown category
@@ -171,25 +169,27 @@ acrobatics, comedy, magic, music" because the error should list the available
 categories. Fix that test.
 ```
 
-#### 2e. Commit the test code
+#### 2e: Commit the tests
 
-When every test matches your expected results, commit them:
+When every test matches your expected results, commit the tests:
 
 ```text
 ! git add -A && git commit -m "lab1a: tests"
 ```
 
-### Step 3. Make the tests pass (write the code)
+### Step 3: Make the tests pass
 
-#### 3a. Clear the conversation
+#### 3a: Clear the conversation
 
-To get good results, Claude should build from the "spec" and your committed tests (not all the context from that chat):
+Claude builds from the sheet and your committed tests, not from the conversation that produced them. To clear the conversation, enter the following command:
 
 ```text
 /clear
 ```
 
-#### 3b. Ask Claude to make the tests pass
+#### 3b: Ask Claude to make the tests pass
+
+To have Claude write the code, enter the following prompt:
 
 ```text
 Make the new tests from my last commit pass (see git show HEAD). Don't change
@@ -198,62 +198,62 @@ Read tasks/lab1a-category-filter.md for context. Run the full suite and show
 me the output.
 ```
 
-Claude shouldn't touch any test file.
+Claude must not touch any test file. You verified the tests in step 2, so the code alone has to make them pass. Step 4 checks that.
 
-We don't want to rewrite tests we've already verified to make them pass. The code alone should do that. Step 4 checks it.
+### Step 4: Check the evidence
 
-### Step 4. Check the evidence
+Don't take Claude's word for the result. Check it yourself.
 
-Don't take Claude's word for it; check for yourself.
+#### 4a: Run the tests
 
-#### 4a. Run the tests
-
-The last line should say only `passed`, with no `skipped`, `deselected` or `xfailed`:
+To run the tests yourself, enter the following command:
 
 ```text
 ! uv run pytest
 ```
 
-#### 4b. Check that Claude only changed app code
+The last line must say only `passed`, with no `skipped`, `deselected`, or `xfailed`.
 
-This shows the files that have changed since the last commit.  
-Every file this lists should be under `app/`:
+#### 4b: Check that Claude changed only app code
+
+To list the files that changed since the last commit, enter the following command:
 
 ```text
 ! git status --short
 ```
 
-A file in `tests/` (changed, or new with `??`), a `conftest.py`, or `pyproject.toml` means Claude touched your tests or how they run: ask why before going on. If there are any fixes in step 6, the only test changes should be the new tests you asked for. Nothing existing should be modified.
+Every file in the list must be under the `app/` directory. A file in `tests/`, whether changed or new with `??`, a `conftest.py` file, or the `pyproject.toml` file means that Claude touched your tests or how they run. Ask Claude why before you go on. If step 6 adds fixes, the only test changes are the new tests that you asked for, and no existing test changes.
 
-#### 4c. Visual tests in the browser
+#### 4c: Check the feature in your browser
 
-Try it yourself: follow [Check it in your browser](#check-it-in-your-browser) below.
+To try the feature yourself, follow the [Check it in your browser](#check-it-in-your-browser) section of this document.
 
-#### 4d. Something doesn't match?
+#### 4d: Report a mismatch
 
-Tell Claude which criterion failed and what you saw.
+If something doesn't match your expected results, tell Claude which criterion failed and what you saw.
 
-### Step 5. Review the diff
+### Step 5: Review the diff
 
-#### 5a. Read every change Claude made before you accept it
+#### 5a: Read every change before you accept it
 
-These commands stage the changes and then show the diff between these staged changes and the latest commit on your branch.
+To stage the changes and show the diff between the staged changes and the latest commit on your branch, enter the following command:
 
 ```text
 ! git add -A && git diff --staged
 ```
 
+Your tests are already committed, so the diff shows only the code that Claude wrote. As you read the diff, answer the following questions:
+
 - Can you explain every change?
-- Was anything touched that has nothing to do with categories?
-- Prefer side by side? Use VS Code's **Source Control** panel.
+- Did anything change that has nothing to do with categories?
 
-Your tests are already committed, so this shows only the code Claude wrote.
+To read the diff side by side, use the **Source Control** panel in VS Code.
 
-### Step 6. Get a second opinion
+### Step 6: Get a second opinion
 
-#### 6a. Create a code reviewer for your changes
+#### 6a: Create a code reviewer for your changes
 
-Ask Claude to create a reviewer subagent. It hasn't seen your conversation, and it checks the change against this sheet.
+A reviewer subagent hasn't seen your conversation, and it checks the change against this sheet. To create one, enter the following prompt:
 
 ```text
 Use a subagent to review this branch's changes (git diff main) against
@@ -273,49 +273,44 @@ Then ask me which ones to fix. For each one I pick, write a failing test that
 shows the problem, then fix it. Run the full suite and show me the output.
 ```
 
-Claude shows the MUST FIX findings and asks which to fix. The labels are the reviewer's opinion, so check the evidence yourself before you answer.
+Claude shows the MUST FIX findings and asks which ones to fix. The labels are the reviewer's opinion, so check the evidence yourself before you answer.
 
-#### 6b. Answer with the numbers you want fixed
+#### 6b: Answer with the numbers you want fixed
 
-For example "1 and 3". Then repeat steps 4 and 5.   
-Or you can decide you don't want to fix it, or you want to have a chat with Claude about it before you decide.
+Reply with the numbers of the findings to fix, such as "1 and 3", and then repeat steps 4 and 5. You can also decide not to fix a finding, or discuss it with Claude before you decide. Claude might also list UNSURE or OPTIONAL findings. Those are yours to decide, and the lab doesn't need them. If Claude reports no MUST FIX findings, there's nothing to answer. Repeat steps 4 and 5 once, and then go on to step 7. If Claude asks how to fix something, answer with the behavior that you want and let Claude choose the code.
 
-Why "don't report style"? See [step 6 of How we work](00-how-we-work.md#6-get-a-second-opinion).
+For more information about why the prompt says "not report style", see [Get a second opinion](00-how-we-work.md#6-get-a-second-opinion).
 
-### Step 7. Commit
+### Step 7: Commit
 
-Commit when you're satisfied with the change:
+When you're satisfied with the change, commit it:
 
 ```text
 ! git add -A && git commit -m "lab1a: category filter"
 ```
 
-### Finished with time to spare?
-
-Try the [Optional stretch](#optional-stretch) below.
+If you finish with time to spare, try the [Optional stretch](#optional-stretch) section of this document.
 
 ## Check it in your browser
 
-Use this for step 4c of the workflow.
+Use this section during [4c: Check the feature in your browser](#4c-check-the-feature-in-your-browser). Compare what you see with your expected results.
 
-Compare what you see with your expected results.
+### Start the app
 
-### 1. Start the app
-
-Ask Claude to start the app in the background ([more on starting the app](01-getting-started.md#start-the-app)):
+Ask Claude to start the app in the background:
 
 ```text
 Start the app in the background with uv run uvicorn app.main:app --reload,
 and tell me when it's ready.
 ```
 
-Wait until Claude says it's ready, then keep working in the same conversation.
+Wait until Claude says that the app is ready, and then keep working in the same conversation. For more information, see [Start the app](01-getting-started.md#start-the-app).
 
-### 2. Open each link (criteria 1–5)
+### Open each link for criteria 1 to 5
 
-Open each link in your browser. In Chrome or Edge, tick **Pretty-print** to make the result easier to read.
+Open each link in the following table in your browser. In Chrome or Edge, select **Pretty-print** to make the result easier to read. Firefox formats the result on its own. In Safari, read the raw text or use the `/docs` page.
 
-| Criterion | Open | You should see |
+| Criterion | Open | Expected result |
 | --- | --- | --- |
 | 1 | [http://127.0.0.1:8000/shows?category=comedy](http://127.0.0.1:8000/shows?category=comedy) | Exactly 2 shows: `Laugh Lines Live`, then `Stand-Up Saloon` |
 | 2 | [http://127.0.0.1:8000/shows?category=magic](http://127.0.0.1:8000/shows?category=magic) | `Smoke & Sleight`, then `The Vanishing Ace` |
@@ -324,61 +319,67 @@ Open each link in your browser. In Chrome or Edge, tick **Pretty-print** to make
 | 3 | [http://127.0.0.1:8000/shows?category=Comedy](http://127.0.0.1:8000/shows?category=Comedy) | The same 2 shows as criterion 1 |
 | 4 | [http://127.0.0.1:8000/shows](http://127.0.0.1:8000/shows) | All 8 shows |
 | 5 | [http://127.0.0.1:8000/shows?category=music&start_date=2026-11-20](http://127.0.0.1:8000/shows?category=music&start_date=2026-11-20) | `Desert Strings`, then `Neon Nights Revue` |
-| 5 | [http://127.0.0.1:8000/shows?category=music&start_date=2026-11-24](http://127.0.0.1:8000/shows?category=music&start_date=2026-11-24) | `[]` (nothing plays after Nov 23) |
+| 5 | [http://127.0.0.1:8000/shows?category=music&start_date=2026-11-24](http://127.0.0.1:8000/shows?category=music&start_date=2026-11-24) | `[]`, because nothing plays after November 23 |
 
-**Tip:** open the criterion 1 link *before* you build the feature. You'll get all 8 shows, because the app silently ignores parameters it doesn't know. That's why your tests have to fail first.
+**Note**: If you open the criterion 1 link before you build the feature, you get all 8 shows, because the app ignores parameters that it doesn't know. That's why your tests have to fail first.
 
-### 3. Check the error and the parameter in /docs (criteria 6–7)
+### Check the error and the parameter on the `/docs` page for criteria 6 and 7
 
-A browser link shows the error message but not the status code, so use /docs for these two.
+A browser link shows the error message but not the status code, so use the `/docs` page for these two criteria. To check them, follow these steps:
 
-1. Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) and click **GET /shows**.
+1. Open the [API documentation page](http://127.0.0.1:8000/docs), and then click **GET /shows**.
 
    <img src="img/lab1a-docs-1-find-endpoint.png" alt="Click GET /shows in the /docs page" width="600">
 
-2. **Criterion 7:** under **Parameters**, `category` is listed next to `start_date` and `end_date`, with no `* required` marker. Click **Try it out**.
+2. For criterion 7, confirm that under **Parameters**, `category` is listed next to `start_date` and `end_date` with no `* required` marker.
 
    <img src="img/lab1a-docs-2-try-it-out.png" alt="The category parameter and the Try it out button" width="600">
 
-3. Type `opera` in the **category** box and click **Execute**.
+3. Click **Try it out**.
+
+4. In the **category** box, enter `opera`, and then click **Execute**.
 
    <img src="img/lab1a-docs-3-fill-and-execute.png" alt="category set to opera, then Execute" width="600">
 
-4. **Criterion 6:** scroll down to **Server response**. The code is **400**, and the response body's detail is exactly `Unknown category 'opera'. Choose one of: acrobatics, comedy, magic, music`.
+5. For criterion 6, scroll down to **Server response**. The code is **400**, and the detail in the response body is exactly `Unknown category 'opera'. Choose one of: acrobatics, comedy, magic, music`.
 
    <img src="img/lab1a-docs-4-response-400.png" alt="Code 400 with the unknown-category message" width="600">
 
-5. Change `opera` to `comedy` and click **Execute** again. The code is **200**, with `Laugh Lines Live` and `Stand-Up Saloon`. The **Request URL** box shows the same link you opened in part 2.
+6. Change `opera` to `comedy`, and then click **Execute** again. The code is **200**, with `Laugh Lines Live` and `Stand-Up Saloon`. The **Request URL** box shows the same link that you opened in the preceding table.
 
    <img src="img/lab1a-docs-5-response-200.png" alt="Code 200 with the two comedy shows" width="600">
 
-**Something doesn't match?** Don't fix it by hand. Tell Claude which criterion failed and what you saw.
+If something doesn't match, don't fix it by hand. Tell Claude which criterion failed and what you saw.
 
-### 4. Stop the app
+### Stop the app
 
-When you're done checking:
+When you're done checking, ask Claude to stop the app:
 
 ```text
 Stop the app.
 ```
 
-Other ways to stop it, and what "address already in use" means: [Stop the app](01-getting-started.md#stop-the-app).
+For other ways to stop the app, and what an "address already in use" error means, see [Stop the app](01-getting-started.md#stop-the-app).
 
-## Checklist: What Done Means
+Then go back to [4d: Report a mismatch](#4d-report-a-mismatch) and continue with [Step 5: Review the diff](#step-5-review-the-diff).
 
-- [ ] A test for each of the 7 criteria, all passing
-- [ ] The tests you committed in step 2 weren't changed to make them pass
-- [ ] Existing `tests/test_shows.py` tests pass unchanged
-- [ ] Every test asserts exact values (exact cents for money), not "smaller" or "not empty"
-- [ ] `uv run pytest` is fully green and still finishes in under 5 seconds
-- [ ] Routes in `main.py` and `web.py` only call into domain modules
-- [ ] You tried it by hand in the UI or /docs with values you worked out yourself
-- [ ] You can explain every line of `git diff main`, and nothing unrelated changed
+## Completion checklist
+
+The lab is complete when the following statements are true:
+
+- [ ] Each of the 7 criteria has a test, and every test passes.
+- [ ] The tests that you committed in step 2 weren't changed to make them pass.
+- [ ] The existing tests in the `tests/test_shows.py` file pass unchanged.
+- [ ] Every test asserts exact values, such as exact cents for money, not "smaller" or "not empty".
+- [ ] The `uv run pytest` command passes and finishes in less than 5 seconds.
+- [ ] Routes in the `main.py` file only call into domain modules.
+- [ ] You tried the feature by hand in the UI or on the `/docs` page with values that you worked out yourself.
+- [ ] You can explain every line of `git diff main`, and nothing unrelated changed.
 
 ## Optional stretch
 
-Finished early? Add a category dropdown to the home page (`GET /`) that filters the show list. The template only renders a form and the results; the filtering still happens in `shows.list_shows()`. Add a test that `GET /?category=comedy` lists only the two comedy shows.
+If you finish early, add a category dropdown to the home page (`GET /`) that filters the show list. The template only renders a form and the results, and the filtering still happens in the `shows.list_shows()` function. Add a test that the `GET /?category=comedy` request lists only the two comedy shows.
 
 ## Hints
 
-Stuck? Hints (nudge, stronger nudge, near-answer) are on the [workshop hints page](https://www.notion.so/409be0acdc2381a19172d05d8bc0cb5c). Open one level at a time.
+If you're stuck, open the [workshop hints page](https://www.notion.so/409be0acdc2381a19172d05d8bc0cb5c). It lists the places where students get stuck in this lab, each with what to check and what to tell Claude. Open the section whose heading matches what you see.

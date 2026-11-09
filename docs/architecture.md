@@ -1,13 +1,13 @@
 # How ShowTix fits together
 
-Eight pictures of the app and the way we work on it. Read this before your first lab, or whenever a sheet sends you into code you haven't seen. All eight are editable SVG files in [`img/`](img/), so they stay sharp when enlarged. The original Mermaid sketches for pictures 1 to 5 remain in [`diagrams/`](diagrams/). Not sure where to start? See [Where to start a feature](#where-to-start-a-feature).
+Eight pictures of the app and the way we work on it. Read this before your first lab, or whenever a sheet sends you into code you haven't seen. Every picture shows the `main` branch. Your lab changes some of these rules on purpose, and the sheet's Background section says which ones. All eight are editable SVG files in [`img/`](img/), so they stay sharp when enlarged. The original Mermaid sketches for pictures 1 to 5 remain in [`diagrams/`](diagrams/). Not sure where to start? See [Where to start a feature](#where-to-start-a-feature).
 
 ## 1. How a request flows through the app
 
 <img src="img/1-request-flow.svg" alt="Browser forms go to web.py and API requests go to main.py. Both call shared domain modules; orders coordinates inventory, promos and pure pricing. Data modules use SQLite. FastAPI injects database connections and time; in Lab 2, llm.py connects through get_llm() to inject the Claude API client into routes for support replies, search and concierge features." width="1000">
 
 - **Routes hold no business rules.** `app/main.py` (the JSON API) and `app/web.py` (the pages) read the request, call a domain module, and return what it gives back. A checkbox on every sheet checks this.
-- **The rules live in the domain modules.** `orders.py` runs quote, order and cancel, and calls the other three.
+- **The rules live in the domain modules.** `orders.py` runs quote, order and cancel, and calls `inventory.py`, `promos.py` and `pricing.py`.
 - **All money math is in `pricing.py`.** Nothing else adds, discounts or taxes money.
 - **Time and the Claude client are injected.** Routes get the current time from `clock.py` and the Claude client from `llm.py` (Lab 2), so tests can swap in a fixed time and a fake Claude.
 
@@ -22,7 +22,7 @@ Eight pictures of the app and the way we work on it. Read this before your first
 - **Seats are never stored as a count.** Seats sold is the sum of order lines on orders that aren't cancelled, so cancelling an order frees its seats with no extra code.
 - **A quote is not a price guarantee or a seat hold.** Current facts are checked again at purchase, and the form sends quantities and a promo, never an amount the server trusts.
 - **Quote and purchase have two entry points.** The API uses `POST /orders/quote` and `POST /orders`; browser forms use `POST /performances/{id}/quote` and `POST /performances/{id}/orders`. Cancellation is API only: `POST /orders/{id}/cancel`.
-- Labs 1b, 1d, 1e and 1f all change something in this picture.
+- Labs 1d, 1e and 1f change this picture: 1d gives a promo use back on cancel, 1e adds a waitlist that cancellation feeds, and 1f makes a quote hold seats, so a quote no longer writes nothing.
 
 **Check your understanding:** Why is there no `seats_left = seats_left + qty` in cancellation? Seats left is worked out on every read; a second counter would duplicate that information.
 
@@ -41,7 +41,7 @@ Eight pictures of the app and the way we work on it. Read this before your first
 
 <img src="img/4-lab2-feature.svg" alt="Planned Lab 2 routes pass an injected Claude client to feature code. llm.py configures the client; feature code calls it and validates results. Support replies read facts first, search parses and validates filters before querying, and concierge alternates model calls with domain tools. Unit tests use a fake client; separate evals use the real model." width="1000">
 
-- **These are features you build in Lab 2.** The client dependency, fake and shared eval runner exist today; the feature routes, modules and feature-specific evals are lab additions.
+- **These are features you build in Lab 2.** The client dependency, the fake and the shared eval runner are in the base app. The feature routes, modules and feature-specific evals are lab additions.
 - **The call order depends on the feature.** Support replies load order facts before calling Claude. Search asks Claude for filters, validates them, then queries the domain modules. Concierge alternates model calls with domain tools and sends their real results back to Claude.
 - **`llm.py` configures the client and supplies `MODEL`.** FastAPI injects the client through `get_llm()`; the route passes it to feature code, which calls its `messages.create()` method.
 - **Your code checks what comes back** before it reaches the customer. Prices and seats always come from the domain modules, never from the model.
@@ -59,7 +59,7 @@ The workflow every sheet follows. [`tasks/00-how-we-work.md`](../tasks/00-how-we
 
 ## 6. The data model
 
-<img src="img/6-data-model.svg" alt="Seven SQLite tables. Venues have many shows, shows have many performances, and each performance has many price tiers and orders. An order may use one promo code and has many order lines. Each order line belongs to one order and one price tier and stores the price paid." width="1000">
+<img src="img/6-data-model.svg" alt="Seven SQLite tables. Venues have many shows, shows have many performances, and each performance has many price tiers and orders. An order can use one promo code and has many order lines. Each order line belongs to one order and one price tier and stores the price paid." width="1000">
 
 - **A show is a production; a performance is one night.** Prices and seats belong to the night, through `price_tiers`.
 - **`order_lines.unit_price_cents` is the price paid.** It's captured at purchase, so old orders never change when tier prices do.
@@ -76,7 +76,7 @@ The workflow every sheet follows. [`tasks/00-how-we-work.md`](../tasks/00-how-we
 - **Shape checks and fact checks live in different places.** `models.py` checks the request's shape, positive quantities and the 8-ticket limit. Domain functions check facts: does the tier belong to this night, are enough seats left, is the promo valid today?
 - **Errors depend on the door.** In the API, a bad request shape is JSON 422 and domain errors are JSON 400, 404 or 409. Cart errors on an existing performance show the form again as HTML 400. A missing performance returns JSON 404, even from a form submission; a nonnumeric performance ID in the URL returns JSON 422 before the handler runs.
 
-**Check your understanding:** Where should a new "promo is exhausted" rule live? In `promos.py`, so page and API purchases both enforce it.
+**Check your understanding:** Where does a new "promo is exhausted" rule belong? In `promos.py`, so page and API purchases both enforce it.
 
 ## 8. How tests control the app
 
@@ -96,7 +96,7 @@ Hints for finding your way, not a replacement for the sheet's criteria. Each lab
 | Lab | Start reading here | Useful pictures |
 | --- | --- | --- |
 | 1a: Category filter | `main.py`, `shows.list_shows()`, `test_shows.py` | 1, 7, 8 |
-| 1b: Itemized receipt | `orders.get_order()`, `models.py`, `templates/order.html`, `test_orders.py`, `test_web.py` | 2, 3, 6 |
+| 1b: Itemized receipt | `orders.get_order()`, `shows.show_for_performance()`, `inventory.availability()`, `models.py`, `test_orders.py` | 2, 3, 6 |
 | 1c: Group discount | `pricing.price_order()` and its callers, `test_pricing.py`, `test_interactions.py` | 3, 7 |
 | 1d: Promo limits | `promos.find_valid_promo()`, `promos.record_use()`, `orders.create_order()` | 2, 6 |
 | 1e: Waitlist | The inventory query, cancellation, the schema, both entry points | 1, 2, 6 |

@@ -6,6 +6,7 @@ Ticketing backend for fictional Las Vegas shows. Python 3.12, FastAPI, SQLite, p
 
 - Run: `uv run uvicorn app.main:app --reload`, then open http://127.0.0.1:8000/ (web UI) or http://127.0.0.1:8000/docs (API)
 - Test: `uv run pytest` (the full suite must stay under 5 seconds)
+- Run one test file or one test: `uv run pytest tests/test_pricing.py` or `uv run pytest -k test_name`
 - Reset the local database: `uv run python -m app.seed`
 - Check the Claude API key: `uv run python -m app.llm` (one small real call; prints OK or what to fix)
 
