@@ -83,26 +83,8 @@ Type `/clear`, then ask Claude for the tests, and only the tests:
 ```text
 Read tasks/lab1a-category-filter.md and the relevant code. Write a failing
 test for each acceptance criterion. Test behavior through the API, the pages,
-or functions that already exist, not new functions or exact HTML. Don't
-overwrite app constants or internals to create a scenario (the fake_claude and
-clock fixtures are fine). If a wrong implementation can't be told apart
-through real behavior, tell me so I can check for it in the diff.
-
-Then check the impact of any rule this sheet changes. Search the existing
-tests and app/ for anywhere the old rule is asserted or calculated, including
-helper functions. For each one, ask: if someone used this to get the answer
-the rule governs, would the new rule make today's answer wrong?
-- Yes, and a test covers it: update the test to the new rule.
-- Yes, and no test covers it: add a failing test.
-- No: leave it.
-- Unsure: leave it alone and say why in the report.
-
-Where the sheet leaves a detail open, pick the simplest answer that fits it,
-build the tests on that, and list each pick in one line at the end of the
-report. Don't ask me questions. Report each one in plain English for someone
-who doesn't know this code: what it does, the old answer, the new answer, what
-you did. Don't change anything in app/. Run the tests and show me which ones
-fail.
+or functions that already exist, not new functions or exact HTML. Don't change
+anything in app/. Run the tests and show me which ones fail.
 ```
 
 Compare each test with your expected results. Same shows, same status code, same message, same cents? A test that checks "the total got smaller" instead of "the total is 25044 ($250.44)" is a weak test. And a test should check behavior through the API or the page, not call a function that doesn't exist yet: a test like that designs the code for Claude, and step 3 won't let Claude change it. If one is wrong, tell Claude what it should be and why:
@@ -124,8 +106,6 @@ When you're satisfied with the tests, commit them:
 - **Checking tests is easier than checking code.** Each test is one criterion with one expected result, so you can hold it against your expected results line by line. Once the tests are right, they're the target Claude works toward.
 - **Committing them makes them tamper-evident.** If a test is awkward to pass, an AI can quietly loosen it. Once your reviewed tests are committed, any later change to them shows up in `git diff`.
 - **A test that already passes isn't always a mistake.** If the behavior exists today (a request without the new filter returns everything, as before), the test should pass. Your sheet says when to expect that.
-- **A passing test can still be out of date.** Tests lock in what was true when they were written. When a rule changes, an old test can keep passing while it describes the old rule, and it can steer the new code around it. You don't need to know which tests those are. State the old rule and the new rule in business terms; Claude finds what they touch and reports it in plain English, and you check its answers against the new rule. When the sheet leaves something open, it picks the simplest answer and tells you, so you can overrule it in 2d.
-- **Test what someone can see.** Could a customer or API caller ever see the difference? If yes, it's a criterion. If no, check it in the diff in step 5. A test that overwrites app values to invent a situation designs the code for Claude, just like a test that calls a function that doesn't exist yet.
 
 ## 3. Clear, then implement
 
@@ -133,10 +113,9 @@ Type `/clear`, then:
 
 ```text
 Make the new tests from my last commit pass (see git show HEAD). Don't change
-any test. If an existing test conflicts with the sheet or blocks the right
-design, stop and tell me why. If you change anything the tests don't need,
-tell me what and why. Read tasks/lab1a-category-filter.md for context. Run the
-full suite and show me the output.
+any test. If you change anything the tests don't need, tell me what and why.
+Read tasks/lab1a-category-filter.md for context. Run the full suite and show
+me the output.
 ```
 
 **Big features: one vertical slice at a time.** On the Breakthrough and Advanced labs, step 1 ends with a Slices list in the sheet, based on what you decided; step 3 builds them in that order, and Claude stops after each one. How many slices depends on the feature: each one should work end to end and be small enough to review in a few minutes. A *vertical* slice is a piece that works end to end, such as "customers can join the waitlist", not a layer such as "all the database code". After each slice, read its diff, commit it, then ask for the next.
@@ -146,8 +125,7 @@ full suite and show me the output.
 **Why:**
 
 - **`/clear` gives the implementing session a clean start.** It works from your sheet and your committed tests, not from a long conversation full of options you didn't choose.
-- **"Don't change any test":** your tests are the definition of done. The code moves to meet them, not the other way around. Existing tests get updated in step 2, where you review them, never to make code pass. If one conflicts with your sheet, Claude stops and tells you instead of working around it.
-- **Text that states the rule changes with the code.** `CLAUDE.md`, docstrings and comments describing the old rule get updated in step 3, in the same diff. `docs/` stays as it is on a lab branch.
+- **"Don't change any test":** your tests are the definition of done. The code moves to meet them, not the other way around.
 - **"Run the full suite":** your change can break something somewhere else. That's called a regression. The full suite runs in a few seconds, so always run all of it, not just your new tests.
 - **"Show me the output":** evidence, not claims. "All tests pass" on its own tells you very little; the actual output tells you what ran and what happened.
 
@@ -161,7 +139,7 @@ Don't take Claude's word for it. The `!` runs a command yourself, not through Cl
   ! uv run pytest
   ```
 
-- **Check that Claude only changed app code.** Every file this lists should be under `app/` (or be `CLAUDE.md`, if Claude updated the rule text with the code):
+- **Check that Claude only changed app code.** Every file this lists should be under `app/`:
 
   ```text
   ! git status --short
@@ -195,9 +173,7 @@ Have a subagent review the work. It starts with a fresh context, so it hasn't se
 Use a subagent to review this branch's changes (git diff main) against
 tasks/lab1a-category-filter.md. It hasn't seen our conversation. It should
 check every acceptance criterion, not report style, and not change any files
-or the database. It should also look for anything that still uses or expects
-an old rule this sheet changes. Show me its findings as a numbered list, each
-with:
+or the database. Show me its findings as a numbered list, each with:
 - a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but
   not in the criteria, or already there before this branch), UNSURE, or
   OPTIONAL
@@ -246,13 +222,11 @@ Find out why before you correct it. Press Esc to stop it if it's still going, th
 
    ```text
    Make the new tests from my last commit pass (see git show HEAD). Don't change
-   any test. If an existing test conflicts with the sheet or blocks the right
-   design, stop and tell me why. If you change anything the tests don't need,
-   tell me what and why. Important: cap only the service fees, not the total or
-   the tax, because tax and ticket prices are separate charges. For example, 8
-   tickets have fees of 3000 cents (not 6000), and their tax doesn't change. All
-   of the money math belongs in app/pricing.py. Run the full suite and show me
-   the output.
+   any test. If you change anything the tests don't need, tell me what and why.
+   Important: cap only the service fees, not the total or the tax, because tax
+   and ticket prices are separate charges. For example, 8 tickets have fees of
+   3000 cents (not 6000), and their tax doesn't change. All of the money math
+   belongs in app/pricing.py. Run the full suite and show me the output.
    ```
 4. **If it's a rule for the whole project,** add it to `CLAUDE.md` so every session knows it.
 

@@ -50,7 +50,7 @@ Here is the relevant background about the feature you'll be building:
 - **Pricing happens in `pricing.price_order()`** in `app/pricing.py`, in a fixed order (see CLAUDE.md): subtotal, discount, service fee, tax, total. `orders.quote()` merges cart items by tier, so each `pricing.Line` it passes in is one tier.
 - **A promo discount is computed by `pricing.discount()`.** Quotes and orders carry a single `discount_cents` today. `pricing.pricing_lines()` turns a breakdown into the ordered lines (Subtotal, Discount, Service fees, Tax, Total) that quotes and orders return as `pricing_lines`. The UI's quote and confirmation pages loop over that list, so a line you add there shows up in the UI with no template changes.
 - **Quotes (`Quote`) and stored orders (`Order`, `orders` table) must show the same numbers.** Tests use an in-memory database, but the running app uses a local SQLite file. If you change the schema, [reset the database](01-getting-started.md#reset-the-database), or the UI will break even while tests pass.
-- **Docs:** `CLAUDE.md`, module docstrings and code comments describe the rule this sheet changes. Update them in step 3 with the code, not in step 2. Leave `docs/` alone: it describes `main`, which every lab starts from.
+- **Leave `CLAUDE.md` and `docs/` as they are.** They'll still describe a promo-only discount after this change. That's fine: they describe `main`, and every lab starts from `main`.
 
 **For an illustration of the pricing order, see [How a price is built](../docs/architecture.md#3-how-a-price-is-built).**
 
@@ -63,7 +63,7 @@ In this lab, most criteria are given below. **Add one or two edge cases of your 
 1. 6 or more tickets in the same tier get 15% off that tier's subtotal (rounded half up to the cent).
 2. 5 tickets get no discount; exactly 6 do.
 3. If a promo code also applies, the customer gets whichever discount is larger. They never stack.
-4. The quote breakdown shows the group discount as its own line: its own field, `group_discount_cents`, and its own entry in `pricing_lines` (labelled exactly `Group discount (15%)`, negative, right after `Subtotal`, and only when it's non-zero). The discount that loses is reported as 0, and the existing `Discount` line stays.
+4. The quote breakdown shows the group discount as its own line: its own field, `group_discount_cents`, and its own entry in `pricing_lines` (labelled exactly `Group discount (15%)`, negative, right after `Subtotal`, and only when it's non-zero).
 5. All amounts stay in integer cents; tax follows the existing pricing order (9% of the subtotal after the discount that won).
 6. The stored order matches the quote, including the group discount line.
 7. If the group discount beats a promo, the promo isn't applied: the order doesn't record the promo code, and the promo's use count doesn't go up.
@@ -163,26 +163,8 @@ Make a note of this somewhere to refer to later (like notes, notepad, or an empt
 ```text
 Read tasks/lab1c-group-discount.md and the relevant code. Write a failing test
 for each acceptance criterion. Test behavior through the API, the pages, or
-functions that already exist, not new functions or exact HTML. Don't overwrite
-app constants or internals to create a scenario (the fake_claude and clock
-fixtures are fine). If a wrong implementation can't be told apart through real
-behavior, tell me so I can check for it in the diff.
-
-Then check the impact of any rule this sheet changes. Search the existing
-tests and app/ for anywhere the old rule is asserted or calculated, including
-helper functions. For each one, ask: if someone used this to get the answer
-the rule governs, would the new rule make today's answer wrong?
-- Yes, and a test covers it: update the test to the new rule.
-- Yes, and no test covers it: add a failing test.
-- No: leave it.
-- Unsure: leave it alone and say why in the report.
-
-Where the sheet leaves a detail open, pick the simplest answer that fits it,
-build the tests on that, and list each pick in one line at the end of the
-report. Don't ask me questions. Report each one in plain English for someone
-who doesn't know this code: what it does, the old answer, the new answer, what
-you did. Don't change anything in app/. Run the tests and show me which ones
-fail.
+functions that already exist, not new functions or exact HTML. Don't change
+anything in app/. Run the tests and show me which ones fail.
 ```
 
 #### 2c. Manually check the tests Claude just created
@@ -192,8 +174,6 @@ Claude may write more tests than you expect. Check these first, then the rest as
 - **Compare each test with your expected results from step 1.**
 - **Tests must check behavior through the API or the page**, **<ins>not functions that don't exist yet</ins>**.   
 A test that calls a new function is designing the code for Claude.
-- **Tests must not overwrite app values to set up a situation the sheet doesn't describe.** The `fake_claude` and `clock` fixtures are fine.
-- **Read Claude's impact report, even if you don't know the code.** Each new answer should match the rule this sheet changes, each updated test should fail right now, and every existing test that changed should be in the report. Reject any that isn't. If the sheet changes no rule, no existing test should change. Read its list of picks too: each should fit the sheet; if one doesn't, say so in 2d.
 - **The four worked examples are tests**, with every line asserted in exact cents.
 - **Your own edge cases have tests too.**
 
@@ -233,10 +213,9 @@ To get good results, Claude should build from the "spec" and your committed test
 
 ```text
 Make the new tests from my last commit pass (see git show HEAD). Don't change
-any test. If an existing test conflicts with the sheet or blocks the right
-design, stop and tell me why. If you change anything the tests don't need,
-tell me what and why. Read tasks/lab1c-group-discount.md for context. Run the
-full suite and show me the output.
+any test. If you change anything the tests don't need, tell me what and why.
+Read tasks/lab1c-group-discount.md for context. Run the full suite and show me
+the output.
 ```
 
 Claude shouldn't touch any test file.
@@ -258,7 +237,7 @@ The last line should say only `passed`, with no `skipped`, `deselected` or `xfai
 #### 4b. Check that Claude only changed app code
 
 This shows the files that have changed since the last commit.  
-Every file this lists should be under `app/` (or be `CLAUDE.md`, if Claude updated the rule text with the code):
+Every file this lists should be under `app/`:
 
 ```text
 ! git status --short
@@ -328,9 +307,7 @@ Ask Claude to create a reviewer subagent. It hasn't seen your conversation, and 
 Use a subagent to review this branch's changes (git diff main) against
 tasks/lab1c-group-discount.md. It hasn't seen our conversation. It should
 check every acceptance criterion, not report style, and not change any files
-or the database. It should also look for anything that still uses or expects
-an old rule this sheet changes. Show me its findings as a numbered list, each
-with:
+or the database. Show me its findings as a numbered list, each with:
 - a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but
   not in the criteria, or already there before this branch), UNSURE, or
   OPTIONAL

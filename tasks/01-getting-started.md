@@ -311,7 +311,7 @@ Your tests are committed before Claude implements, so a change to them, or to ho
 ! git status --short
 ```
 
-- Every file it lists should be under `app/` (or be `CLAUDE.md`, if Claude updated the rule text with the code).
+- Every file it lists should be under `app/`.
 - A file in `tests/` (changed, or new with `??`), a `conftest.py`, or `pyproject.toml` means Claude touched your tests or how they run. Ask Claude what it changed and why.
 - On labs built slice by slice (1e, 1f, 2c), you commit after each slice, so also run this. It should list only your tests commit:
 

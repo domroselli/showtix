@@ -49,7 +49,6 @@ Here is the relevant background about the feature you'll be building:
 
 - **`promo_codes` has `max_uses` (null means unlimited) and `uses`.** The base app is deliberately half-built: `promos.record_use()` adds a use when an order is created, but nothing reads `max_uses`, and cancelling never gives a use back. Orders store the `promo_code` they used (null when none).
 - **Validation lives in `promos.find_valid_promo()`; cancelling is `orders.cancel_order()`.** Cancelling an already-cancelled order raises `Conflict` (409). Promo errors already show inline on the UI's quote page, so a new error message appears there for free.
-- **Docs:** `CLAUDE.md`, module docstrings and code comments describe the rule this sheet changes. Update them in step 3 with the code, not in step 2. Leave `docs/` alone: it describes `main`, which every lab starts from.
 - **Seeded limits are large** (LOCALS10: 500, WELCOME5: 1000). In tests, set a small limit inside `with conn:`: `with conn: conn.execute("UPDATE promo_codes SET max_uses = 1 WHERE code = 'WELCOME5'")`. Without `with conn:`, the change leaves a transaction open and the next order fails.
 
 **For an illustration of how orders and cancels flow, see [Quote, order, cancel](../docs/architecture.md#2-quote-order-cancel).**
@@ -69,7 +68,7 @@ In this lab, most criteria are given below. **Add one or two edge cases of your 
 7. _Your edge case_
 8. _Your edge case_ (optional)
 
-**Edge cases to think about:** does a quote use up anything, what a freed use means for a code that was fully used, a limit lowered below the uses already taken (is the check `>=`, not `==`?), promo codes typed in lowercase, and what the 409 in criterion 4 says, not just its code.
+**Edge cases to think about:** does a quote use up anything, what a freed use means for a code that was fully used, promo codes typed in lowercase, and what the 409 in criterion 4 says, not just its code.
 
 Tests for criteria 2, 5 and 6 (and 4, depending on how you write it) pass before you change anything. **That's expected:** they guard behavior your change <ins>must not</ins> break.
 
@@ -153,26 +152,8 @@ Make a note of this somewhere to refer to later (like notes, notepad, or an empt
 ```text
 Read tasks/lab1d-promo-limits.md and the relevant code. Write a failing test
 for each acceptance criterion. Test behavior through the API, the pages, or
-functions that already exist, not new functions or exact HTML. Don't overwrite
-app constants or internals to create a scenario (the fake_claude and clock
-fixtures are fine). If a wrong implementation can't be told apart through real
-behavior, tell me so I can check for it in the diff.
-
-Then check the impact of any rule this sheet changes. Search the existing
-tests and app/ for anywhere the old rule is asserted or calculated, including
-helper functions. For each one, ask: if someone used this to get the answer
-the rule governs, would the new rule make today's answer wrong?
-- Yes, and a test covers it: update the test to the new rule.
-- Yes, and no test covers it: add a failing test.
-- No: leave it.
-- Unsure: leave it alone and say why in the report.
-
-Where the sheet leaves a detail open, pick the simplest answer that fits it,
-build the tests on that, and list each pick in one line at the end of the
-report. Don't ask me questions. Report each one in plain English for someone
-who doesn't know this code: what it does, the old answer, the new answer, what
-you did. Don't change anything in app/. Run the tests and show me which ones
-fail.
+functions that already exist, not new functions or exact HTML. Don't change
+anything in app/. Run the tests and show me which ones fail.
 ```
 
 #### 2c. Manually check the tests Claude just created
@@ -180,8 +161,6 @@ fail.
 - **Compare each test with your expected results from step 1.**
 - **Tests must check behavior through the API or the page**, **<ins>not functions that don't exist yet</ins>**.   
 A test that calls a new function is designing the code for Claude.
-- **Tests must not overwrite app values to set up a situation the sheet doesn't describe.** The `fake_claude` and `clock` fixtures are fine.
-- **Read Claude's impact report, even if you don't know the code.** Each new answer should match the rule this sheet changes, each updated test should fail right now, and every existing test that changed should be in the report. Reject any that isn't. If the sheet changes no rule, no existing test should change. Read its list of picks too: each should fit the sheet; if one doesn't, say so in 2d.
 - **Some tests already pass before you build anything:** criteria 2, 5 and 6, and maybe 4.   
 **That's expected**; they guard behavior your change <ins>must not</ins> break.
 - **Each test must read `uses` from the database** after the action, not just check the status code.
@@ -223,10 +202,9 @@ To get good results, Claude should build from the "spec" and your committed test
 
 ```text
 Make the new tests from my last commit pass (see git show HEAD). Don't change
-any test. If an existing test conflicts with the sheet or blocks the right
-design, stop and tell me why. If you change anything the tests don't need,
-tell me what and why. Read tasks/lab1d-promo-limits.md for context. Run the
-full suite and show me the output.
+any test. If you change anything the tests don't need, tell me what and why.
+Read tasks/lab1d-promo-limits.md for context. Run the full suite and show me
+the output.
 ```
 
 Claude shouldn't touch any test file.
@@ -248,7 +226,7 @@ The last line should say only `passed`, with no `skipped`, `deselected` or `xfai
 #### 4b. Check that Claude only changed app code
 
 This shows the files that have changed since the last commit.  
-Every file this lists should be under `app/` (or be `CLAUDE.md`, if Claude updated the rule text with the code):
+Every file this lists should be under `app/`:
 
 ```text
 ! git status --short
@@ -309,10 +287,9 @@ Ask Claude to create a reviewer subagent. It hasn't seen your conversation, and 
 
 ```text
 Use a subagent to review this branch's changes (git diff main) against
-tasks/lab1d-promo-limits.md. It hasn't seen our conversation. It should check
-every acceptance criterion, not report style, and not change any files or the
-database. It should also look for anything that still uses or expects an old
-rule this sheet changes. Show me its findings as a numbered list, each with:
+tasks/lab1d-promo-limits.md. It hasn't seen our conversation. It should
+check every acceptance criterion, not report style, and not change any files
+or the database. Show me its findings as a numbered list, each with:
 - a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but
   not in the criteria, or already there before this branch), UNSURE, or
   OPTIONAL

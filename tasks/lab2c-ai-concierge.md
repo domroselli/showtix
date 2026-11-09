@@ -210,26 +210,8 @@ for each acceptance criterion except the eval, including the ones you added
 from your decisions (not the "Not doing" list), using fake_claude. Then write
 the eval cases to tests/evals/concierge.json (cases only; don't call the API).
 Test behavior through the API, the pages, or functions that already exist, not
-new functions or exact HTML. Don't overwrite app constants or internals to
-create a scenario (the fake_claude and clock fixtures are fine). If a wrong
-implementation can't be told apart through real behavior, tell me so I can
-check for it in the diff.
-
-Then check the impact of any rule this sheet changes. Search the existing
-tests and app/ for anywhere the old rule is asserted or calculated, including
-helper functions. For each one, ask: if someone used this to get the answer
-the rule governs, would the new rule make today's answer wrong?
-- Yes, and a test covers it: update the test to the new rule.
-- Yes, and no test covers it: add a failing test.
-- No: leave it.
-- Unsure: leave it alone and say why in the report.
-
-Where the sheet leaves a detail open, pick the simplest answer that fits it,
-build the tests on that, and list each pick in one line at the end of the
-report. Don't ask me questions. Report each one in plain English for someone
-who doesn't know this code: what it does, the old answer, the new answer, what
-you did. Don't change anything in app/. Run the tests and show me which ones
-fail.
+new functions or exact HTML. Don't change anything in app/. Run the tests and
+show me which ones fail.
 ```
 
 #### 2c. Manually check the tests and eval cases Claude just created
@@ -237,8 +219,6 @@ fail.
 - **Compare each test and each eval case with your expected results from step 1.** The eval cases are the model's expected results, so they must be right too.
 - **Tests must check behavior through the API or the page**, **<ins>not functions that don't exist yet</ins>**.   
 A test that calls a new function is designing the code for Claude.
-- **Tests must not overwrite app values to set up a situation the sheet doesn't describe.** The `fake_claude` and `clock` fixtures are fine.
-- **Read Claude's impact report, even if you don't know the code.** Each new answer should match the rule this sheet changes, each updated test should fail right now, and every existing test that changed should be in the report. Reject any that isn't. If the sheet changes no rule, no existing test should change. Read its list of picks too: each should fit the sheet; if one doesn't, say so in 2d.
 - **One test's fake client must recommend a made-up show id**, and the response must leave it out (criterion 1).
 - **Every criterion you added from your decisions must have a test.**
 
@@ -280,13 +260,11 @@ To get good results, Claude should build from the "spec" and your committed test
 ```text
 Make the new tests from my last commit pass (see git show HEAD), one slice at
 a time, in the order of the Slices list in the sheet. Don't change any test.
-If an existing test conflicts with the sheet or blocks the right design, stop
-and tell me why. If you change anything the tests don't need, tell me what and
-why. Read tasks/lab2c-ai-concierge.md for context. After each slice, run the
-full suite, show me the output, and stop so I can review and commit it. When
-every slice is done, write tests/evals/run_concierge.py, which runs those eval
-cases with the shared runner (see the Evals section of README.md). Don't run
-it.
+If you change anything the tests don't need, tell me what and why. Read
+tasks/lab2c-ai-concierge.md for context. After each slice, run the full suite,
+show me the output, and stop so I can review and commit it. When every slice
+is done, write tests/evals/run_concierge.py, which runs those eval cases with
+the shared runner (see the Evals section of README.md). Don't run it.
 ```
 
 Claude shouldn't touch any test file.
@@ -301,7 +279,7 @@ We don't want to rewrite tests we've already verified to make them pass. The cod
   ! git diff
   ```
 
-- Check that Claude only changed app code. Every file this lists should be under `app/` (or be `CLAUDE.md`, if Claude updated the rule text with the code). After the last slice, `tests/evals/run_concierge.py` is the one expected new test file:
+- Check that Claude only changed app code. Every file this lists should be under `app/`. After the last slice, `tests/evals/run_concierge.py` is the one expected new test file:
 
   ```text
   ! git status --short
@@ -330,7 +308,7 @@ The last line should say only `passed`, with no `skipped`, `deselected` or `xfai
 #### 4b. Check that Claude only changed app code
 
 You committed each slice, so this shows only what's changed since your last commit. It may list nothing.  
-Any file it lists should be under `app/` (or be `CLAUDE.md`, if Claude updated the rule text with the code):
+Any file it lists should be under `app/`:
 
 ```text
 ! git status --short
@@ -403,10 +381,9 @@ Ask Claude to create a reviewer subagent. It hasn't seen your conversation, and 
 
 ```text
 Use a subagent to review this branch's changes (git diff main) against
-tasks/lab2c-ai-concierge.md. It hasn't seen our conversation. It should check
-every acceptance criterion, not report style, and not change any files or the
-database. It should also look for anything that still uses or expects an old
-rule this sheet changes. Show me its findings as a numbered list, each with:
+tasks/lab2c-ai-concierge.md. It hasn't seen our conversation. It should
+check every acceptance criterion, not report style, and not change any files
+or the database. Show me its findings as a numbered list, each with:
 - a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but
   not in the criteria, or already there before this branch), UNSURE, or
   OPTIONAL
