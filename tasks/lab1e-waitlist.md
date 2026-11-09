@@ -207,9 +207,18 @@ anything in app/. Run the tests and show me which ones fail.
 
 #### 2c. Manually check the tests Claude just created
 
-- **Compare each test with your expected results from step 1.**
-- **Tests must check behavior through the API or the page**, **<ins>not functions that don't exist yet</ins>**.   
-A test that calls a new function is designing the code for Claude.
+Claude's reply is your checklist: one line per test with the criterion it covers, what it expects and whether it passes today. If the reply doesn't give you that, ask:
+
+```text
+For each new or updated test, give me one table: the criterion it covers, the
+route or app function it calls and whether that already exists in app/, the
+exact value it expects, the values that failed, and pass or fail right now.
+```
+
+Then check:
+
+- **Each expected value matches your step 1 table.** Claude wrote the tests and the summary, so the table you wrote without Claude is the thing to trust. A value you can't find there: work it out yourself, or use 2d.
+- **Every route or function a test calls already exists in `app/`.** `client.get(...)` and `client.post(...)` are the API. A test that calls a function that doesn't exist yet is designing the code for Claude: use 2d.
 - **First-in-first-out and the partial fill must be tested with exact seat counts.**
 - **Every criterion you added from your decisions must have a test.**
 
@@ -218,6 +227,13 @@ A test that calls a new function is designing the code for Claude.
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
 that test.
+```
+
+If a test calls a function that doesn't exist yet:
+
+```text
+The test ___ calls ___, which doesn't exist yet. Rewrite it to check the same
+behavior through the API or the page.
 ```
 
 **Example:**

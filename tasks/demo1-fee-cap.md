@@ -117,8 +117,18 @@ change anything in app/. Run the tests and show me which ones fail.
 
 #### 2c. Manually check the tests Claude just created
 
-- **Compare each test with the worked examples.** Exact cents: 2250, 3000, 3000 for fees; 1863, 2484, 4968 for tax; 24813, 33084, 63168 for totals; 68400 for 5 Premium.
-- **Tests must check behavior through the API**, **<ins>not functions that don't exist yet</ins>**.
+Claude's reply is your checklist: one line per test with the criterion it covers, what it expects and whether it passes today. If the reply doesn't give you that, ask:
+
+```text
+For each new or updated test, give me one table: the criterion it covers, the
+route or app function it calls and whether that already exists in app/, the
+exact value it expects, the values that failed, and pass or fail right now.
+```
+
+Then check:
+
+- **Each expected value matches the worked examples.** Exact cents: 2250, 3000, 3000 for fees; 1863, 2484, 4968 for tax; 24813, 33084, 63168 for totals; 68400 for 5 Premium. For a case Claude invented (a promo order, a mixed-tier order), work it out: discounted subtotal, fees `min(750 × tickets, 3000)`, tax 9% of the discounted subtotal, total.
+- **Every route or function a test calls already exists in `app/`.** `client.get(...)` and `client.post(...)` are the API. A test that calls a function that doesn't exist yet is designing the code for Claude: use 2d.
 - **Claude names the existing tests it updated.** Expect two: the fee helper (8 tickets, 6000 to 3000) and the 5 Premium total (69150 to 68400). Claude may ask whether the cap must live inside `service_fees()`: yes, anyone who calls that helper should get the real fee.
 - **Criteria 2 and 3 already pass before you build anything.** That's expected; they guard behavior your change <ins>must not</ins> break. Criterion 4 and both updated tests must fail.
 - **If every test passes, a test is wrong.**
@@ -128,6 +138,13 @@ change anything in app/. Run the tests and show me which ones fail.
 ```text
 The test for criterion 4 expects ___, but it should be ___ because ___. Fix
 that test.
+```
+
+If a test calls a function that doesn't exist yet:
+
+```text
+The test ___ calls ___, which doesn't exist yet. Rewrite it to check the same
+behavior through the API or the page.
 ```
 
 #### 2e. Commit the test code
