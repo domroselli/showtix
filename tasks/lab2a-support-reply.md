@@ -50,6 +50,7 @@ Here is the relevant background about the feature you'll be building, including 
 
 - **The order's facts:** `orders.get_order()` in `app/orders.py` loads an order with its ticket `lines` (qty, tier, unit price paid) and its `pricing_lines` (Subtotal, Discount, Service fees, Tax, Total), rebuilt from the stored totals. `shows.show_for_performance()` gives the show title and venue, and `inventory.availability(conn, performance_id).starts_at` gives the performance date and time.
 - **Calling Claude:** `app/llm.py` gives routes a `get_llm` dependency and the model name `MODEL` (`claude-haiku-5-5`). It reads your key from `SHOWTIX_CLAUDE_KEY` in `.env` (see [Set up your API key](01-getting-started.md#set-up-your-api-key-lab-2)). Your code never reads the key itself; `get_llm` does. To write cents as dollars, in a prompt for example, use `pricing.dollars()`.
+- **A missing key is the existing 503 from `app/llm.py`.** Criterion 6's 502 is for a call that reached the API and failed.
 - **Never give Claude your API key.** Don't paste it into Claude Code, in a prompt or a `!` command. Paste it into `.env` yourself, in your editor: anything you type in Claude Code becomes part of the conversation, and Claude can copy it into a file and from there into a commit.
 - **Testing without the network:** every test runs with a fake Claude automatically, so no test can reach the real API. Take the `fake_claude` fixture (`FakeClaude`, in `tests/fakes.py`) whenever you need to queue replies or check calls. Queue the reply you want with `fake_claude.queue("...")`, call your endpoint, then check what was sent with `fake_claude.last_prompt` or `fake_claude.calls`. To simulate an API failure, queue `api_error()` from `tests/fakes.py`: it's a real `anthropic.APIError`, as the SDK would raise it.
 - **The customer's message is untrusted text.** Keep your instructions in the system prompt and put the customer's words in the user message, clearly labelled.
@@ -99,7 +100,7 @@ The customer is wrong here: the order really was $250.44. A good reply corrects 
 
 #### Workflow Overview
 
-1. Start a fresh conversation. Write your expected results (no Claude yet).
+1. Write your expected results (no Claude yet).
 2. Start a fresh conversation. Claude writes failing tests and the eval cases. You check them against your expected results, then commit.
 3. Start a fresh conversation. Claude makes the tests pass without changing them, then writes the eval runner.
 4. Check the evidence: run the tests, confirm only app/ and the eval runner changed, run the eval twice, try it in /docs.
@@ -111,13 +112,7 @@ Why each step matters: [How we work](00-how-we-work.md).
 
 ### Step 1. Alignment on what "done" means (no Claude yet)
 
-#### 1a. Start with a fresh conversation
-
-```text
-/clear
-```
-
-#### 1b. Review the acceptance criteria
+#### 1a. Review the acceptance criteria
 
 This is how Claude knows when the feature is complete. Think through exactly what each criterion should return before Claude writes anything.  
 Make a note of this somewhere to refer to later (like notes, notepad, or an empty text file. Whatever works for you).
@@ -146,8 +141,26 @@ Read tasks/lab2a-support-reply.md and the relevant code. Write a failing test
 for each acceptance criterion except the eval, using fake_claude. Then write
 the eval cases to tests/evals/support_reply.json (cases only; don't call the
 API). Test behavior through the API, the pages, or functions that already
-exist, not new functions or exact HTML. Don't change anything in app/. Run the
-tests and show me which ones fail.
+exist, not new functions or exact HTML. Don't overwrite app constants or
+internals to create a scenario (the fake_claude and clock fixtures are fine).
+If a wrong implementation can't be told apart through real behavior, tell me
+so I can check for it in the diff.
+
+Then check the impact of any rule this sheet changes. Search the existing
+tests and app/ for anywhere the old rule is asserted or calculated, including
+helper functions. For each one, ask: if someone used this to get the answer
+the rule governs, would the new rule make today's answer wrong?
+- Yes, and a test covers it: update the test to the new rule.
+- Yes, and no test covers it: add a failing test.
+- No: leave it.
+- Unsure: leave it alone and say why in the report.
+
+Where the sheet leaves a detail open, pick the simplest answer that fits it,
+build the tests on that, and list each pick in one line at the end of the
+report. Don't ask me questions. Report each one in plain English for someone
+who doesn't know this code: what it does, the old answer, the new answer, what
+you did. Don't change anything in app/. Run the tests and show me which ones
+fail.
 ```
 
 #### 2c. Manually check the tests and eval cases Claude just created
@@ -155,6 +168,8 @@ tests and show me which ones fail.
 - **Compare each test and each eval case with your expected results from step 1.** The eval cases are the model's expected results, so they must be right too.
 - **Tests must check behavior through the API or the page**, **<ins>not functions that don't exist yet</ins>**.   
 A test that calls a new function is designing the code for Claude.
+- **Tests must not overwrite app values to set up a situation the sheet doesn't describe.** The `fake_claude` and `clock` fixtures are fine.
+- **Read Claude's impact report, even if you don't know the code.** Each new answer should match the rule this sheet changes, each updated test should fail right now, and every existing test that changed should be in the report. Reject any that isn't. If the sheet changes no rule, no existing test should change. Read its list of picks too: each should fit the sheet; if one doesn't, say so in 2d.
 - **The four worked-example rows are tests**, with exact `unverified_amounts`.
 - **Criterion 3's tests check the exact messages**, and that `fake_claude.calls` stays empty.
 - **A near-miss amount must <ins>not</ins> pass as grounded.** `$15.5` or `$250.4` must not be read as `$15.00` or `$250.00` and match a real amount.   
@@ -197,10 +212,12 @@ To get good results, Claude should build from the "spec" and your committed test
 
 ```text
 Make the new tests from my last commit pass (see git show HEAD). Don't change
-any test. If you change anything the tests don't need, tell me what and why.
-Read tasks/lab2a-support-reply.md for context. Run the full suite and show me
-the output. Then write tests/evals/run_support_reply.py, which runs those eval
-cases with the shared runner (see the Evals section of README.md). Don't run it.
+any test. If an existing test conflicts with the sheet or blocks the right
+design, stop and tell me why. If you change anything the tests don't need,
+tell me what and why. Read tasks/lab2a-support-reply.md for context. Run the
+full suite and show me the output. Then write
+tests/evals/run_support_reply.py, which runs those eval cases with the shared
+runner (see the Evals section of README.md). Don't run it.
 ```
 
 Claude shouldn't touch any test file you committed.
@@ -222,7 +239,7 @@ The last line should say only `passed`, with no `skipped`, `deselected` or `xfai
 #### 4b. Check that Claude only changed app code
 
 This shows the files that have changed since the last commit.  
-Every file this lists should be under `app/`, plus the one new file you asked for, `tests/evals/run_support_reply.py`:
+Every file this lists should be under `app/` (or be `CLAUDE.md`, if Claude updated the rule text with the code), plus the one new file you asked for, `tests/evals/run_support_reply.py`:
 
 ```text
 ! git status --short
@@ -283,9 +300,10 @@ Ask Claude to create a reviewer subagent. It hasn't seen your conversation, and 
 
 ```text
 Use a subagent to review this branch's changes (git diff main) against
-tasks/lab2a-support-reply.md. It hasn't seen our conversation. It should
-check every acceptance criterion, not report style, and not change any files
-or the database. Show me its findings as a numbered list, each with:
+tasks/lab2a-support-reply.md. It hasn't seen our conversation. It should check
+every acceptance criterion, not report style, and not change any files or the
+database. It should also look for anything that still uses or expects an old
+rule this sheet changes. Show me its findings as a numbered list, each with:
 - a label: MUST FIX (a criterion isn't met, or a bug), OUT OF SCOPE (real, but
   not in the criteria, or already there before this branch), UNSURE, or
   OPTIONAL
