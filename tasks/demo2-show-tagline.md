@@ -128,22 +128,21 @@ To call the endpoint on the `/docs` page, follow the steps in the [Test the endp
 To compare the patterns, follow these steps:
 
 1. Explain that pattern 1 is the same feature without the tool. You present pattern 1 as a diff between the two demo commits instead of a live switch.
-2. List the last three commits:
+2. List the commits that changed the tagline module:
 
    ```text
-   ! git log --oneline -3
+   ! git log --oneline -- app/tagline.py
    ```
 
-3. Compare the two commits:
+   The output lists the two demo commits, newest first. Merge commits from the `main` branch don't appear, because they don't change this file.
+
+3. Show how the `Demo 2, step 2` commit changed the tagline module:
 
    ```text
-   ! git diff PLAIN_CALL_COMMIT STRICT_TOOL_COMMIT -- app/tagline.py
+   ! git log -p -1 --format= -- app/tagline.py
    ```
 
-   Replace the following:
-
-   - `PLAIN_CALL_COMMIT`: the hash of the commit that uses the plain call
-   - `STRICT_TOOL_COMMIT`: the hash of the commit that uses the strict tool
+   The output is the diff from the plain call to the strict tool. You don't need to copy a commit hash.
 
 ### Step 5: Build a test live
 
